@@ -1,45 +1,3 @@
-/*
-package app.labs.config;
-
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.web.SecurityFilterChain;
-
-@Configuration
-@EnableWebSecurity
-@EnableMethodSecurity
-public class WebSecurityConfig {
-
-	private static final String[] STATIC_RESOURCE_PATHS = {"/css/**", "/js/**", "/json/**"};
-	private static final String[] PUBLIC_URLS = {
-		"/login",
-		"/admin/main",
-		"/admin/product", 
-		"/admin/order",
-		"/admin/progress",
-		"/admin/pallet", 
-		"/admin/simulator",
-		"/worker/packaging",
-		"/worker/simulator", 
-		"/common/check"
-	};
-	
-    @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-	    http.authorizeHttpRequests((requests) -> requests
-	            .requestMatchers(STATIC_RESOURCE_PATHS).permitAll()
-	            .requestMatchers(PUBLIC_URLS).permitAll()
-	            .anyRequest().authenticated()
-	        );
-
-	    return http.build();
-	}
-}
-*/
-
 package app.labs.config;
 
 import java.util.List;
@@ -64,8 +22,21 @@ import org.springframework.security.web.SecurityFilterChain;
 public class WebSecurityConfig {
 
     private static final String[] STATIC_RESOURCE_PATHS = {"/css/**", "/js/**", "/json/**", "/images/**"};
-    private static final String[] PUBLIC_URLS = {"/login", "/admin-login", "/worker-login"};
-
+    private static final String[] PUBLIC_URLS = {
+        "/login",
+        "/admin-login",
+        "/worker-login"
+        "/admin/main",
+        "/admin/product", 
+        "/admin/order",
+        "/admin/progress",
+        "/admin/pallet", 
+        "/admin/simulator",
+        "/worker/packaging",
+        "/worker/simulator", 
+        "/common/check"
+    };
+  
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
