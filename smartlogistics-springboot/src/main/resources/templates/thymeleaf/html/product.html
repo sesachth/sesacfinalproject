@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Product List</title>
+</head>
+<body>
+<h1>Product List</h1>
+
+<table border="1">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Width</th>
+            <th>Depth</th>
+            <th>Height</th>
+            <th>Weight</th>
+            <th>Category</th>
+            <th>Fragile</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- Thymeleaf 반복문 -->
+        <tr th:each="product : ${products}">
+            <td th:text="${product.productId}"></td>
+            <td th:text="${product.name}"></td>
+            <td th:text="${product.width}"></td>
+            <td th:text="${product.depth}"></td>
+            <td th:text="${product.height}"></td>
+            <td th:text="${product.weight}"></td>
+            <td th:text="${product.category}"></td>
+            <!-- null 체크 추가 -->
+            <td th:text="${product.fragile != null ? (product.fragile ? 'Yes' : 'No') : 'No'}"></td>
+            <td>
+                <!-- 수정 -->
+                <form th:action="@{/admin/product/update}" method="post">
+                    <input type="hidden" name="productId" th:value="${product.productId}" />
+                    <button type="submit">Edit</button>
+                </form>
+
+                <!-- 삭제 -->
+                <a th:href="@{/admin/product/delete/{id}(id=${product.productId})}">Delete</a>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<!-- 제품 추가 폼 -->
+<!-- 제품 추가 폼 -->
+<h2>Add Product</h2>
+<form th:action="@{/admin/product/add}" method="post">
+    Name: <input type="text" name="name" required /><br/>
+    Width: <input type="number" name="width" required /><br/>
+    Depth: <input type="number" name="depth" required /><br/>
+    Height: <input type="number" name="height" required /><br/>
+    Weight: <input type="number" name="weight" required /><br/>
+    
+    <!-- 카테고리를 선택할 수 있도록 select 추가 -->
+    Category: 
+    <select name="category" required>
+        <option value="잡화류">잡화류</option>
+        <option value="전자제품류">전자제품류</option>
+        <option value="가공식품">가공식품</option>
+        <option value="제과류">제과류</option>
+        <option value="음료">음료</option>
+        <option value="의류">의류</option>
+        <option value="세정용 화장품류">세정용 화장품류</option>
+        <option value="그 밖의 화장품류">그 밖의 화장품류</option>
+        <option value="의약외품류">의약외품류</option>
+        <option value="세제류">세제류</option>
+        <option value="건강기능식품">건강기능식품</option>
+    </select><br/>
+
+    Fragile: 
+    <input type="hidden" name="fragile" value="false" />
+    <input type="checkbox" name="fragile" th:checked="${product != null && product.fragile}" value="true" /><br/>
+    
+    <button type="submit">Add Product</button>
+</form>
+
+
+</body>
+</html>
