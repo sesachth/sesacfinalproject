@@ -1,10 +1,12 @@
 package app.labs.service;
 
-import app.labs.dao.ProductRepository;
-import app.labs.model.Product;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import java.util.List;
+
+import app.labs.model.Product;
+import app.labs.repository.ProductRepository;
 
 @Service
 public class ProductService {
