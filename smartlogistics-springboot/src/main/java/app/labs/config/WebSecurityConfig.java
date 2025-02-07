@@ -23,8 +23,21 @@ import org.springframework.security.web.SecurityFilterChain;
 public class WebSecurityConfig {
 
     private static final String[] STATIC_RESOURCE_PATHS = {"/css/**", "/js/**", "/json/**", "/images/**"};
-    private static final String[] PUBLIC_URLS = {"/login", "/admin-login", "/worker-login"};
-
+    private static final String[] PUBLIC_URLS = {
+        "/login",
+        "/admin-login",
+        "/worker-login"
+        "/admin/main",
+        "/admin/product", 
+        "/admin/order",
+        "/admin/progress",
+        "/admin/pallet", 
+        "/admin/simulator",
+        "/worker/packaging",
+        "/worker/simulator", 
+        "/common/check"
+    };
+  
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
