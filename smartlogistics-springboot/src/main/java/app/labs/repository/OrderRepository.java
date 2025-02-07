@@ -1,11 +1,15 @@
 package app.labs.repository;
 
-import app.labs.model.Order;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
+
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicLong;
+import app.labs.model.Order;
 
 @Repository
 public class OrderRepository {
@@ -17,6 +21,7 @@ public class OrderRepository {
     }
 
     public Order saveOrder(Order order) {
+    	
         if (order.getOrderId() == null) {
             order.setOrderId(idGenerator.getAndIncrement()); // orderId 자동 증가
         }

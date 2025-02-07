@@ -12,14 +12,11 @@ public class Product {
     private String name;
     private String category;
 
-    int productId;
-    String name;
     float width;
     float depth;
     float height;
     float weight;
     boolean fragile;
-    String category;
 
     public void setFragile(boolean fragile) {
         this.fragile = fragile;
