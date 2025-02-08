@@ -17,6 +17,7 @@ public class Product {
     float height;
     float weight;
     boolean fragile;
+    String category;
 
     public void setFragile(boolean fragile) {
         this.fragile = fragile;

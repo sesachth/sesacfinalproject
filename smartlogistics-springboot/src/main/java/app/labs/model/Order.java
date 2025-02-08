@@ -18,7 +18,7 @@ public class Order {
     // 기본 생성자
     public Order() {}
 
-    // 전체 필드를 포함하는 생성자
+    // 전체 필드를 포함하는 생성자 *
     public Order(Long orderId, String orderNum, LocalDateTime orderTime, String destination, String state, Long productProductId) {
         this.orderId = orderId;
         this.orderNum = orderNum;
