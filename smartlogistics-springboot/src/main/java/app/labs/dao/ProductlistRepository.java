@@ -1,14 +1,11 @@
-package app.labs.repository;
-
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Select;
+package app.labs.dao;
 
 import app.labs.model.Product;
-
 import java.util.List;
+import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
-public interface ProductRepository {
+public interface ProductlistRepository {
 
     // 전체 물품 목록 조회
     List<Product> findAll();
@@ -24,10 +21,6 @@ public interface ProductRepository {
 
     // 특정 물품 삭제 (삭제 성공 시 영향받은 행의 수 반환)
     int delete(int productId);
-
-    @Select("SELECT * FROM product")
-    List<Product> getAllProducts();
-
-    @Select("SELECT * FROM product")
-    List<OrderProduct> getAllProducts();
 }
+
+

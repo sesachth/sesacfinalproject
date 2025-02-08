@@ -20,26 +20,28 @@ public class OrderService {
         this.orderMapper = orderMapper;
     }
 
-    // ✅ 랜덤 주문 생성 (개별 주문 75%, 그룹 주문 25%)
-    public List<Order> createRandomOrders() {
-        orderMapper.clearOrders(); // 기존 주문 삭제
+    // ✅ 새로운 주문 생성 메서드 (매개변수 추가)
+    public List<Order> createRandomOrders(int minOrders, int maxOrders, double groupOrderRatio) {
+        sqlSession.delete("mybatis.mappers.OrderMapper.clearOrders");
 
-        List<Product> products = orderMapper.getAllProducts();
-        if (products.isEmpty()) {
+        List<OrderProduct> orderProducts = sqlSession.selectList("mybatis.mappers.OrderMapper.getAllProducts");
+        if (orderProducts.isEmpty()) {
             throw new RuntimeException("❌ 상품 데이터가 없습니다.");
         }
 
-        Long maxOrderId = Optional.ofNullable(orderMapper.getMaxOrderId()).orElse(0L);
-        int orderCount = random.nextInt(1001) + 1000; // ✅ 1000~2000개 주문 생성
+        Object result = sqlSession.selectOne("mybatis.mappers.OrderMapper.getMaxOrderId");
+        Long maxOrderId = (result != null) ? ((Number) result).longValue() : 0L;
+
+        int orderCount = random.nextInt(maxOrders - minOrders + 1) + minOrders;
 
         for (int i = 0; i < orderCount; ) {
-            boolean isGroupedOrder = random.nextDouble() < 0.25; // ✅ 25% 확률로 그룹 주문 (기존 30% → 25%로 감소)
-            String orderNum = generateOrderNum(); // ✅ 주문번호 생성
-            String destination = getRandomDestination(); // ✅ 목적지 선택
+            boolean isGroupedOrder = random.nextDouble() < groupOrderRatio;
+            String orderNum = generateOrderNum();  // ✅ 여기서 메서드 사용
+            String destination = getRandomDestination();  // ✅ 여기서 메서드 사용
 
-            int batchSize = isGroupedOrder ? 2 : 1; // ✅ 그룹 주문은 최대 2개, 개별 주문은 1개
+            int batchSize = isGroupedOrder ? 2 : 1;
             for (int j = 0; j < batchSize && i < orderCount; j++, i++) {
-                Product product = products.get(random.nextInt(products.size())); // 랜덤 상품 선택
+                OrderProduct orderProduct = orderProducts.get(random.nextInt(orderProducts.size()));
 
                 Order order = new Order();
                 order.setOrderId(++maxOrderId);
@@ -47,21 +49,21 @@ public class OrderService {
                 order.setOrderTime(LocalDateTime.now());
                 order.setDestination(destination);
                 order.setState("Pending");
-                order.setProductProductId(product.getProductId());
+                order.setProductProductId(orderProduct.getProductId());
 
-                orderMapper.insertOrder(order);
+                sqlSession.insert("mybatis.mappers.OrderMapper.insertOrder", order);
             }
         }
 
-        return orderMapper.getAllOrders(); // ✅ 생성된 모든 주문 반환
+        return sqlSession.selectList("mybatis.mappers.OrderMapper.getAllOrders");
     }
 
-    // ✅ 8자리 랜덤 orderNum 생성
+    // ✅ 8자리 랜덤 orderNum 생성 (메서드 추가)
     private String generateOrderNum() {
         return String.valueOf(10000000 + random.nextInt(90000000));
     }
 
-    // ✅ 랜덤 목적지 선택
+    // ✅ 랜덤 목적지 선택 (메서드 추가)
     private String getRandomDestination() {
         String[] destinations = {"캠프1", "캠프2", "캠프3", "캠프4", "캠프5"};
         return destinations[random.nextInt(destinations.length)];

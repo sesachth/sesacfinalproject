@@ -8,33 +8,35 @@ import org.springframework.stereotype.Service;
 import app.labs.model.Product;
 import app.labs.repository.ProductRepository;
 
+
 @Service
 public class ProductService {
 
     private final ProductRepository productRepository;
+    private final ProductlistRepository productlistRepository;
   
     @Autowired
-    public ProductService(ProductRepository productRepository) {
-        this.productRepository = productRepository;
+    public ProductService(ProductlistRepository productlistRepository) {
+        this.productlistRepository = productlistRepository;
     }
     
     public List<Product> getAllProducts() {
-        return productRepository.findAll();
+        return productlistRepository.findAll();
     }
     
     public Product getProductById(int productId) {
-        return productRepository.findById(productId);
+        return productlistRepository.findById(productId);
     }
     
     public void addProduct(Product product) {
-        productRepository.insert(product);
+        productlistRepository.insert(product);
     }
     
     public boolean updateProduct(Product product) {
-        return productRepository.update(product) > 0;
+        return productlistRepository.update(product) > 0;
     }
     
     public boolean deleteProductById(int productId) {
-        return productRepository.delete(productId) > 0;
+        return productlistRepository.delete(productId) > 0;
     }
 }
