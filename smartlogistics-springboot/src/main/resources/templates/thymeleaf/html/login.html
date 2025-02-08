@@ -2,14 +2,19 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Login</title>
+    <link rel="stylesheet" th:href="@{/css/login.css}">
 </head>
 <body>
-    <h2>Login Page</h2>
-    <a href="/admin-login">
-        <img src="/static/images/admin_icon.png" alt="Admin Login" width="100">
-    </a>
-    <a href="/worker-login">
-        <img src="/static/images/worker_icon.png" alt="Worker Login" width="100">
-    </a>
+    <div class="container">
+        <a href="/admin-login" class="icon-box">
+            <img th:src="@{/images/admin_icon.png}" alt="Admin Login">
+            <span>관리자 접속</span>
+        </a>
+
+        <a href="/worker-login" class="icon-box">
+            <img th:src="@{/images/worker_icon.png}" alt="Worker Login">
+            <span>작업자 접속</span>
+        </a>
+    </div>
 </body>
 </html>

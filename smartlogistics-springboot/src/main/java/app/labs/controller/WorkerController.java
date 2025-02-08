@@ -9,6 +9,6 @@ public class WorkerController {
 
 	@GetMapping("/worker/simulator")
     public String mainPage(Model model) {
-        return "thymeleaf/html/worker";
+        return "thymeleaf/html/worker_smartpackaging";
     }
 }
