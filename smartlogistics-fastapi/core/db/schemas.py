@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-class BoxBase(BaseModel):
+class Box(BaseModel):
     spec: int
     width: float
     depth: float
@@ -8,6 +8,5 @@ class BoxBase(BaseModel):
     palletId: int
     productId: int
 
-class Box(BoxBase):
     class Config:
         from_attributes = True
