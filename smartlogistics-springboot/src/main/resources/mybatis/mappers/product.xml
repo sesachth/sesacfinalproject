@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="app.labs.dao.ProductlistRepository">
+
+    <!-- 전체 물품 목록 조회 -->
+    <select id="findAll" resultType="app.labs.model.Product">
+        SELECT productId, name, width, depth, height, weight, 
+               CASE WHEN is_fragile = 1 THEN TRUE ELSE FALSE END AS fragile, 
+               category
+          FROM product
+    </select>
+
+    <!-- 단건 물품 조회 -->
+    <select id="findById" parameterType="int" resultType="app.labs.model.Product">
+        SELECT productId, name, width, depth, height, weight, 
+               CASE WHEN is_fragile = 1 THEN TRUE ELSE FALSE END AS fragile, 
+               category
+          FROM product
+         WHERE productId = #{productId}
+    </select>
+
+<insert id="insert" parameterType="app.labs.model.Product">
+    <!-- 가장 큰 productId를 찾아서 1 더하기 -->
+    INSERT INTO product (productId, name, width, depth, height, weight, is_fragile, category)
+    VALUES (
+        (SELECT IFNULL(MAX(productId) + 1, 1) FROM product), 
+        #{name}, #{width}, #{depth}, #{height}, #{weight}, 
+        CASE WHEN #{fragile} THEN 1 ELSE 0 END, 
+        #{category}
+    )
+</insert>
+
+    <!-- 기존 물품 수정 -->
+<update id="update">
+  UPDATE product
+  <set>
+    <if test="name != null and name != ''">name = #{name},</if>
+    <if test="width != null">width = #{width},</if>
+    <if test="depth != null">depth = #{depth},</if>
+    <if test="height != null">height = #{height},</if>
+    <if test="weight != null">weight = #{weight},</if>
+    <if test="fragile != null">is_fragile AS fragile = #{fragile},</if>
+    <if test="category != null">category = #{category}</if>
+  </set>
+  WHERE productId = #{productId}
+</update>
+
+    <!-- 특정 물품 삭제 -->
+    <delete id="delete" parameterType="int">
+        DELETE FROM product
+         WHERE productId = #{productId}
+    </delete>
+
+</mapper>
