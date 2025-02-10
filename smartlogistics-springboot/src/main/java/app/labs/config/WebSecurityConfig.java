@@ -44,6 +44,7 @@ public class WebSecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(STATIC_RESOURCE_PATHS).permitAll()
                 .requestMatchers(PUBLIC_URLS).permitAll()
+                //.requestMatchers("/login", "/admin-login", "/worker-login").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")  // 관리자 전용
                 .requestMatchers("/worker/**").hasAnyRole("ADMIN", "WORKER") // 작업자 전용
                 .anyRequest().authenticated()
