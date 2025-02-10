@@ -26,7 +26,7 @@ public class WebSecurityConfig {
     private static final String[] PUBLIC_URLS = {
         "/login",
         "/admin-login",
-        "/worker-login",
+        "/worker-login"
         "/admin/main",
         "/admin/product", 
         "/admin/order",
