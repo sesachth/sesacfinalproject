@@ -8,5 +8,5 @@ class Box(Base):
     width = Column(Float, nullable=False)
     depth = Column(Float, nullable=False)
     height = Column(Float, nullable=False)
-    Pallet_palletId = Column(Integer, ForeignKey('pallet.palletId'), index=True)
-    product_productId = Column(Integer, ForeignKey('product.productId'), index=True)
+    palletId = Column(Integer, ForeignKey('pallet.palletId'), index=True)
+    productId = Column(Integer, ForeignKey('product.productId'), index=True)
