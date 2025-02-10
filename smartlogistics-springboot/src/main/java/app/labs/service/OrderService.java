@@ -20,6 +20,7 @@ public class OrderService {
         this.orderMapper = orderMapper;
     }
 
+    /*
     // ✅ 새로운 주문 생성 메서드 (매개변수 추가)
     public List<Order> createRandomOrders(int minOrders, int maxOrders, double groupOrderRatio) {
         sqlSession.delete("mybatis.mappers.OrderMapper.clearOrders");
@@ -57,6 +58,7 @@ public class OrderService {
 
         return sqlSession.selectList("mybatis.mappers.OrderMapper.getAllOrders");
     }
+	*/
 
     // ✅ 8자리 랜덤 orderNum 생성 (메서드 추가)
     private String generateOrderNum() {

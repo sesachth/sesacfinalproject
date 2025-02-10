@@ -13,6 +13,7 @@ import java.util.List;
 @RequestMapping("/admin/product")
 public class ProductController {
 
+	/*
     private final ProductService productService;
 
     @Autowired
@@ -48,4 +49,5 @@ public class ProductController {
         productService.deleteProductById(id);
         return "redirect:/admin/product";
     }
+    */
 }

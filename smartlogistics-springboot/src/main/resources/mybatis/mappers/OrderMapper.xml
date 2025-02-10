@@ -15,7 +15,8 @@
     </select>
 
     <!-- ✅ 모든 상품 가져오기 -->
-    <select id="getAllProducts" resultType="app.labs.dao.OrderProduct">
+    <!-- <select id="getAllProducts" resultType="app.labs.dao.OrderProduct">  임시 처리 -->
+    <select id="getAllProducts" resultType="app.labs.model.Product">
         SELECT * FROM product;
     </select>
 
@@ -26,22 +27,26 @@
     </insert>
 
     <!-- ✅ 전체 주문 조회 (이 부분이 빠져있을 가능성 있음) -->
-    <select id="getAllOrders" resultType="app.labs.dao.Order">
+    <!-- <select id="getAllOrders" resultType="app.labs.dao.Order"> 임시 처리 -->
+    <select id="getAllOrders" resultType="app.labs.model.Order">
         SELECT * FROM `order`;
     </select>
 
     <!-- ✅ 특정 날짜의 주문 조회 -->
-    <select id="getOrdersByDate" resultType="app.labs.dao.Order">
+    <!-- <select id="getOrdersByDate" resultType="app.labs.dao.Order"> 임시 처리 -->
+    <select id="getOrdersByDate" resultType="app.labs.model.Order">
         SELECT * FROM `order` WHERE DATE(orderTime) = #{date};
     </select>
 
     <!-- ✅ 목적지 & 날짜 기반 주문 조회 -->
-    <select id="getOrdersByDestinationAndDate" resultType="app.labs.dao.Order">
+    <!-- <select id="getOrdersByDestinationAndDate" resultType="app.labs.dao.Order"> 임시 처리 -->
+    <select id="getOrdersByDestinationAndDate" resultType="app.labs.model.Order">
         SELECT * FROM `order` WHERE destination = #{destination} AND DATE(orderTime) = #{date};
     </select>
 
     <!-- ✅ 목적지 기반 주문 조회 -->
-    <select id="getOrdersByDestination" resultType="app.labs.dao.Order">
+    <!-- <select id="getOrdersByDestination" resultType="app.labs.dao.Order"> 임시 처리 -->
+    <select id="getOrdersByDestination" resultType="app.labs.model.Order">
         SELECT * FROM `order` WHERE destination = #{destination};
     </select>
 

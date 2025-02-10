@@ -15,7 +15,7 @@ import java.util.logging.Logger;
 @RestController
 @RequestMapping("/api/orders")
 public class OrderController {
-
+	/*
     private final OrderService orderService;
     private final ObjectMapper objectMapper;
     private static final Logger logger = Logger.getLogger(OrderController.class.getName());
@@ -44,6 +44,7 @@ public class OrderController {
         }
     }
 
+    
     // ✅ 랜덤 주문 생성 API
     @GetMapping("/generate")
     public ResponseEntity<String> generateOrders() {
@@ -55,4 +56,5 @@ public class OrderController {
             return ResponseEntity.status(500).body("{\"error\": \"Failed to generate orders\", \"message\": \"" + e.getMessage() + "\"}");
         }
     }
+    */
 }

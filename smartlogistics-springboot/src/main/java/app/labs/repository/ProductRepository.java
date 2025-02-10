@@ -25,9 +25,12 @@ public interface ProductRepository {
     // 특정 물품 삭제 (삭제 성공 시 영향받은 행의 수 반환)
     int delete(int productId);
 
+    
     @Select("SELECT * FROM product")
     List<Product> getAllProducts();
 
+    /*
     @Select("SELECT * FROM product")
     List<OrderProduct> getAllProducts();
+	*/
 }

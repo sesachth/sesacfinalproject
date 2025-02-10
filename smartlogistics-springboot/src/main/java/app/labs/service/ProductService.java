@@ -5,14 +5,16 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import app.labs.dao.ProductlistRepository;
 import app.labs.model.Product;
-import app.labs.repository.ProductRepository;
 
 
 @Service
 public class ProductService {
 
-    private final ProductRepository productRepository;
+	
+    //private final ProductRepository productRepository;
+    
     private final ProductlistRepository productlistRepository;
   
     @Autowired
@@ -39,4 +41,5 @@ public class ProductService {
     public boolean deleteProductById(int productId) {
         return productlistRepository.delete(productId) > 0;
     }
+    
 }
