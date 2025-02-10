@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     @property
     def DATABASE_URL(self) -> MySQLDsn:
         return MySQLDsn.build(
-            scheme="mysql+pymysql",
+            scheme="mysql+aiomysql",
             host=self.DB_HOST,
             port=self.DB_PORT,
             path=self.DB_NAME,

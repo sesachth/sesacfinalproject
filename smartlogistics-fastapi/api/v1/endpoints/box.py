@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from core.db.database import get_db
 
 import core.db.crud as crud
@@ -10,34 +10,22 @@ import models.model as model
 router = APIRouter()
 
 @router.get("/boxes", response_model=schemas.Box)
-async def read_boxes(db: Session = Depends(get_db)):
-    #db_boxes = crud.get_boxes(db)
+async def read_boxes(db: AsyncSession = Depends(get_db)):
+    db_boxes = await crud.get_boxes(db)
     
-    #if db_boxes is None:
-    #    raise HTTPException(status_code=404, detail="Box not found")
-    '''
+    if db_boxes is None:
+        raise HTTPException(status_code=404, detail="Box not found")
+    
     boxes_list = [
         {
             "spec": model.Box.spec,
             "width": model.Box.width,
             "depth": model.Box.depth,
             "height": model.Box.height,
-            "palletId": model.Box.Pallet_palletId,
-            "productId": model.Box.product_productId,
+            "palletId": model.Box.palletId,
+            "productId": model.Box.productId,
         }
         for model.Box in db_boxes
-    ]
-    '''
-
-    boxes_list = [
-        {
-            "spec": 1,
-            "width": 2,
-            "depth": 3,
-            "height": 4,
-            "palletId": 5,
-            "productId": 6,
-        }
     ]
 
     return JSONResponse(content={"boxes": boxes_list}, media_type="application/json")
