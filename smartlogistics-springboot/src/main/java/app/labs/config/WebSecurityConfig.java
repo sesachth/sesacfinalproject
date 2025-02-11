@@ -1,4 +1,3 @@
-
 package app.labs.config;
 
 import java.util.List;
@@ -35,23 +34,24 @@ public class WebSecurityConfig {
         "/admin/simulator",
         "/worker/packaging",
         "/worker/simulator", 
-        "/common/check"
+        "/common/check",
     };
   
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/admin/order/generate").permitAll() // ✅ 주문 생성 API 접근 허용
+                .requestMatchers("/admin/order/**").permitAll() // ✅ 필요시 전체 허용 가능
                 .requestMatchers(STATIC_RESOURCE_PATHS).permitAll()
                 .requestMatchers(PUBLIC_URLS).permitAll()
-                //.requestMatchers("/login", "/admin-login", "/worker-login").permitAll()
-                .requestMatchers("/admin/**").hasRole("ADMIN")  // 관리자 전용
-                .requestMatchers("/worker/**").hasAnyRole("ADMIN", "WORKER") // 작업자 전용
+                .requestMatchers("/admin/**").hasRole("ADMIN")  
+                .requestMatchers("/worker/**").hasAnyRole("ADMIN", "WORKER") 
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
                 .loginPage("/login") // 로그인 페이지 설정
-                .defaultSuccessUrl("/admin/main", true) // 로그인 성공 시 이동
+                .defaultSuccessUrl("/admin/main", true)
                 .permitAll()
             )
             .logout(logout -> logout
@@ -59,12 +59,13 @@ public class WebSecurityConfig {
                 .logoutSuccessUrl("/login")
                 .permitAll()
             )
-        	.exceptionHandling(exception -> exception
-                .accessDeniedHandler(new CustomAccessDeniedHandler())  // 커스텀 403 핸들러 설정
+            .exceptionHandling(exception -> exception
+                .accessDeniedHandler(new CustomAccessDeniedHandler())
             );
 
         return http.build();
     }
+
 
     @Bean
     public PasswordEncoder passwordEncoder() {
