@@ -20,15 +20,9 @@
          WHERE productId = #{productId}
     </select>
 
-<insert id="insert" parameterType="app.labs.model.Product">
-    <!-- 가장 큰 productId를 찾아서 1 더하기 -->
-    INSERT INTO product (productId, name, width, depth, height, weight, is_fragile, category)
-    VALUES (
-        (SELECT IFNULL(MAX(productId) + 1, 1) FROM product), 
-        #{name}, #{width}, #{depth}, #{height}, #{weight}, 
-        CASE WHEN #{fragile} THEN 1 ELSE 0 END, 
-        #{category}
-    )
+<insert id="insert" useGeneratedKeys="true" keyProperty="productId">
+  INSERT INTO product (name, width, depth, height, weight, is_fragile, category) 
+  VALUES (#{name}, #{width}, #{depth}, #{height}, #{weight}, #{fragile}, #{category})
 </insert>
 
     <!-- 기존 물품 수정 -->

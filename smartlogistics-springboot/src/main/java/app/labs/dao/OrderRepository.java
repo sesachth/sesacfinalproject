@@ -1,4 +1,4 @@
-package app.labs.repository;
+package app.labs.dao;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -21,7 +21,6 @@ public class OrderRepository {
     }
 
     public Order saveOrder(Order order) {
-    	
         if (order.getOrderId() == null) {
             order.setOrderId(idGenerator.getAndIncrement()); // orderId 자동 증가
         }
@@ -47,7 +46,7 @@ public class OrderRepository {
                 (startTime == null || endTime == null || 
                  (order.getOrderTime().isAfter(LocalDateTime.parse(startTime)) &&
                   order.getOrderTime().isBefore(LocalDateTime.parse(endTime)))) &&
-                (productProductId == null || order.getProductProductId().equals(productProductId))) {
+                (productProductId == null || order.getProductId().equals(productProductId))) {
                 result.add(order);
             }
         }
