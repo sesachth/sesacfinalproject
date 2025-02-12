@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+    <!--
+    <th:block layout:fragment="title">
+    	<title>BOXER</title>
+    </th:block>
+    --> 
+    <th:block layout:fragment="css">
+    	<link rel="stylesheet" th:href="@{/css/admin/admin.css}" />
+    </th:block> 
+</head>
+<body>
+    <th:block layout:fragment="wrapper">
+    	<div class="outside-container">
+        	<div class="main-container">
+                <div th:replace="~{thymeleaf/html/common/include::profile}"></div>
+            	<div th:replace="~{thymeleaf/html/common/include::sidebar}"></div>
+            	<div layout:fragment="content" class="main-content"></div>
+        	</div>
+        </div>
+    </th:block>
+	
+	<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>    
+    <th:block layout:fragment="script"></th:block>
+</body>
+</html>

@@ -1,0 +1,180 @@
+/* 전역 리셋 예시 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+ body { 
+  font-family: 'Noto Sans KR', sans-serif;
+  width: 100vw;
+  height: 100vh;
+  background: #ffffff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  }
+
+@font-face {
+    font-family: 'BMJua';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_one@1.0/BMJUA.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+.outside-container {
+	position: absolute;
+	width: 100vw;
+	height: 100vh;
+	
+	background: #E9E9E9;
+}
+
+.main-container {
+	position: absolute;
+	width: calc(100vw - 60px);
+	height: calc(100vh - 60px);
+	left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+	
+	background: #F6F6F4;
+	/*box-shadow: 5px 25px 20px rgba(0, 0, 0, 0.15);*/
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2), 0 15px 45px rgba(0, 0, 0, 0.1);
+	border-radius: 25px;
+}
+
+.profile-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.profile-container {
+	position: absolute;
+	width: 70px;
+    height: 70px;
+    
+	top: 30px;
+	left: 40px;
+	
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	
+    background-color: #F7EFE5;
+    border-radius: 50%;
+	box-shadow: 2px 5px 30px rgba(0, 0, 0, 0.15);
+}
+
+.profile-img {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+  }
+
+.profile-text {
+	display: flex;
+	flex-direction: column;
+	gap: 0.2rem;	
+}
+
+.role {
+	font-family: 'Inter';
+	font-style: normal;
+	font-weight: 400;
+	font-size: 22px;
+	line-height: 27px;
+
+	color: #7B7B7B;
+}
+
+.username {
+	font-family: 'Inter';
+	/*font-family: 'BMJua', sans-serif;*/
+	font-style: normal;
+	font-weight: 600;
+	font-size: 22px;
+	line-height: 27px;
+
+	color: #000000;
+}
+
+/* 사이드바 네비게이션 */
+.sidebar-nav {
+  	position: absolute;
+  	top: 120px; /* 프로필 카드보다 아래 */
+  	left: 40px;
+  	width: 260px;
+
+  	background: #fff;
+  	border-radius: 14px;
+
+  	display: flex;
+  	flex-direction: column;
+  	gap: 1.8rem;
+  	padding: 0.5rem 0.5rem;
+}
+
+.sidemenu {
+	  display: flex;
+	  align-items: center;
+	  gap: 1.3rem;
+	  
+	  /*left 마진 필요시 설정 추가*/
+	  margin-left: 0rem;
+	  border-radius: 12px;
+	  padding: 0.3rem;
+		
+	  text-decoration: none;
+	  color: #000;
+}
+
+
+.sidemenu:hover {
+  background-color: #f0f0f0;
+}
+
+.sidemenu.active {
+  background-color: #68269E;  /* 보라색 배경 */
+  color: #fff;                /* 흰색 텍스트 */
+}
+
+.sidemenu.active:hover {
+	background-color: #68269E;
+	color: #fff;
+}
+
+.sidemenu svg {
+	margin-left: 0.2rem;
+	display: block;
+	width: 26px;
+	height: 26px;
+}
+
+nav .big-icon {
+	width: 27px;
+	height: 27px;
+}
+
+.sidemenu-text{
+	font-family: 'Inter', sans-serif;
+	font-weight: 500;
+	font-size: 20px;
+	transform: translateY(-1px);
+}
+
+
+/* 메인 콘텐츠 */
+.main-content {
+	position: absolute;
+	width: calc(100% - 380px);
+	min-height: calc(100vh - 220px);
+	right: 40px;
+	top: 120px;
+	margin-bottom: 40px;
+	
+ 	background: #FFFFFF;
+ 	border-radius: 14px;
+}
+
