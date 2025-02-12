@@ -1,31 +1,24 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-	  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-	  layout:decorator="~{/thymeleaf/html/common/default_layout}">
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorator="~{/thymeleaf/html/common/default_layout}">
 
 <th:block layout:fragment="css">
 	<link rel="stylesheet" th:href="@{/css/admin/admin.css}" />
+	<link rel="stylesheet" th:href="@{/css/admin/admin_stacking.css}" />
 </th:block>
 
 <th:block layout:fragment="wrapper">
-    	<div class="outside-container">
-        	<div class="main-container">
-                <div th:replace="~{thymeleaf/html/common/include::profile}"></div>
-            	<div th:replace="~{thymeleaf/html/common/include::sidebar}"></div>
-            	<div layout:fragment="content" class="main-content">
-            	
-            	
-            	
-            	
-            	
-            	
-            	
-            	
-            	
-            	
-            	
-            	</div>
-        	</div>
-        </div>
-    </th:block>
+	<div class="outside-container">
+		<div class="main-container">
+			<div th:replace="~{thymeleaf/html/common/include::profile}"></div>
+			<div th:replace="~{thymeleaf/html/common/include::sidebar}"></div>
+			<div layout:fragment="content" class="main-content">
+
+				<script type="module" th:src="@{/js/admin/admin_stacking_three.js}"></script>
+
+			</div>
+		</div>
+	</div>
+</th:block>
 </html>
