@@ -15,42 +15,5 @@ public class LoginController {
         }
         return "thymeleaf/html/login";
     }
-	
-	/*
-	private final UserDetailsService userDetailsService;
 
-    public LoginController(UserDetailsService userDetailsService) {
-        this.userDetailsService = userDetailsService;
-    }
-    
-    @GetMapping("/login")
-    public String loginPage() {
-        return "thymeleaf/html/login";
-    }
-
-    @GetMapping("/admin-login")
-    public RedirectView adminLogin(HttpServletRequest request) {
-        return autoLogin("admin", "admin", "/admin/main", request);
-    }
-
-    @GetMapping("/worker-login")
-    public RedirectView workerLogin(HttpServletRequest request) {
-        return autoLogin("worker", "worker", "/worker/simulator", request);
-    }
-
-    private RedirectView autoLogin(String username, String password, String redirectUrl, HttpServletRequest request) {
-        UserDetails userDetails = userDetailsService.loadUserByUsername(username);  // 변경된 부분!
-
-        Authentication authentication = 
-                new UsernamePasswordAuthenticationToken(userDetails, userDetails.getPassword(), userDetails.getAuthorities());
-
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        // 세션에 SecurityContext를 적용
-        HttpSession session = request.getSession(true);
-        session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
-
-        return new RedirectView(redirectUrl);
-    }
-    */
 }

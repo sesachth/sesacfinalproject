@@ -25,8 +25,6 @@ public class WebSecurityConfig {
     private static final String[] STATIC_RESOURCE_PATHS = {"/css/**", "/js/**", "/json/**", "/images/**"};
     private static final String[] PUBLIC_URLS = {
         "/login",
-        "/admin-login",
-        "/worker-login",
         "/admin/main",
         "/admin/product", 
         "/admin/order",
@@ -46,6 +44,7 @@ public class WebSecurityConfig {
                 .requestMatchers("/admin/order/**").permitAll() // ✅ 필요시 전체 허용 가능
                 .requestMatchers(STATIC_RESOURCE_PATHS).permitAll()
                 .requestMatchers(PUBLIC_URLS).permitAll()
+                //.requestMatchers("/login").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")  
                 .requestMatchers("/worker/**").hasAnyRole("ADMIN", "WORKER") 
                 .anyRequest().authenticated()
