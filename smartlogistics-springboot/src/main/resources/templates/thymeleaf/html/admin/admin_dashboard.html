@@ -1,31 +1,36 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-	  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-	  layout:decorator="~{/thymeleaf/html/common/default_layout}">
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorator="~{/thymeleaf/html/common/default_layout}">
 
 <th:block layout:fragment="css">
 	<link rel="stylesheet" th:href="@{/css/admin/admin.css}" />
+	<link rel="stylesheet" th:href="@{/css/admin/admin_dashboard.css}" />
 </th:block>
 
+<script th:src="@{https://cdn.jsdelivr.net/npm/chart.js/dist/chart.umd.min.js}"></script>
+<script th:src="@{https://cdn.jsdelivr.net/npm/chartjs-chart-geo/build/index.umd.min.js}"></script>
+<script th:src="@{https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js}"></script>
+
 <th:block layout:fragment="wrapper">
-    	<div class="outside-container">
-        	<div class="main-container">
-                <div th:replace="~{thymeleaf/html/common/include::profile}"></div>
-            	<div th:replace="~{thymeleaf/html/common/include::sidebar}"></div>
-            	<div layout:fragment="content" class="main-content">
-            	
-            	
-            	
-            	
-            	
-            	
-            	
-            	
-            	
-            	
-            	
-            	</div>
-        	</div>
-        </div>
-    </th:block>
+	<div class="outside-container">
+		<div class="main-container">
+			<div th:replace="~{thymeleaf/html/common/include::profile}"></div>
+			<div th:replace="~{thymeleaf/html/common/include::sidebar}"></div>
+			<div layout:fragment="content" class="main-content">
+
+				<div class="container">
+					<h1>관리자 - 대시보드 페이지입니다.</h1>
+					<div class="grid">
+						<div th:each="i : ${#numbers.sequence(1, 6)}">
+							<canvas th:id="'chart' + ${i}"></canvas>
+						</div>
+					</div>
+				</div>
+				<script th:src="@{/js/admin/admin_dashboard_charts.js}"></script>
+
+			</div>
+		</div>
+	</div>
+</th:block>
 </html>

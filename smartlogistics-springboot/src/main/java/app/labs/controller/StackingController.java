@@ -5,10 +5,12 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
-public class AdminSimulatorController {
+public class StackingController {
 
-	@GetMapping("/admin/simulator")
+	@GetMapping("/admin/stacking")
     public String adminSimulatorPage(Model model) {
-        return "thymeleaf/html/admin_simulator";
+		model.addAttribute("page", "stacking");
+		
+        return "thymeleaf/html/admin/admin_stacking";
     }
 }
