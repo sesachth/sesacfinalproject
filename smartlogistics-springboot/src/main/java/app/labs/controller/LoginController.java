@@ -9,10 +9,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class LoginController {
 
 	@GetMapping("/login")
-    public String loginPage(@RequestParam(value = "error", required = false) String error, Model model) {
+    public String loginPage(@RequestParam(value = "error", required = false) String error, 
+    						Model model) {
         if (error != null) {
             model.addAttribute("errorMessage", "아이디 또는 비밀번호가 올바르지 않습니다.");
         }
+        
         return "thymeleaf/html/login";
     }
 

@@ -25,7 +25,7 @@ public class WebSecurityConfig {
     private static final String[] STATIC_RESOURCE_PATHS = {"/css/**", "/js/**", "/json/**", "/images/**"};
     private static final String[] PUBLIC_URLS = {
         "/login",
-        "/admin/main",
+        "/admin/dashboard",
         "/admin/product", 
         "/admin/order",
         "/admin/progress",

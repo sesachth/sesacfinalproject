@@ -24,7 +24,7 @@ public class CustomLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         for (GrantedAuthority authority : authorities) {
             if (authority.getAuthority().equals("ROLE_ADMIN")) {
-                return "/admin/main";
+                return "/admin/dashboard";
             } else if (authority.getAuthority().equals("ROLE_WORKER")) {
                 return "/worker/packaging";
             }

@@ -1,19 +1,24 @@
 package app.labs.controller;
 
-import app.labs.model.Product;
-import app.labs.service.ProductService;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 
-import java.util.List;
+import app.labs.model.Product;
+import app.labs.service.ProductService;
 
 @Controller
 @RequestMapping("/admin/product")
 public class ProductController {
 
-	/*
+	
     private final ProductService productService;
 
     @Autowired
@@ -26,7 +31,7 @@ public class ProductController {
     public String showProductPage(Model model) {
         List<Product> products = productService.getAllProducts();
         model.addAttribute("products", products);
-        return "thymeleaf/html/product"; // thymeleaf/product.html 렌더링
+        return "thymeleaf/html/admin/admin_product"; // thymeleaf/product.html 렌더링
     }
 
     // POST /admin/product/add - 제품 추가 처리
@@ -49,5 +54,5 @@ public class ProductController {
         productService.deleteProductById(id);
         return "redirect:/admin/product";
     }
-    */
+    
 }
