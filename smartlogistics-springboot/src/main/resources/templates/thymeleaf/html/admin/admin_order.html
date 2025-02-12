@@ -1,31 +1,219 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-	  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-	  layout:decorator="~{/thymeleaf/html/common/default_layout}">
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorator="~{/thymeleaf/html/common/default_layout}">
 
-<th:block layout:fragment="css">
-	<link rel="stylesheet" th:href="@{/css/admin/admin.css}" />
-</th:block>
+<head>
+    <th:block layout:fragment="css">
+        <link rel="stylesheet" th:href="@{/css/admin/admin.css}" />
+    </th:block>
+</head>
 
-<th:block layout:fragment="wrapper">
-    	<div class="outside-container">
-        	<div class="main-container">
+<body>
+    <th:block layout:fragment="wrapper">
+        <div class="outside-container">
+            <div class="main-container">
                 <div th:replace="~{thymeleaf/html/common/include::profile}"></div>
-            	<div th:replace="~{thymeleaf/html/common/include::sidebar}"></div>
-            	<div layout:fragment="content" class="main-content">
-            	
-            	
-            	
-            	
-            	
-            	
-            	
-            	
-            	
-            	
-            	
-            	</div>
-        	</div>
+                <div th:replace="~{thymeleaf/html/common/include::sidebar}"></div>
+                <div layout:fragment="content" class="main-content">
+                    
+                    <!-- 주문 필터링 UI -->
+                    <div class="filter-container">
+                        <label for="dateFilter">날짜:</label>
+                        <input type="date" id="dateFilter" />
+
+                        <label for="campFilter">캠프:</label>
+                        <select id="campFilter">
+                            <option value="">전체</option>
+                            <option value="서초 캠프">서초 캠프</option>
+                            <option value="강남 캠프">강남 캠프</option>
+                            <option value="강서 캠프">강서 캠프</option>
+                            <option value="중구 캠프">중구 캠프</option>
+                            <option value="성동 캠프">성동 캠프</option>
+                        </select>
+                        
+                        <button id="filterBtn">조회</button>
+                    </div>
+                    
+                    <!-- 주문 생성 버튼 -->
+                    <div class="order-actions">
+                        <button id="generateOrderBtn">랜덤 주문 생성</button>
+                    </div>
+
+                    <!-- 주문 목록 테이블 -->
+                    <div class="table-container">
+                        <table class="order-table">
+                            <thead>
+                                <tr>
+                                    <th>주문 ID</th>
+                                    <th>주문 번호</th>
+                                    <th>주문 날짜</th>
+                                    <th>주문 시간</th>
+                                    <th>목적지</th>
+                                    <th>상품 ID</th>
+                                    <th>상태</th>
+                                </tr>
+                            </thead>
+                            <tbody id="orderTableBody">
+                                <!-- 주문 데이터가 여기에 추가됨 -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- 페이지네이션 -->
+                    <div class="pagination">
+                        <button id="prevGroup">«</button>
+                        <span id="pageNumbers"></span>
+                        <button id="nextGroup">»</button>
+                    </div>
+
+                </div>
+            </div>
         </div>
     </th:block>
+
+    <script>
+    let currentPage = 1;
+    const rowsPerPage = 10;
+    const pageGroupSize = 10;
+    let totalPages = 1;
+    let orders = [];
+
+    window.onload = () => loadOrders();
+
+    document.getElementById("filterBtn").addEventListener("click", function() {
+        currentPage = 1;
+        loadOrders();
+    });
+
+    document.getElementById("generateOrderBtn").addEventListener("click", function() {
+        fetch("/admin/order/generate", { method: "POST" })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                loadOrders();
+            })
+            .catch(error => console.error("Error:", error));
+    });
+
+    document.getElementById("prevGroup").addEventListener("click", function() {
+        if (currentPage > 1) {
+            currentPage--;
+            loadOrders();
+        }
+    });
+
+    document.getElementById("nextGroup").addEventListener("click", function() {
+        if (currentPage < totalPages) {
+            currentPage++;
+            loadOrders();
+        }
+    });
+
+    function loadOrders(page = 1) {
+        let date = document.getElementById("dateFilter").value;
+        let camp = document.getElementById("campFilter").value;
+
+        let queryParams = new URLSearchParams({ page, size: 20 });
+        if (date) queryParams.append("date", date);
+        if (camp) queryParams.append("destination", camp);
+
+        fetch(`/admin/order/api?${queryParams.toString()}`)
+            .then(response => response.json())
+            .then(data => {
+                orders = data.orders;
+                totalPages = data.totalPages;
+                currentPage = page;
+                updateOrderList();
+            })
+            .catch(error => console.error("Error:", error));
+    }
+
+
+    function updateOrderList() {
+        let orderTable = document.getElementById("orderTableBody");
+        orderTable.innerHTML = "";
+
+        if (!orders || orders.length === 0) {
+            orderTable.innerHTML = "<tr><td colspan='7' style='text-align:center;'>❌ 주문이 없습니다.</td></tr>";
+            return;
+        }
+
+        orders.forEach(order => {
+            let orderDate = new Date(order.orderTime);
+            let formattedDate = orderDate.toISOString().split("T")[0]; // YYYY-MM-DD
+            let formattedTime = orderDate.toTimeString().split(" ")[0]; // HH:MM:SS
+
+            let row = `<tr>
+                <td>${order.orderId || '-'}</td>
+                <td>${order.orderNum || '-'}</td>
+                <td>${formattedDate || '-'}</td>
+                <td>${formattedTime || '-'}</td>
+                <td>${order.destination || '-'}</td>
+                <td>${order.productId || '-'}</td>
+                <td>${order.state || '-'}</td>
+            </tr>`;
+            orderTable.innerHTML += row;
+        });
+
+        updatePagination();
+    }
+
+    function updatePagination() {
+        let pageNumbers = document.getElementById("pageNumbers");
+        pageNumbers.innerHTML = "";
+
+        let startPage = Math.max(1, Math.floor((currentPage - 1) / pageGroupSize) * pageGroupSize + 1);
+        let endPage = Math.min(startPage + pageGroupSize - 1, totalPages);
+
+        for (let i = startPage; i <= endPage; i++) {
+            let pageButton = document.createElement("button");
+            pageButton.innerText = i;
+            pageButton.classList.add("page-btn");
+            if (i === currentPage) pageButton.classList.add("active");
+            pageButton.addEventListener("click", () => {
+                loadOrders(i);  // ✅ 페이지 변경 시 새 데이터 요청
+            });
+            pageNumbers.appendChild(pageButton);
+        }
+    }
+
+
+
+</script>
+
+
+    <style>
+        .table-container {
+            max-height: 500px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+        .order-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .order-table th, .order-table td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        .pagination button {
+            padding: 5px 10px;
+            margin: 2px;
+            border: none;
+            background: #eee;
+            cursor: pointer;
+        }
+        .pagination .active {
+            background: #6200ea;
+            color: white;
+        }
+    </style>
+</body>
 </html>
