@@ -5,10 +5,12 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
-public class SmartLogisticsController {
+public class DashBoardController {
 	
-	@GetMapping("/admin/main")
+	@GetMapping("/admin/dashboard")
     public String mainPage(Model model) {
-        return "thymeleaf/html/admin_main";
+		model.addAttribute("page", "dashboard");
+		
+        return "thymeleaf/html/admin/admin_dashboard";
     }
 }
