@@ -27,7 +27,7 @@ public class UserService implements UserDetailsService{
         if (user == null) {
         	System.out.println("로그인 실패: 사용자 없음");
             throw new UsernameNotFoundException("User not found: " + username);
-        }
+        }  
              
         return User.builder()
             .username(user.getUsername())

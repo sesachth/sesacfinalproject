@@ -39,6 +39,8 @@ public class WebSecurityConfig {
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+        	.csrf(csrf -> csrf
+            .ignoringRequestMatchers("/admin/order/generate"))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/admin/order/generate").permitAll() // ✅ 주문 생성 API 접근 허용
                 .requestMatchers("/admin/order/**").permitAll() // ✅ 필요시 전체 허용 가능
@@ -60,6 +62,8 @@ public class WebSecurityConfig {
             .logout(logout -> logout
                 .logoutUrl("/logout")
                 .logoutSuccessUrl("/login")
+                .invalidateHttpSession(true) // 세션 무효화
+                .deleteCookies("JSESSIONID") // 쿠키 삭제
                 .permitAll()
             )
             .exceptionHandling(exception -> exception
