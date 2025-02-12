@@ -15,7 +15,7 @@ public class Product {
     float height;
     float weight;
     boolean fragile;
-    //String category;
+    String category;
 
     // 명확한 getter/setter 추가
     public boolean isFragile() {
