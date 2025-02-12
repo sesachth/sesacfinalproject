@@ -14,37 +14,97 @@
         SELECT * FROM product ORDER BY RAND() LIMIT 1;
     </select>
 
-    <!-- ✅ 전체 주문 조회 -->
-    <select id="getAllOrders" resultType="app.labs.model.Order">
-        SELECT * FROM `order` ORDER BY orderTime DESC;
-    </select>
+    <!-- ✅ 주문번호가 같다면 orderId 기준으로 정렬 -->
+	<select id="getAllOrders" resultType="app.labs.model.Order">
+    SELECT orderId, orderNum, orderTime, destination, state, productId, palletId
+    FROM `order`
+    ORDER BY orderNum ASC, orderTime ASC, orderId ASC
+    LIMIT #{size} OFFSET #{offset};
+	</select>
 
-    <!-- ✅ 특정 목적지의 주문 조회 -->
-    <select id="getOrdersByDestination" resultType="app.labs.model.Order">
-        SELECT * FROM `order`
-        WHERE destination = #{destination}
-        ORDER BY orderTime DESC;
-    </select>
+	<!-- ✅ 특정 목적지의 주문 조회 (페이징 추가) -->
+	<select id="getOrdersByDestination" resultType="app.labs.model.Order">
+    SELECT * FROM `order`
+    WHERE (destination = #{destination} OR #{destination} IS NULL)
+    ORDER BY orderId ASC
+    LIMIT #{size} OFFSET #{offset};
+	</select>
 
-    <!-- ✅ 특정 날짜 범위의 주문 조회 -->
-    <select id="getOrdersByDate" resultType="app.labs.model.Order">
-        SELECT * FROM `order`
-        WHERE orderTime BETWEEN #{startOfDay} AND #{endOfDay}
-        ORDER BY orderTime DESC;
-    </select>
+	<!-- ✅ 특정 날짜 범위의 주문 조회 (페이징 추가) -->
+	<select id="getOrdersByDate" resultType="app.labs.model.Order">
+    SELECT * FROM `order`
+    WHERE orderTime BETWEEN COALESCE(#{startOfDay}, '2000-01-01 00:00:00')
+                        AND COALESCE(#{endOfDay}, '2100-12-31 23:59:59')
+    ORDER BY orderId ASC
+    LIMIT #{size} OFFSET #{offset};
+	</select>
 
-    <!-- ✅ 특정 목적지 & 날짜 범위의 주문 조회 -->
-    <select id="getOrdersByDestinationAndDate" resultType="app.labs.model.Order">
-        SELECT * FROM `order`
-        WHERE destination = #{destination}
-        AND orderTime BETWEEN #{startOfDay} AND #{endOfDay}
-        ORDER BY orderTime DESC;
-    </select>
+	<!-- ✅ 특정 목적지 & 날짜 범위의 주문 조회 (페이징 추가) -->
+	<select id="getOrdersByDestinationAndDate" resultType="app.labs.model.Order">
+    SELECT * FROM `order`
+    WHERE (destination = #{destination} OR #{destination} IS NULL)
+    AND orderTime BETWEEN COALESCE(#{startOfDay}, '2000-01-01 00:00:00')
+                      AND COALESCE(#{endOfDay}, '2100-12-31 23:59:59')
+    ORDER BY orderId ASC
+    LIMIT #{size} OFFSET #{offset};
+	</select>
+
+
+
+	
+	<select id="getFilteredOrders" resultType="app.labs.model.Order">
+    SELECT * FROM `order`
+    WHERE (#{destination} IS NULL OR destination = #{destination})
+    AND (#{startOfDay} IS NULL OR orderTime BETWEEN #{startOfDay} AND #{endOfDay})
+    ORDER BY orderTime DESC
+    LIMIT #{size} OFFSET #{offset};
+	</select>
+	
+	<!-- ✅ 전체 주문 개수 조회 -->
+	<select id="getTotalOrderCount" resultType="int">
+    SELECT COUNT(*) FROM `order`;
+	</select>
+
+	<!-- ✅ 특정 목적지의 주문 개수 조회 -->
+	<select id="getTotalOrderCountByDestination" resultType="int">
+    SELECT COUNT(*) FROM `order` WHERE destination = #{destination};
+	</select>
+
+	<!-- ✅ 특정 날짜의 주문 개수 조회 -->
+	<select id="getTotalOrderCountByDate" resultType="int">
+    SELECT COUNT(*) FROM `order`
+    WHERE orderTime BETWEEN #{startOfDay} AND #{endOfDay};
+	</select>
+
+	<!-- ✅ 특정 목적지 + 날짜의 주문 개수 조회 -->
+	<select id="getTotalOrderCountByDestinationAndDate" resultType="int">
+    SELECT COUNT(*) FROM `order`
+    WHERE destination = #{destination}
+    AND orderTime BETWEEN #{startOfDay} AND #{endOfDay};
+	</select>
+
 
     <!-- ✅ 주문 저장 -->
-    <insert id="insertOrder">
-        INSERT INTO `order` (orderId, orderNum, orderTime, destination, state, productId, palletId)
-        VALUES (#{orderId}, #{orderNum}, #{orderTime}, #{destination}, #{state}, #{productId}, #{palletId});
-    </insert>
+    <insert id="insertOrder" useGeneratedKeys="true" keyProperty="orderId">
+    INSERT INTO `order` (orderNum, orderTime, destination, state, productId, palletId)
+    VALUES (#{orderNum}, #{orderTime}, #{destination}, #{state}, #{productId}, #{palletId});
+	</insert>
+
+	<delete id="deleteAllOrders">
+    DELETE FROM `order`;
+	</delete>
+
+	<update id="resetAutoIncrement">
+    ALTER TABLE `order` AUTO_INCREMENT = 1;
+	</update>
+	
+	<insert id="batchInsertOrders" parameterType="java.util.List">
+    INSERT INTO `order` (orderNum, orderTime, destination, state, productId, palletId)
+    VALUES
+    <foreach collection="list" item="order" separator=",">
+        (#{order.orderNum}, #{order.orderTime}, #{order.destination}, #{order.state}, #{order.productId}, #{order.palletId})
+    </foreach>
+</insert>
+	
 
 </mapper>
