@@ -16,6 +16,7 @@ body {
     justify-content: center;
     align-items: center;
     gap: 50px;
+    margin-top: 200px;
 }
 
 .icon-box {
@@ -32,4 +33,14 @@ body {
 .icon-box img {
     width: 300px; 
     height: auto;
+}
+
+.modal-dialog {
+    max-width: 500px;
+    width: 100%;
+    z-index: 1050 !important; /* 모달이 화면 위에 표시되도록 */
+}
+
+.modal-backdrop {
+    display: none !important;
 }

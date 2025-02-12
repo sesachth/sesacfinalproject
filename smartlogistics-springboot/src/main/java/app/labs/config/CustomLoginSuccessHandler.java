@@ -26,7 +26,7 @@ public class CustomLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
             if (authority.getAuthority().equals("ROLE_ADMIN")) {
                 return "/admin/main";
             } else if (authority.getAuthority().equals("ROLE_WORKER")) {
-                return "/worker/simulator";
+                return "/worker/packaging";
             }
         }
         return "/login";
