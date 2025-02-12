@@ -45,7 +45,7 @@ public class ProductController {
 
     // GET /admin/product/delete/{id} - 제품 삭제 처리
     @GetMapping("/delete/{id}")
-    public String deleteProduct(@PathVariable int id) {
+    public String deleteProduct(@PathVariable("id") int id) {  
         productService.deleteProductById(id);
         return "redirect:/admin/product";
     }
