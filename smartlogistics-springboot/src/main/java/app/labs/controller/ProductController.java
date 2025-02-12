@@ -14,6 +14,7 @@ import java.util.List;
 public class ProductController {
 
     private final ProductService productService;
+    
 
     @Autowired
     public ProductController(ProductService productService) {
@@ -24,8 +25,9 @@ public class ProductController {
     @GetMapping
     public String showProductPage(Model model) {
         List<Product> products = productService.getAllProducts();
+        model.addAttribute("page", "product");
         model.addAttribute("products", products);
-        return "thymeleaf/html/product"; // thymeleaf/product.html 렌더링
+        return "thymeleaf/html/admin/admin_product"; // thymeleaf/product.html 렌더링
     }
 
     // POST /admin/product/add - 제품 추가 처리

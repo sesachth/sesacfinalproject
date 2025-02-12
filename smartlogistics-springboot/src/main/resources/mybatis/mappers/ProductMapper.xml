@@ -34,7 +34,7 @@
     <if test="depth != null">depth = #{depth},</if>
     <if test="height != null">height = #{height},</if>
     <if test="weight != null">weight = #{weight},</if>
-    <if test="fragile != null">is_fragile AS fragile = #{fragile},</if>
+    <if test="fragile != null">is_fragile = #{fragile},</if>
     <if test="category != null">category = #{category}</if>
   </set>
   WHERE productId = #{productId}
@@ -44,6 +44,7 @@
     <delete id="delete" parameterType="int">
         DELETE FROM product
          WHERE productId = #{productId}
+         
     </delete>
 
 </mapper>
