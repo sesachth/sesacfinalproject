@@ -1,80 +1,78 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorator="~{/thymeleaf/html/common/default_layout}">
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorator="~{/thymeleaf/html/common/default_layout}">
 
 <head>
-    <th:block layout:fragment="css">
-        <link rel="stylesheet" th:href="@{/css/admin/admin.css}" />
-    </th:block>
+<th:block layout:fragment="css">
+	<link rel="stylesheet" th:href="@{/css/admin/admin.css}" />
+</th:block>
 </head>
 
 <body>
-    <th:block layout:fragment="wrapper">
-        <div class="outside-container">
-            <div class="main-container">
-                <div th:replace="~{thymeleaf/html/common/include::profile}"></div>
-                <div th:replace="~{thymeleaf/html/common/include::sidebar}"></div>
-                <div layout:fragment="content" class="main-content">
-                    
-                    <!-- 주문 필터링 UI -->
-                    <div class="filter-container">
-                        <label for="dateFilter">날짜:</label>
-                        <input type="date" id="dateFilter" />
+	<th:block layout:fragment="wrapper">
+		<div class="outside-container">
+			<div class="main-container">
+				<div th:replace="~{thymeleaf/html/common/include::profile}"></div>
+				<div th:replace="~{thymeleaf/html/common/include::sidebar}"></div>
+				<div layout:fragment="content" class="main-content">
 
-                        <label for="campFilter">캠프:</label>
-                        <select id="campFilter">
-                            <option value="">전체</option>
-                            <option value="서초 캠프">서초 캠프</option>
-                            <option value="강남 캠프">강남 캠프</option>
-                            <option value="강서 캠프">강서 캠프</option>
-                            <option value="중구 캠프">중구 캠프</option>
-                            <option value="성동 캠프">성동 캠프</option>
-                        </select>
-                        
-                        <button id="filterBtn">조회</button>
-                    </div>
-                    
-                    <!-- 주문 생성 버튼 -->
-                    <div class="order-actions">
-                        <button id="generateOrderBtn">랜덤 주문 생성</button>
-                    </div>
+					<!-- 주문 필터링 UI -->
+					<div class="filter-container">
+						<label for="dateFilter">날짜:</label> <input type="date"
+							id="dateFilter" /> <label for="campFilter">캠프:</label> <select
+							id="campFilter">
+							<option value="">전체</option>
+							<option value="서초 캠프">서초 캠프</option>
+							<option value="강남 캠프">강남 캠프</option>
+							<option value="강서 캠프">강서 캠프</option>
+							<option value="중구 캠프">중구 캠프</option>
+							<option value="성동 캠프">성동 캠프</option>
+						</select>
 
-                    <!-- 주문 목록 테이블 -->
-                    <div class="table-container">
-                        <table class="order-table">
-                            <thead>
-                                <tr>
-                                    <th>주문 ID</th>
-                                    <th>주문 번호</th>
-                                    <th>주문 날짜</th>
-                                    <th>주문 시간</th>
-                                    <th>목적지</th>
-                                    <th>상품 ID</th>
-                                    <th>상태</th>
-                                </tr>
-                            </thead>
-                            <tbody id="orderTableBody">
-                                <!-- 주문 데이터가 여기에 추가됨 -->
-                            </tbody>
-                        </table>
-                    </div>
+						<button id="filterBtn">조회</button>
+					</div>
 
-                    <!-- 페이지네이션 -->
-                    <div class="pagination">
-                        <button id="prevGroup">«</button>
-                        <span id="pageNumbers"></span>
-                        <button id="nextGroup">»</button>
-                    </div>
+					<!-- 주문 생성 버튼 -->
+					<div class="order-actions">
+						<button id="generateOrderBtn">랜덤 주문 생성</button>
+					</div>
 
-                </div>
-            </div>
-        </div>
-    </th:block>
+					<!-- 주문 목록 테이블 -->
+					<div class="table-container">
+						<table class="order-table">
+							<thead>
+								<tr>
+									<th>주문 ID</th>
+									<th>주문 번호</th>
+									<th>주문 날짜</th>
+									<th>주문 시간</th>
+									<th>목적지</th>
+									<th>상품 ID</th>
+									<th>상태</th>
+								</tr>
+							</thead>
+							<tbody id="orderTableBody">
+								<!-- 주문 데이터가 여기에 추가됨 -->
+							</tbody>
+						</table>
+					</div>
 
-    <script>
+					<!-- 페이지네이션 -->
+					<div class="pagination">
+						<button id="prevGroup">«</button>
+						<span id="pageNumbers"></span>
+						<button id="nextGroup">»</button>
+					</div>
+
+				</div>
+			</div>
+		</div>
+	</th:block>
+
+	<script>
     let currentPage = 1;
-    const rowsPerPage = 10;
+    const rowsPerPage = 20;
     const pageGroupSize = 10;
     let totalPages = 1;
     let orders = [];
@@ -110,7 +108,7 @@
         }
     });
 
-    function loadOrders(page = 1) {
+    function loadOrders(page = currentPage) {  // ✅ 현재 페이지를 유지하도록 수정
         let date = document.getElementById("dateFilter").value;
         let camp = document.getElementById("campFilter").value;
 
@@ -123,12 +121,14 @@
             .then(data => {
                 orders = data.orders;
                 totalPages = data.totalPages;
-                currentPage = page;
                 updateOrderList();
             })
-            .catch(error => console.error("Error:", error));
+            .catch(error => {
+                console.error("Error:", error);
+                document.getElementById("orderTableBody").innerHTML =
+                    "<tr><td colspan='7' style='text-align:center;'>❌ 주문이 없습니다.</td></tr>";
+            });
     }
-
 
     function updateOrderList() {
         let orderTable = document.getElementById("orderTableBody");
@@ -159,6 +159,7 @@
         updatePagination();
     }
 
+
     function updatePagination() {
         let pageNumbers = document.getElementById("pageNumbers");
         pageNumbers.innerHTML = "";
@@ -170,50 +171,67 @@
             let pageButton = document.createElement("button");
             pageButton.innerText = i;
             pageButton.classList.add("page-btn");
-            if (i === currentPage) pageButton.classList.add("active");
-            pageButton.addEventListener("click", () => {
-                loadOrders(i);  // ✅ 페이지 변경 시 새 데이터 요청
+
+            // ✅ 현재 페이지에 'active' 클래스 추가
+            if (i === currentPage) {
+                pageButton.classList.add("active");
+            }
+
+            pageButton.addEventListener("click", function() {
+                currentPage = i;  // ✅ 클릭한 페이지로 currentPage 변경
+                loadOrders(i);
             });
+
             pageNumbers.appendChild(pageButton);
         }
+
+        // ✅ 이전 버튼 활성화/비활성화 처리
+        document.getElementById("prevGroup").disabled = (currentPage === 1);
+
+        // ✅ 다음 버튼 활성화/비활성화 처리
+        document.getElementById("nextGroup").disabled = (currentPage === totalPages);
     }
-
-
 
 </script>
 
 
-    <style>
-        .table-container {
-            max-height: 500px;
-            overflow-y: auto;
-            margin-top: 10px;
-        }
-        .order-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        .order-table th, .order-table td {
-            padding: 10px;
-            border: 1px solid #ddd;
-            text-align: center;
-        }
-        .pagination {
-            display: flex;
-            justify-content: center;
-            margin-top: 10px;
-        }
-        .pagination button {
-            padding: 5px 10px;
-            margin: 2px;
-            border: none;
-            background: #eee;
-            cursor: pointer;
-        }
-        .pagination .active {
-            background: #6200ea;
-            color: white;
-        }
-    </style>
+
+	<style>
+.table-container {
+	max-height: 500px;
+	overflow-y: auto;
+	margin-top: 10px;
+}
+
+.order-table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.order-table th, .order-table td {
+	padding: 10px;
+	border: 1px solid #ddd;
+	text-align: center;
+}
+
+.pagination {
+	display: flex;
+	justify-content: center;
+	margin-top: 10px;
+}
+
+.pagination button {
+	padding: 5px 10px;
+	margin: 2px;
+	border: none;
+	background: #eee;
+	cursor: pointer;
+}
+
+.pagination .active {
+	background: #6200ea;
+	color: white;
+}
+</style>
 </body>
 </html>

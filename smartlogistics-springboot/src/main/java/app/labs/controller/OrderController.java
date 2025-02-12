@@ -76,7 +76,6 @@ public class OrderController {
     }
 
 
-
     // ✅ 랜덤 주문 생성 API
     @RequestMapping(value = "/generate", method = {RequestMethod.GET, RequestMethod.POST})
     @ResponseBody
