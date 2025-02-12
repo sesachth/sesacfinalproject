@@ -98,22 +98,20 @@ public class OrderService {
         sqlSession.insert("smartlogistics.OrderMapper.batchInsertOrders", orders);
     }
 
-    // ✅ 랜덤으로 1000~2000개의 주문 생성 (시간 순서 유지)
+ // ✅ 랜덤 주문 생성 (같은 orderNum을 가진 주문은 연속된 orderId 배정)
     public void generateRandomOrders() {
         resetOrders();  // ✅ 기존 주문 삭제 및 AUTO_INCREMENT 초기화
 
         int orderCount = random.nextInt(1001) + 1000; // ✅ 1000~2000개 주문 생성
         Map<String, LocalDateTime> orderNumToTime = new HashMap<>();
         Map<String, String> orderNumToDestination = new HashMap<>();
+        Map<String, List<Order>> orderGroups = new LinkedHashMap<>(); // ✅ orderNum 별 그룹 저장 (순서 유지)
 
-        // ✅ 하루 동안 시간 분포 (균등 분배)
         LocalDateTime startOfDay = LocalDateTime.now().truncatedTo(ChronoUnit.DAYS);
         long totalSeconds = ChronoUnit.SECONDS.between(startOfDay, startOfDay.plusDays(1)); // 하루 총 초
         long interval = totalSeconds / orderCount; // ✅ 주문 간의 시간 간격
 
         LocalDateTime lastOrderTime = startOfDay;  // ✅ 첫 주문 시간
-
-        List<Order> orderList = new ArrayList<>();
 
         for (int i = 0; i < orderCount; i++) {
             Product randomProduct = getRandomProduct();
@@ -142,11 +140,15 @@ public class OrderService {
             order.setProductId(randomProduct.getProductId());
             order.setPalletId(null);
 
-            orderList.add(order);
+            // ✅ orderNum 별로 그룹화하여 저장
+            orderGroups.putIfAbsent(orderNum, new ArrayList<>());
+            orderGroups.get(orderNum).add(order);
         }
 
-        // ✅ Batch Insert 실행 (한 번에 삽입)
-        batchInsertOrders(orderList);
+        // ✅ 같은 orderNum을 가지는 주문들을 연속적으로 INSERT
+        for (List<Order> groupOrders : orderGroups.values()) {
+            batchInsertOrders(groupOrders);
+        }
     }
 
 
