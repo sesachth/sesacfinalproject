@@ -51,23 +51,11 @@ public class WebSecurityConfig {
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
-            	/*
-                .loginPage("/login") // 로그인 페이지 설정
-                .defaultSuccessUrl("/admin/main", true)
-                .permitAll()
-                */
             	.loginPage("/login")
                 .loginProcessingUrl("/perform_login") // 로그인 처리 URL
                 .usernameParameter("username")  // HTML input name과 일치해야 함
                 .passwordParameter("password")
                 .successHandler(new CustomLoginSuccessHandler()) // 로그인 성공 핸들러
-                .failureHandler((request, response, exception) -> {
-                    System.out.println("로그인 실패: " + exception.getMessage());
-                    if (exception instanceof BadCredentialsException) {
-                        System.out.println("잘못된 비밀번호입니다.");
-                    }
-                    response.sendRedirect("/login?error=true");
-                })
                 .permitAll()	
             )
             .logout(logout -> logout
