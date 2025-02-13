@@ -65,6 +65,7 @@ public class WebSecurityConfig {
                 .logoutSuccessUrl("/login")
                 .invalidateHttpSession(true) // 세션 무효화
                 .deleteCookies("JSESSIONID") // 쿠키 삭제
+                // 캐시 삭제
                 .addLogoutHandler((request, response, authentication) -> {
                     response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
                     response.setHeader("Pragma", "no-cache");
