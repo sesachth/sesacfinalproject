@@ -54,6 +54,9 @@ dependencies {
 	testImplementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter-test:3.0.4'
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	
+	// Apache POI
+	implementation 'org.apache.poi:poi-ooxml:5.2.3'
 }
 
 eclipse { 

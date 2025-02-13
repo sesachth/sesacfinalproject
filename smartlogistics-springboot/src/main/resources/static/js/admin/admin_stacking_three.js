@@ -1,66 +1,156 @@
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.173.0/build/three.module.js';
+import * as THREE from 'three';  // Three.js 라이브러리 가져오기
 
-// 씬 생성
-const scene = new THREE.Scene();
-
-// 카메라 설정
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.set(3, 3, 5);
-camera.lookAt(0, 0, 0);
-
-// 렌더러 생성
-const renderer = new THREE.WebGLRenderer();
-renderer.setSize(window.innerWidth / 2, window.innerHeight / 2);
-document.querySelector('.main-content').appendChild(renderer.domElement);
-
-// 큐브 생성 (물체)
-const geometry = new THREE.BoxGeometry(1.1, 0.15, 1.1); // 크기를 1.1, 0.15, 1.1로 설정
-const material = new THREE.MeshPhongMaterial({ color: 0x808080 }); // 색상을 회색(0x808080)으로 설정
-const cube = new THREE.Mesh(geometry, material);
-
-// 큐브 위치 조정: 모서리를 (0, 0, 0)에 맞추기 위해 이동
-cube.position.set(1.1 / 2, 0.15 / 2, 1.1 / 2); // x축: +0.55, y축: +0.075, z축: +0.55
-scene.add(cube);
-
-// 조명 추가 및 조정
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-scene.add(ambientLight);
-
-const pointLight = new THREE.PointLight(0xffffff, 1);
-pointLight.position.set(5, 5, 5);
-scene.add(pointLight);
-
-// AxesHelper 추가 (좌표계 표시)
-const axesHelper = new THREE.AxesHelper(5); // 축의 길이를 5로 설정
-scene.add(axesHelper);
-
-// 회전을 위한 변수 초기화
+let scene, camera, renderer, baseCube, boxes = [];
 let isDragging = false;
 let previousMousePosition = { x: 0, y: 0 };
 let rotationSpeed = 0.005;
-
-// 줌을 위한 변수 초기화
 let zoomSpeed = 0.1;
 let minDistance = 1;
 let maxDistance = 20;
+let stackingResults = null;
 
-// 마우스 이벤트 핸들러
-document.addEventListener('mousedown', (event) => {
+$(document).ready(function() {
+    // Ajax 요청으로 stackingResults 데이터 가져오기
+    $.ajax({
+        url: 'http://localhost:8000/api/v1/stacking_results', // FastAPI 엔드포인트
+        method: 'GET',
+        dataType: 'json',
+        success: function(response) {
+			stackingResults = response;
+            populatePalletSelect(stackingResults.pallets);
+        },
+        error: function(xhr, status, error) {
+            console.error('Error fetching stacking results:', error);
+            alert('Failed to load stacking results data.');
+        }
+    });
+
+    $('#palletSelect').change(function() {
+        const selectedPalletId = $(this).val();
+        if (selectedPalletId) {
+			updateBoxList(selectedPalletId);
+            initThreeJS(selectedPalletId);
+        }
+    });
+});
+
+function populatePalletSelect(pallets) {
+    const selectBox = $('#palletSelect');
+    selectBox.empty();
+    selectBox.append('<option value="">Select a pallet</option>');
+
+    pallets.forEach(function(pallet) {
+        selectBox.append(`<option value="${pallet.pallet_id}">${pallet.destination}</option>`);
+    });
+}
+
+function initThreeJS(palletId) {
+    // Three.js 초기화 및 렌더링
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(2, 2, 2);
+    camera.lookAt(0, 0, 0);
+
+    renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth / 2, window.innerHeight / 2);
+    $('.main-content').append(renderer.domElement);
+
+    // 바닥 큐브 생성
+    const baseGeometry = new THREE.BoxGeometry(1.1, 0.15, 1.1);
+    const baseMaterial = new THREE.MeshPhongMaterial({ color: 0x808080 });
+    baseCube = new THREE.Mesh(baseGeometry, baseMaterial);
+    baseCube.position.set(1.1 / 2, 0.15 / 2, 1.1 / 2);
+    scene.add(baseCube);
+
+    // 조명 추가
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    scene.add(ambientLight);
+
+    const pointLight = new THREE.PointLight(0xffffff, 1);
+    pointLight.position.set(5, 5, 5);
+    scene.add(pointLight);
+
+    // AxesHelper 추가
+    const axesHelper = new THREE.AxesHelper(5);
+    scene.add(axesHelper);
+
+    // 선택된 파렛트의 박스 데이터 가져오기
+	if (stackingResults) {
+	    createBoxes(stackingResults.pallets[palletId].boxes);
+	    animate();
+	} else {
+	    console.error('Error fetching box data:');
+	}
+
+    // 이벤트 리스너 추가
+    addEventListeners();
+}
+
+function updateBoxList(selectedPalletId) {
+    const boxList = $('#boxList');
+    boxList.empty();
+
+    const selectedPalletData = stackingResults.pallets.find(p => p.pallet_id === parseInt(selectedPalletId));
+     
+    if (selectedPalletData && selectedPalletData.boxes) {
+        selectedPalletData.boxes.forEach(box => {
+            boxList.append(`
+                <div class="list-group-item">
+                    <h5 class="mb-1">${box.product_name}</h5>
+                </div>
+            `);
+        });
+    } else {
+        boxList.append('<div class="list-group-item">No boxes found for this pallet.</div>');
+    }
+}
+
+function createBoxes(boxesData) {
+    boxes = [];
+    boxesData.forEach(boxData => {
+        const boxGeometry = new THREE.BoxGeometry(boxData.width, boxData.height, boxData.depth);
+        const boxMaterial = new THREE.MeshPhongMaterial({ color: Math.random() * 0xffffff });
+        const boxMesh = new THREE.Mesh(boxGeometry, boxMaterial);
+
+        boxMesh.position.set(
+            boxData.x_coordinate,
+            boxData.y_coordinate + 0.15 / 2, // 바닥 큐브 높이의 절반을 더해 바닥 위에 위치하도록 함
+            boxData.z_coordinate
+        );
+
+        boxes.push({
+            mesh: boxMesh,
+            velocity: 0 // 정적 위치이므로 속도는 0
+        });
+
+        scene.add(boxMesh);
+    });
+}
+
+function addEventListeners() {
+    document.addEventListener('mousedown', onMouseDown);
+    document.addEventListener('mouseup', onMouseUp);
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('wheel', onWheel, { passive: false });
+    window.addEventListener('resize', onWindowResize);
+}
+
+function onMouseDown(event) {
     isDragging = true;
-});
+}
 
-document.addEventListener('mouseup', (event) => {
+function onMouseUp(event) {
     isDragging = false;
-});
+}
 
-document.addEventListener('mousemove', (event) => {
+function onMouseMove(event) {
     if (isDragging) {
         const deltaX = event.clientX - previousMousePosition.x;
         const deltaY = event.clientY - previousMousePosition.y;
 
         const spherical = new THREE.Spherical();
         const cameraPosition = new THREE.Vector3();
-        cameraPosition.copy(camera.position).sub(cube.position);
+        cameraPosition.copy(camera.position).sub(baseCube.position);
         spherical.setFromVector3(cameraPosition);
 
         spherical.theta -= deltaX * rotationSpeed;
@@ -68,76 +158,40 @@ document.addEventListener('mousemove', (event) => {
 
         spherical.phi = Math.max(0.1, Math.min(Math.PI - 0.1, spherical.phi));
 
-        cameraPosition.setFromSpherical(spherical).add(cube.position);
+        cameraPosition.setFromSpherical(spherical).add(baseCube.position);
         camera.position.copy(cameraPosition);
-        camera.lookAt(cube.position);
+        camera.lookAt(baseCube.position);
     }
 
     previousMousePosition.x = event.clientX;
     previousMousePosition.y = event.clientY;
-});
+}
 
-// 마우스 휠 이벤트 핸들러 (줌인/아웃)
-document.addEventListener(
-    'wheel',
-    (event) => {
-        event.preventDefault();
+function onWheel(event) {
+    event.preventDefault();
 
-        const zoomAmount = event.deltaY * zoomSpeed;
-        const cameraPosition = new THREE.Vector3();
-        cameraPosition.copy(camera.position).sub(cube.position);
+    const zoomAmount = event.deltaY * zoomSpeed;
+    const cameraPosition = new THREE.Vector3();
+    cameraPosition.copy(camera.position).sub(baseCube.position);
 
-        // 줌 인/아웃 제한 설정
-        if (
-            (zoomAmount > 0 && cameraPosition.length() < maxDistance) ||
-            (zoomAmount < 0 && cameraPosition.length() > minDistance)
-        ) {
-            cameraPosition.multiplyScalar(1 + zoomAmount / 100);
-        }
+    if (
+        (zoomAmount > 0 && cameraPosition.length() < maxDistance) ||
+        (zoomAmount < 0 && cameraPosition.length() > minDistance)
+    ) {
+        cameraPosition.multiplyScalar(1 + zoomAmount / 100);
+    }
 
-        camera.position.copy(cameraPosition.add(cube.position));
-        camera.lookAt(cube.position);
-    },
-    { passive: false }
-);
+    camera.position.copy(cameraPosition.add(baseCube.position));
+    camera.lookAt(baseCube.position);
+}
 
-// 애니메이션 루프
+function onWindowResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth / 2, window.innerHeight / 2);
+}
+
 function animate() {
     requestAnimationFrame(animate);
     renderer.render(scene, camera);
 }
-animate();
-
-// 창 크기 변경 대응
-window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-});
-
-/*	// 추후 사용 예정
-$(document).ready(function() {
-	$.ajax({
-        url: 'http://localhost:8000/api/v1/boxes',
-        type: 'GET',
-        dataType: 'json',
-        success: function(data) {
-            // 서버에서 받은 데이터로 HTML 업데이트
-            var html = '<ul>';
-            $.each(data.boxes, function(index, box) {
-                html += '<li>Box ' + (index + 1) + ': ' +
-						'Spec: ' + box.spec + '</li>'
-						'Width: ' + box.width + ', ' +
-                        'Depth: ' + box.depth + ', ' +
-                        'Height: ' + box.height + ', ';
-            });
-            html += '</ul>';
-            $('#boxList').html(html);
-        },
-        error: function(xhr, status, error) {
-            console.error('Error:', error);
-            $('#boxList').html('<p>Error loading data</p>');
-        }
-    });
-});
-*/

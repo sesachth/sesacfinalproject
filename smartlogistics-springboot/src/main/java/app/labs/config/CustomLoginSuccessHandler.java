@@ -17,11 +17,15 @@ public class CustomLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
     protected void handle(HttpServletRequest request, HttpServletResponse response, Authentication authentication)
             throws IOException, ServletException {
         String targetUrl = determineTargetUrl(authentication);
-        getRedirectStrategy().sendRedirect(request, response, targetUrl);
+        // getRedirectStrategy().sendRedirect(request, response, targetUrl);
+        // JSON 응답 반환
+        response.setContentType("text/plain; charset=UTF-8");
+        response.getWriter().write(targetUrl);
     }
 
     private String determineTargetUrl(Authentication authentication) {
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+        authorities.forEach(authority -> System.out.println("Granted Authority: " + authority.getAuthority()));  // ROLE_ADMIN 확인
         for (GrantedAuthority authority : authorities) {
             if (authority.getAuthority().equals("ROLE_ADMIN")) {
                 return "/admin/dashboard";
