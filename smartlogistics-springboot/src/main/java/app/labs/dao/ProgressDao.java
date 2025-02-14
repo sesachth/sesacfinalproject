@@ -4,6 +4,8 @@ import app.labs.model.ProgressDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import java.util.List;
+import org.apache.ibatis.annotations.Update;
+
 
 @Mapper
 public interface ProgressDao {
@@ -23,4 +25,8 @@ public interface ProgressDao {
         @Param("camp") String camp,
         @Param("orderNum") String orderNum
     );
+    
+    // ✅ 진행 상태 업데이트 쿼리 추가
+    @Update("UPDATE `order` SET progress_state = #{progressState} WHERE order_id = #{orderId}")
+    void updateProgressState(@Param("orderId") Long orderId, @Param("progressState") int progressState);
 }

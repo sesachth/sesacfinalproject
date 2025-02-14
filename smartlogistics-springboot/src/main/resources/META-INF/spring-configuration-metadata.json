@@ -1,0 +1,10 @@
+{
+  "properties": [
+    {
+      "name": "websocket.server.port",
+      "type": "java.lang.Integer",
+      "description": "웹소켓 전용 포트 설정",
+      "defaultValue": 8081
+    }
+  ]
+}

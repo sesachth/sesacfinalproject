@@ -21,32 +21,32 @@ public class OrderRepository {
     }
 
     public Order saveOrder(Order order) {
-        if (order.getOrderId() == null) {
-            order.setOrderId(idGenerator.getAndIncrement()); // orderId 자동 증가
+        if (order.getOrder_id() == null) {
+            order.setOrder_id(idGenerator.getAndIncrement()); // order_id 자동 증가
         }
-        orderStore.put(order.getOrderId(), order);
+        orderStore.put(order.getOrder_id(), order);
         return order;
     }
 
     public List<Order> getOrdersByDate(String date) {
         List<Order> result = new ArrayList<>();
         for (Order order : orderStore.values()) {
-            if (order.getOrderTime().toLocalDate().toString().equals(date)) {
+            if (order.getOrder_time().toLocalDate().toString().equals(date)) {
                 result.add(order);
             }
         }
         return result;
     }
 
-    public List<Order> filterOrders(Long orderId, String destination, String startTime, String endTime, Long productProductId) {
+    public List<Order> filterOrders(Long order_id, String destination, String startTime, String endTime, Long product_id) {
         List<Order> result = new ArrayList<>();
         for (Order order : orderStore.values()) {
-            if ((orderId == null || order.getOrderId().equals(orderId)) &&
+            if ((order_id == null || order.getOrder_id().equals(order_id)) &&
                 (destination == null || order.getDestination().equals(destination)) &&
                 (startTime == null || endTime == null || 
-                 (order.getOrderTime().isAfter(LocalDateTime.parse(startTime)) &&
-                  order.getOrderTime().isBefore(LocalDateTime.parse(endTime)))) &&
-                (productProductId == null || order.getProductId().equals(productProductId))) {
+                 (order.getOrder_time().isAfter(LocalDateTime.parse(startTime)) &&
+                  order.getOrder_time().isBefore(LocalDateTime.parse(endTime)))) &&
+                (product_id == null || order.getProduct_id().equals(product_id))) {
                 result.add(order);
             }
         }
