@@ -177,19 +177,19 @@
         fetch(`/admin/order/api?${queryParams.toString()}`)
             .then(response => response.json())
             .then(data => {
+                console.log("🔥 API 응답 데이터:", data); // ✅ API 응답 확인
                 orders = data.orders;
-                totalPages = data.totalPages || 1;  // ✅ `totalPages` 값이 1일 때도 기본 설정
+                totalPages = data.totalPages || 1;
 
                 updateOrderList();
-                updatePagination();  // ✅ 페이지네이션 강제 실행
+                updatePagination();
             })
             .catch(error => {
-                console.error("Error:", error);
+                console.error("❌ Error:", error);
                 document.getElementById("orderTableBody").innerHTML =
                     "<tr><td colspan='8' style='text-align:center;'>❌ 주문이 없습니다.</td></tr>";
             });
     }
-
 
     function updateOrderList(orderData = orders) {
         let orderTable = document.getElementById("orderTableBody");
@@ -200,21 +200,31 @@
             return;
         }
 
+        console.log("🔥 렌더링할 주문 데이터:", orderData); // ✅ 주문 데이터 확인
+
         orderData.forEach(order => {
-            let formattedDate = order.orderTime.split("T")[0]; // YYYY-MM-DD
-            let formattedTime = order.orderTime.split("T")[1].split(".")[0]; // HH:MM:SS
+            let formattedDate = order.order_time
+                ? order.order_time.split("T")[0]
+                : order.formattedOrderTime
+                    ? order.formattedOrderTime.split("T")[0]
+                    : "-";
+
+            let formattedTime = order.order_time
+                ? order.order_time.split("T")[1].split(".")[0]
+                : order.formattedOrderTime
+                    ? order.formattedOrderTime.split("T")[1].split(".")[0]
+                    : "-";
 
             let row = `<tr>
-                <td>${order.orderId || '-'}</td>
-                <td>${order.orderNum || '-'}</td>
-                <td>${formattedDate || '-'}</td>
-                <td>${formattedTime || '-'}</td>
+                <td>${order.order_id || '-'}</td>
+                <td>${order.order_num || '-'}</td>
+                <td>${formattedDate}</td>
+                <td>${formattedTime}</td>
                 <td>${order.destination || '-'}</td>
-                <td>${order.productId || '-'}</td>
+                <td>${order.product_id || '-'}</td>
             </tr>`;
             orderTable.innerHTML += row;
         });
-
     }
 
     function updatePagination() {

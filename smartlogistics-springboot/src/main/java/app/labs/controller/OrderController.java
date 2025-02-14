@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.HashMap;
@@ -117,17 +118,20 @@ public class OrderController {
     // ✅ 주문번호로 주문 조회 API (JSON 반환)
     @GetMapping("/api/search")
     @ResponseBody
-    public ResponseEntity<?> searchOrderByOrderNum(@RequestParam(name = "order_num") String order_num) {
+    public ResponseEntity<?> searchOrderByOrderNum(@RequestParam(name = "orderNum") String orderNum) {
         try {
-            List<Order> orders = orderService.getOrdersByOrderNum(order_num);
-            if (orders.isEmpty()) {
-                return ResponseEntity.status(404).body("❌ 해당 주문이 존재하지 않습니다.");
+            List<Order> orders = orderService.getOrdersByOrderNum(orderNum);
+
+            if (orders == null || orders.isEmpty()) {
+                return ResponseEntity.status(404).body("❌ 해당 주문번호로 조회된 주문이 없습니다.");
             }
+
             return ResponseEntity.ok(Collections.singletonMap("orders", orders));
         } catch (Exception e) {
             return ResponseEntity.status(500).body("❌ 주문 조회 중 오류 발생: " + e.getMessage());
         }
     }
+
 
     // ✅ 주문 상태 업데이트 API
     @PutMapping("/update-status/{order_id}")
@@ -154,38 +158,57 @@ public class OrderController {
 
         List<Order> orders;
 
-        if (destination == null && date == null) {
-            orders = orderService.getAllOrders(5000, 0);
-        } else if (destination != null && date == null) {
-            orders = orderService.getOrdersByDestination(destination, 5000, 0);
-        } else if (destination == null && date != null) {
-            String startOfDay = date + " 00:00:00";
-            String endOfDay = date + " 23:59:59";
-            orders = orderService.getOrdersByDate(startOfDay, endOfDay, 5000, 0);
-        } else {
-            String startOfDay = date + " 00:00:00";
-            String endOfDay = date + " 23:59:59";
-            orders = orderService.getOrdersByDestinationAndDate(destination, startOfDay, endOfDay, 5000, 0);
-        }
-
-        try (Workbook workbook = new XSSFWorkbook()) {
-            Sheet sheet = workbook.createSheet("Orders");
-            Row header = sheet.createRow(0);
-
-            String[] columns = {"주문 ID", "주문 번호", "주문 날짜", "주문 시간", "목적지", "상품 ID"};
-            for (int i = 0; i < columns.length; i++) {
-                header.createCell(i).setCellValue(columns[i]);
+        try {
+            if (destination == null && date == null) {
+                orders = orderService.getAllOrders(5000, 0);
+            } else if (destination != null && date == null) {
+                orders = orderService.getOrdersByDestination(destination, 5000, 0);
+            } else if (destination == null && date != null) {
+                String startOfDay = date + " 00:00:00";
+                String endOfDay = date + " 23:59:59";
+                orders = orderService.getOrdersByDate(startOfDay, endOfDay, 5000, 0);
+            } else {
+                String startOfDay = date + " 00:00:00";
+                String endOfDay = date + " 23:59:59";
+                orders = orderService.getOrdersByDestinationAndDate(destination, startOfDay, endOfDay, 5000, 0);
             }
 
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            workbook.write(outputStream);
-            
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=orders.xlsx")
-                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                    .body(outputStream.toByteArray());
-        } catch (IOException e) {
-            return ResponseEntity.internalServerError().body(null);
+            if (orders.isEmpty()) {
+                return ResponseEntity.badRequest().body("❌ 다운로드할 주문이 없습니다.".getBytes(StandardCharsets.UTF_8));
+            }
+
+            try (Workbook workbook = new XSSFWorkbook()) {
+                Sheet sheet = workbook.createSheet("Orders");
+                Row header = sheet.createRow(0);
+
+                String[] columns = {"주문 ID", "주문 번호", "주문 날짜", "주문 시간", "목적지", "상품 ID"};
+                for (int i = 0; i < columns.length; i++) {
+                    header.createCell(i).setCellValue(columns[i]);
+                }
+
+                int rowIdx = 1;
+                for (Order order : orders) {
+                    Row row = sheet.createRow(rowIdx++);
+                    row.createCell(0).setCellValue(order.getOrderId());
+                    row.createCell(1).setCellValue(order.getOrderNum());
+                    row.createCell(2).setCellValue(order.getOrderTime() != null ? order.getOrderTime().toLocalDate().toString() : "-");
+                    row.createCell(3).setCellValue(order.getOrderTime() != null ? order.getOrderTime().toLocalTime().toString() : "-");
+                    row.createCell(4).setCellValue(order.getDestination());
+                    row.createCell(5).setCellValue(order.getProductId());
+                }
+
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                workbook.write(outputStream);
+
+                return ResponseEntity.ok()
+                        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=orders.xlsx")
+                        .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                        .body(outputStream.toByteArray());
+            }
+
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(("❌ 엑셀 생성 중 오류 발생: " + e.getMessage()).getBytes(StandardCharsets.UTF_8));
         }
     }
+
 }

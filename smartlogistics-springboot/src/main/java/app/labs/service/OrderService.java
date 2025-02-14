@@ -133,36 +133,38 @@ public class OrderService {
             Product randomProduct = getRandomProduct();
             if (randomProduct == null) continue;
 
-            String order_num;
+            String orderNum;
             String destination;
-            LocalDateTime order_time;
+            LocalDateTime orderTime;
 
             if (!orderNumToDestination.isEmpty() && random.nextDouble() < 0.1) {
-                order_num = getRandomExistingOrderNum(orderNumToDestination);
-                destination = orderNumToDestination.get(order_num);
-                order_time = orderNumToTime.get(order_num);
+                orderNum = getRandomExistingOrderNum(orderNumToDestination);
+                destination = orderNumToDestination.get(orderNum);
+                orderTime = orderNumToTime.get(orderNum);
             } else {
-                order_num = generateRandomOrderNum();
+                orderNum = generateRandomOrderNum();
                 destination = getRandomCamp();
-                order_time = startOfDay.plusSeconds(interval * i + random.nextInt((int) interval));
-                orderNumToDestination.put(order_num, destination);
-                orderNumToTime.put(order_num, order_time);
+                orderTime = startOfDay.plusSeconds(interval * i + random.nextInt((int) interval));
+                orderNumToDestination.put(orderNum, destination);
+                orderNumToTime.put(orderNum, orderTime);
             }
 
             Order order = new Order();
-            order.setOrder_num(order_num);
-            order.setOrder_time(order_time);
+            order.setOrderNum(orderNum);
+            order.setOrderTime(orderTime);
             order.setDestination(destination);
-            order.setBox_state(0);
-            order.setProgress_state(0);
-            order.setProduct_id(randomProduct.getProduct_id());
-            order.setPallet_id(null);
+            order.setBoxState(0);
+            order.setProgressState(0);
+            order.setProductId(randomProduct.getProductId());
+            order.setPalletId(null);
 
             orders.add(order);
         }
 
-        orders.sort(Comparator.comparing(Order::getOrder_time));
+        // 주문 시간 기준으로 정렬
+        orders.sort(Comparator.comparing(Order::getOrderTime));
         batchInsertOrders(orders);
+
     }
 
     private String generateRandomOrderNum() {
