@@ -6,22 +6,15 @@
 
     <!-- 필터링된 진행 상태 목록 조회 -->
     <select id="getFilteredProgressList" resultType="app.labs.model.ProgressDTO">
-        SELECT 
-            o.order_id, 
-            o.order_num, 
-            o.order_time, 
-            o.destination, 
-            o.pallet_id, 
-            o.box_state, 
-            o.progress_state,  
-            p.name AS product_name,  <!-- ✅ 필드명 통일 -->
-            p.category  <!-- ✅ 컬럼명 그대로 유지 -->
+        SELECT o.orderId, o.orderNum, o.orderTime, o.destination, o.palletId, 
+               o.box_state, o.progress_state,  -- ✅ `boxState` → `box_state` 변경
+               p.name AS productName, p.category AS productCategory  -- ✅ `p.productName` → `p.name`
         FROM `order` o
-        LEFT JOIN `product` p ON o.product_id = p.product_id
-        WHERE (#{date} IS NULL OR DATE(o.order_time) = #{date})
+        LEFT JOIN `product` p ON o.productId = p.productId
+        WHERE (#{date} IS NULL OR DATE(o.orderTime) = #{date})
           AND (#{camp} IS NULL OR o.destination = #{camp})
-          AND (#{orderNum} IS NULL OR o.order_num = #{orderNum})
-        ORDER BY o.order_time ASC
+          AND (#{orderNum} IS NULL OR o.orderNum = #{orderNum})
+        ORDER BY o.orderTime ASC
         LIMIT #{pageSize} OFFSET #{offset}
     </select>
 
@@ -29,10 +22,10 @@
     <select id="countTotalFilteredProgress" resultType="int">
         SELECT COUNT(*)
         FROM `order` o
-        LEFT JOIN `product` p ON o.product_id = p.product_id
-        WHERE (#{date} IS NULL OR DATE(o.order_time) = #{date})
+        LEFT JOIN `product` p ON o.productId = p.productId
+        WHERE (#{date} IS NULL OR DATE(o.orderTime) = #{date})
           AND (#{camp} IS NULL OR o.destination = #{camp})
-          AND (#{orderNum} IS NULL OR o.order_num = #{orderNum})
+          AND (#{orderNum} IS NULL OR o.orderNum = #{orderNum})
     </select>
 
 </mapper>

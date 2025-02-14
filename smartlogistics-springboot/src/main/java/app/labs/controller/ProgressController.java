@@ -2,17 +2,9 @@ package app.labs.controller;
 
 import app.labs.service.ProgressService;
 import app.labs.model.ProgressDTO;
-import app.labs.model.ProgressMessage;
-
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-
-import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.SendTo;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.messaging.handler.annotation.Payload;
-
 
 import java.util.HashMap;
 import java.util.List;
@@ -70,16 +62,5 @@ public class ProgressController {
         response.put("progressList", progressList);
         response.put("totalPages", totalPages);
         return response;
-    }
-    
- // WebSocket을 통한 진행 상태 업데이트
-    @MessageMapping("/updateProgress")
-    @SendTo("/topic/progress")
-    public String updateProgressStatus(@Payload ProgressMessage message) { // ✅ DTO 사용
-        Long orderId = message.getOrderId();
-        int progressState = message.getProgressState(); 
-
-        progressService.updateProgressState(orderId, progressState);
-        return "포장 완료";
     }
 }
