@@ -3,48 +3,81 @@
     "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="app.labs.dao.ProductlistRepository">
 
+    <!-- resultMap 정의: 각 컬럼을 명시적으로 매핑 -->
+    <resultMap id="productResultMap" type="app.labs.model.Product">
+        <id property="productId" column="product_id" />
+        <result property="name" column="name" />
+        <result property="width" column="width" />
+        <result property="depth" column="depth" />
+        <result property="height" column="height" />
+        <result property="weight" column="weight" />
+        <result property="category" column="category" />
+        <result property="fragile" column="is_fragile" />
+    </resultMap>
+
     <!-- 전체 물품 목록 조회 -->
-    <select id="findAll" resultType="app.labs.model.Product">
-        SELECT productId, name, width, depth, height, weight, 
-               CASE WHEN is_fragile = 1 THEN TRUE ELSE FALSE END AS fragile, 
-               category
-          FROM product
+    <select id="findAll" resultMap="productResultMap">
+        SELECT product_id, name, width,
+        depth, height, weight,
+        is_fragile,
+        category
+        FROM product
     </select>
 
-    <!-- 단건 물품 조회 -->
-    <select id="findById" parameterType="int" resultType="app.labs.model.Product">
-        SELECT productId, name, width, depth, height, weight, 
-               CASE WHEN is_fragile = 1 THEN TRUE ELSE FALSE END AS fragile, 
-               category
-          FROM product
-         WHERE productId = #{productId}
+    <!-- 카테고리 물품 조회 -->
+    <select id="findByCategory" parameterType="String" resultMap="productResultMap">
+        SELECT product_id, name, width, depth, height, weight,
+        category, is_fragile
+        FROM product
+        WHERE category = #{category}
     </select>
 
-<insert id="insert" useGeneratedKeys="true" keyProperty="productId">
-  INSERT INTO product (name, width, depth, height, weight, is_fragile, category) 
-  VALUES (#{name}, #{width}, #{depth}, #{height}, #{weight}, #{fragile}, #{category})
-</insert>
+    <!-- 이름으로 제품 검색 (검색어가 제품명에 포함되어 있는 경우) -->
+    <select id="findByNameContaining" parameterType="String" resultMap="productResultMap">
+        SELECT product_id, name, width, depth, height, weight,
+        is_fragile,
+        category
+        FROM product
+        WHERE name LIKE CONCAT('%', #{name}, '%')
+    </select>
+
+    <!-- 취급주의 물품 조회 -->
+    <select id="findByFragile" parameterType="boolean" resultMap="productResultMap">
+        SELECT product_id, name, width, depth, height, weight,
+        category, is_fragile
+        FROM product
+        WHERE is_fragile = #{fragile}
+    </select>
+
+    <!-- 제품 등록 -->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="productId">
+        INSERT INTO product (name, width, depth, height, weight,
+        is_fragile,
+        category)
+        VALUES (#{name}, #{width}, #{depth}, #{height},
+        #{weight}, #{fragile},
+        #{category})
+    </insert>
 
     <!-- 기존 물품 수정 -->
-<update id="update">
-  UPDATE product
-  <set>
-    <if test="name != null and name != ''">name = #{name},</if>
-    <if test="width != null">width = #{width},</if>
-    <if test="depth != null">depth = #{depth},</if>
-    <if test="height != null">height = #{height},</if>
-    <if test="weight != null">weight = #{weight},</if>
-    <if test="fragile != null">is_fragile = #{fragile},</if>
-    <if test="category != null">category = #{category}</if>
-  </set>
-  WHERE productId = #{productId}
-</update>
+    <update id="update">
+        UPDATE product
+        <set>
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="width != null">width = #{width},</if>
+            <if test="depth != null">depth = #{depth},</if>
+            <if test="height != null">height = #{height},</if>
+            <if test="weight != null">weight = #{weight},</if>
+            <if test="fragile != null">is_fragile = #{fragile},</if>
+            <if test="category != null">category = #{category}</if>
+        </set>
+        WHERE product_id = #{product_id}
+    </update>
 
     <!-- 특정 물품 삭제 -->
     <delete id="delete" parameterType="int">
         DELETE FROM product
-         WHERE productId = #{productId}
-         
+        WHERE product_id = #{product_id}
     </delete>
 
 </mapper>
