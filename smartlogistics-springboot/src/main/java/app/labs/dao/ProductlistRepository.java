@@ -29,5 +29,6 @@ public interface ProductlistRepository {
     
  // 특정 이름으로 제품 검색
     List<Product> findByNameContaining(String name);
+    
 	
 }

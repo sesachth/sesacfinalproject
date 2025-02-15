@@ -53,13 +53,7 @@ public class ProductController {
 		return "thymeleaf/html/admin/admin_product";
 	}
 
-    @GetMapping("/search")
-    public String searchProductsByName(@RequestParam("name") String name, Model model) {
-        List<Product> products = productService.getProductsByName(name);
-        model.addAttribute("products", products);
-        model.addAttribute("searchQuery", name);
-        return "thymeleaf/html/admin/admin_product"; // 기존 페이지 재사용
-    }
+
 
 	// POST /admin/product/add - 제품 추가 처리
 	@PostMapping("/add")

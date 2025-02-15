@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:object="${product}">
+    <form th:action="@{/admin/product/update}" method="post">
+        <div class="modal-header">
+            <h5 class="modal-title">제품 수정</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="닫기">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" th:field="*{productId}" />
+            <div class="form-group">
+                <label>제품 이름</label>
+                <input type="text" th:field="*{name}" class="form-control" required />
+            </div>
+            <div class="form-group">
+                <label>너비</label>
+                <input type="number" th:field="*{width}" step="any" class="form-control" required />
+            </div>
+            <div class="form-group">
+                <label>깊이</label>
+                <input type="number" th:field="*{depth}" step="any" class="form-control" required />
+            </div>
+            <div class="form-group">
+                <label>높이</label>
+                <input type="number" th:field="*{height}" step="any" class="form-control" required />
+            </div>
+            <div class="form-group">
+                <label>무게</label>
+                <input type="number" th:field="*{weight}" step="any" class="form-control" required />
+            </div>
+            <div class="form-group">
+                <label>취급주의</label>
+                <select th:field="*{fragile}" class="form-control">
+                    <option value="true" th:selected="${product.fragile} == true">예</option>
+                    <option value="false" th:selected="${product.fragile} == false">아니오</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>카테고리</label>
+                <input type="text" th:field="*{category}" class="form-control" />
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+            <button type="submit" class="btn btn-primary">저장</button>
+        </div>
+    </form>
+</div>
+</body>
+</html>

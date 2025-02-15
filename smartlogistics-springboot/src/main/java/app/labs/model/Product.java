@@ -10,10 +10,10 @@ import lombok.ToString;
 public class Product {
     Long productId;
     String name;
-    float width;
-    float depth;
-    float height;
-    float weight;
+    Float width;
+    Float depth;
+    Float height;
+    Float weight;
     boolean fragile;
     String category;
 
