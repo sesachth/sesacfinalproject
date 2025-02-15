@@ -12,7 +12,8 @@
         <result property="height" column="height" />
         <result property="weight" column="weight" />
         <result property="category" column="category" />
-        <result property="fragile" column="is_fragile" />
+        <result property="isFragile" column="is_fragile" />
+        <result property="spec" column="sepc" />
     </resultMap>
 
     <!-- 전체 물품 목록 조회 -->
