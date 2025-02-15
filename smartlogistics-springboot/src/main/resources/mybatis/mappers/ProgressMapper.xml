@@ -4,6 +4,7 @@
 
 <mapper namespace="app.labs.dao.ProgressDao">
 
+<<<<<<< HEAD
     <!-- 필터링된 진행 상태 목록 조회 -->
     <select id="getFilteredProgressList" resultType="app.labs.model.ProgressDTO">
         SELECT o.orderId, o.orderNum, o.orderTime, o.destination, o.palletId, 
@@ -17,15 +18,48 @@
         ORDER BY o.orderTime ASC
         LIMIT #{pageSize} OFFSET #{offset}
     </select>
+=======
+	    <resultMap id="progressResultMap" type="app.labs.model.ProgressDTO">
+	    <id property="orderId" column="order_id"/>
+	    <result property="orderNum" column="order_num"/>
+	    <result property="orderTime" column="order_time"/>
+	    <result property="destination" column="destination"/>
+	    <result property="palletId" column="pallet_id"/>
+	    <result property="boxState" column="box_state"/>
+	    <result property="progressState" column="progress_state"/>
+	    <result property="productName" column="name"/>
+	    <result property="productCategory" column="category"/>
+	</resultMap>
+	
+	<select id="getFilteredProgressList" resultMap="progressResultMap">
+	    SELECT o.order_id, o.order_num, o.order_time, o.destination, o.pallet_id, 
+	           o.box_state, o.progress_state,
+	           p.name, p.category
+	    FROM `order` o
+	    LEFT JOIN `product` p ON o.product_id = p.product_id
+	    WHERE (#{date} IS NULL OR DATE(o.order_time) = #{date})
+	      AND (#{camp} IS NULL OR o.destination = #{camp})
+	      AND (#{orderNum} IS NULL OR o.order_num = #{orderNum})
+	    ORDER BY o.order_time ASC
+	    LIMIT #{pageSize} OFFSET #{offset}
+	</select>
+>>>>>>> ac7b0e0de107d84f812ef42342b19c2de86144bf
 
     <!-- 필터링된 진행 상태 개수 조회 -->
     <select id="countTotalFilteredProgress" resultType="int">
         SELECT COUNT(*)
         FROM `order` o
+<<<<<<< HEAD
         LEFT JOIN `product` p ON o.productId = p.productId
         WHERE (#{date} IS NULL OR DATE(o.orderTime) = #{date})
           AND (#{camp} IS NULL OR o.destination = #{camp})
           AND (#{orderNum} IS NULL OR o.orderNum = #{orderNum})
+=======
+        LEFT JOIN `product` p ON o.product_id = p.product_id  -- ✅ `productId` → `product_id`
+        WHERE (#{date} IS NULL OR DATE(o.order_time) = #{date})  -- ✅ `orderTime` → `order_time`
+          AND (#{camp} IS NULL OR o.destination = #{camp})
+          AND (#{orderNum} IS NULL OR o.order_num = #{orderNum})  -- ✅ `orderNum` → `order_num`
+>>>>>>> ac7b0e0de107d84f812ef42342b19c2de86144bf
     </select>
 
 </mapper>

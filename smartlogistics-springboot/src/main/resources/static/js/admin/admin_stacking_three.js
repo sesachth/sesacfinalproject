@@ -87,22 +87,49 @@ function initThreeJS(palletId) {
 }
 
 function updateBoxList(selectedPalletId) {
-    const boxList = $('#boxList');
-    boxList.empty();
+	const boxList = $('#boxList');
+	boxList.empty();
 
-    const selectedPalletData = stackingResults.pallets.find(p => p.pallet_id === parseInt(selectedPalletId));
-     
-    if (selectedPalletData && selectedPalletData.boxes) {
-        selectedPalletData.boxes.forEach(box => {
-            boxList.append(`
-                <div class="list-group-item">
-                    <h5 class="mb-1">${box.product_name}</h5>
-                </div>
-            `);
-        });
-    } else {
-        boxList.append('<div class="list-group-item">No boxes found for this pallet.</div>');
+	const selectedPalletData = stackingResults.pallets.find(p => p.pallet_id === parseInt(selectedPalletId));
+	 
+	if (selectedPalletData && selectedPalletData.boxes) {
+	    selectedPalletData.boxes.forEach(box => {
+	        const listItem = $(`
+	            <div class="list-group-item">
+	                <h5 class="mb-1">${box.product_name}</h5>
+	            </div>
+	        `);
+	        
+	        // 클릭 이벤트 리스너 추가
+	        listItem.on('click', function() {
+				highlightBox(box.product_name);
+				selectBox($(this));
+			});
+	        
+	        boxList.append(listItem);
+	    });
+	} else {
+	    boxList.append('<div class="list-group-item">No boxes found for this pallet.</div>');
+	}
+}
+
+function highlightBox(productName) {
+  scene.traverse((object) => {
+    if (object.userData && object.userData.productName === productName) {
+      object.material.emissive.setHex(0xff0000);
+      object.material.emissiveIntensity = 0.5;
+    } else if (object.isMesh) {
+      object.material.emissive.setHex(0x000000);
+      object.material.emissiveIntensity = 0;
     }
+  });
+}
+
+function selectBox($element) {
+	// 모든 항목에서 'selected' 클래스 제거
+	$('#boxList .list-group-item').removeClass('selected');
+	// 클릭된 항목에 'selected' 클래스 추가
+	$element.addClass('selected');
 }
 
 function createBoxes(boxesData) {
@@ -123,6 +150,7 @@ function createBoxes(boxesData) {
             velocity: 0 // 정적 위치이므로 속도는 0
         });
 
+		boxMesh.userData.productName = boxData.product_name;
         scene.add(boxMesh);
     });
 }

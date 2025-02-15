@@ -1,0 +1,100 @@
+/* Modified admin_product.css */
+
+/* 테이블 컨테이너 스타일 */
+.table-container {
+    width: 100%;
+    max-height: 500px;
+    overflow-y: auto;
+    overflow-x: auto;
+    margin-top: 10px;
+}
+
+/* 제품 테이블 스타일 */
+.product-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed; /* 열 너비 고정 */
+}
+
+/* 제품 테이블 헤더 */
+.product-table th {
+    background: #f4f4f4;
+    padding: 12px;
+    border: 1px solid #ddd;
+    text-align: center;
+    font-weight: bold;
+}
+
+/* 제품 테이블 본문 */
+.product-table td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: center;
+    white-space: nowrap;       /* 텍스트 줄바꿈 방지 */
+    overflow: hidden;          /* 넘치는 내용 숨김 */
+    text-overflow: ellipsis;   /* 넘치면 ... 처리 */
+}
+
+/* 예시: 각 열의 너비 설정 (필요에 따라 조정) */
+.product-table th:nth-child(1),
+.product-table td:nth-child(1) {
+    width: 15%;  /* 예: 상품 코드 */
+}
+
+.product-table th:nth-child(2),
+.product-table td:nth-child(2) {
+    width: 20%;  /* 예: 상품명 */
+}
+
+.product-table th:nth-child(3),
+.product-table td:nth-child(3) {
+    width: 10%;  /* 예: 카테고리 */
+}
+
+.product-table th:nth-child(4),
+.product-table td:nth-child(4) {
+    width: 15%;  /* 예: 등록일 */
+}
+
+.product-table th:nth-child(5),
+.product-table td:nth-child(5) {
+    width: 10%;  /* 예: 재고 상태 */
+}
+
+.product-table th:nth-child(6),
+.product-table td:nth-child(6) {
+    width: 10%;  /* 예: 가격 */
+}
+
+.product-table th:nth-child(7),
+.product-table td:nth-child(7) {
+    width: 10%;  /* 예: 할인율 등 */
+}
+
+/* 페이지네이션 스타일 */
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.pagination button {
+    padding: 8px 12px;
+    margin: 2px;
+    border: none;
+    background: #eee;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.pagination .active {
+    background: #6200ea;
+    color: white;
+}
+
+/* 제품 액션 영역 */
+.product-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 10px;
+}
