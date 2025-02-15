@@ -48,39 +48,47 @@
 
 
     <!-- ✅ 특정 목적지의 주문 조회 (페이징 추가) -->
-    <select id="getOrdersByDestination" resultType="app.labs.model.Order">
-        SELECT * FROM `order`
-        WHERE (destination = #{destination} OR #{destination} IS NULL)
-        ORDER BY order_id ASC
-        LIMIT #{size} OFFSET #{offset};
-    </select>
+	<select id="getOrdersByDestination" resultMap="orderResultMap">
+	    SELECT order_id, order_num, order_time, destination, box_state, progress_state, product_id, pallet_id
+	    FROM `order`
+	    WHERE (#{destination} IS NULL OR destination = #{destination})
+	    ORDER BY order_id ASC
+	    LIMIT #{size} OFFSET #{offset};
+	</select>
+
 
     <!-- ✅ 특정 날짜 범위의 주문 조회 (페이징 추가) -->
-    <select id="getOrdersByDate" resultType="app.labs.model.Order">
-        SELECT * FROM `order`
-        WHERE order_time BETWEEN COALESCE(#{startOfDay}, '2000-01-01 00:00:00')
-                            AND COALESCE(#{endOfDay}, '2100-12-31 23:59:59')
-        ORDER BY order_id ASC
-        LIMIT #{size} OFFSET #{offset};
-    </select>
+    <select id="getOrdersByDate" resultMap="orderResultMap">
+	    SELECT order_id, order_num, order_time, destination, box_state, progress_state, product_id, pallet_id
+	    FROM `order`
+	    WHERE order_time BETWEEN COALESCE(#{startOfDay}, '2000-01-01 00:00:00')
+	                        AND COALESCE(#{endOfDay}, '2100-12-31 23:59:59')
+	    ORDER BY order_id ASC
+	    LIMIT #{size} OFFSET #{offset};
+	</select>
+
 
     <!-- ✅ 특정 목적지 & 날짜 범위의 주문 조회 (페이징 추가) -->
-    <select id="getOrdersByDestinationAndDate" resultType="app.labs.model.Order">
-        SELECT * FROM `order`
-        WHERE (destination = #{destination} OR #{destination} IS NULL)
-        AND order_time BETWEEN COALESCE(#{startOfDay}, '2000-01-01 00:00:00')
-                          AND COALESCE(#{endOfDay}, '2100-12-31 23:59:59')
-        ORDER BY order_id ASC
-        LIMIT #{size} OFFSET #{offset};
-    </select>
+    <select id="getOrdersByDestinationAndDate" resultMap="orderResultMap">
+	    SELECT order_id, order_num, order_time, destination, box_state, progress_state, product_id, pallet_id
+	    FROM `order`
+	    WHERE (#{destination} IS NULL OR destination = #{destination})
+	    AND order_time BETWEEN COALESCE(#{startOfDay}, '2000-01-01 00:00:00')
+	                      AND COALESCE(#{endOfDay}, '2100-12-31 23:59:59')
+	    ORDER BY order_id ASC
+	    LIMIT #{size} OFFSET #{offset};
+	</select>
+
     
-    <select id="getFilteredOrders" resultType="app.labs.model.Order">
-        SELECT * FROM `order`
-        WHERE (#{destination} IS NULL OR destination = #{destination})
-        AND (#{startOfDay} IS NULL OR order_time BETWEEN #{startOfDay} AND #{endOfDay})
-        ORDER BY order_time DESC
-        LIMIT #{size} OFFSET #{offset};
-    </select>
+    <select id="getFilteredOrders" resultMap="orderResultMap">
+	    SELECT order_id, order_num, order_time, destination, box_state, progress_state, product_id, pallet_id
+	    FROM `order`
+	    WHERE (#{destination} IS NULL OR destination = #{destination})
+	    AND (#{startOfDay} IS NULL OR order_time BETWEEN #{startOfDay} AND #{endOfDay})
+	    ORDER BY order_time DESC
+	    LIMIT #{size} OFFSET #{offset};
+	</select>
+
     
     <!-- ✅ 전체 주문 개수 조회 -->
     <select id="getTotalOrderCount" resultType="int">
@@ -106,19 +114,12 @@
     </select>
     
     <!-- ✅ 주문번호로 주문 조회 -->
-	<select id="getOrdersByOrderNum" resultType="app.labs.model.Order">
-    SELECT 
-        order_id, 
-        order_num, 
-        DATE(order_time) AS order_date, 
-        TIME(order_time) AS order_time, 
-        destination, 
-        product_id
-    FROM `order`
-    WHERE TRIM(order_num) = #{orderNum}
+	<select id="getOrdersByOrderNum" resultMap="orderResultMap">
+	    SELECT order_id, order_num, order_time, destination, product_id, box_state, progress_state, pallet_id
+	    FROM `order`
+	    WHERE TRIM(order_num) = #{orderNum};
 	</select>
 
-    
 
     <!-- ✅ 주문 저장 -->
     <insert id="insertOrder" useGeneratedKeys="true" keyProperty="orderId">
