@@ -4,38 +4,63 @@
 
 <mapper namespace="smartlogistics.OrderMapper">
 
+    <!-- resultMap 정의: 각 컬럼을 명시적으로 매핑 -->
+    <resultMap id="productResultMap" type="app.labs.model.Product">
+        <id property="productId" column="product_id" />
+        <result property="name" column="name" />
+        <result property="width" column="width" />
+        <result property="depth" column="depth" />
+        <result property="height" column="height" />
+        <result property="weight" column="weight" />
+        <result property="category" column="category" />
+        <result property="isFragile" column="is_fragile" />
+        <result property="spec" column="spec" />
+    </resultMap>
+    
+    <resultMap id="orderResultMap" type="app.labs.model.Order">
+	    <id property="orderId" column="order_id" />
+	    <result property="orderNum" column="order_num" />
+	    <result property="orderTime" column="order_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"/>
+	    <result property="destination" column="destination" />
+	    <result property="boxState" column="box_state" />
+	    <result property="progressState" column="progress_state" />
+	    <result property="productId" column="product_id" />
+	    <result property="palletId" column="pallet_id" />
+	</resultMap>
+
     <!-- ✅ 현재 가장 큰 orderId 가져오기 -->
     <select id="getMaxOrderId" resultType="java.lang.Long">
         SELECT COALESCE(MAX(orderId), 0) FROM `order`;
     </select>
 
     <!-- ✅ 랜덤 상품 가져오기 -->
-    <select id="getRandomProduct" resultType="app.labs.model.Product">
+    <select id="getRandomProduct" resultMap="productResultMap">
         SELECT * FROM product ORDER BY RAND() LIMIT 1;
     </select>
 
     <!-- ✅ 주문 리스트 가져오기 (주문 ID를 연속적으로 정렬) -->
-    <select id="getAllOrders" resultType="app.labs.model.Order">
-    	SELECT orderId, orderNum, orderTime, destination, box_state, progress_state, productId, palletId
-    	FROM `order`
-    	ORDER BY orderTime ASC, orderId ASC
-    	LIMIT #{size} OFFSET #{offset};
+	<select id="getAllOrders" resultMap="orderResultMap">
+	    SELECT order_id, order_num, order_time, destination, box_state, progress_state, product_id, pallet_id
+	    FROM `order`
+	    ORDER BY order_time ASC, order_id ASC
+	    LIMIT #{size} OFFSET #{offset};
 	</select>
+
 
     <!-- ✅ 특정 목적지의 주문 조회 (페이징 추가) -->
     <select id="getOrdersByDestination" resultType="app.labs.model.Order">
         SELECT * FROM `order`
         WHERE (destination = #{destination} OR #{destination} IS NULL)
-        ORDER BY orderId ASC
+        ORDER BY order_id ASC
         LIMIT #{size} OFFSET #{offset};
     </select>
 
     <!-- ✅ 특정 날짜 범위의 주문 조회 (페이징 추가) -->
     <select id="getOrdersByDate" resultType="app.labs.model.Order">
         SELECT * FROM `order`
-        WHERE orderTime BETWEEN COALESCE(#{startOfDay}, '2000-01-01 00:00:00')
+        WHERE order_time BETWEEN COALESCE(#{startOfDay}, '2000-01-01 00:00:00')
                             AND COALESCE(#{endOfDay}, '2100-12-31 23:59:59')
-        ORDER BY orderId ASC
+        ORDER BY order_id ASC
         LIMIT #{size} OFFSET #{offset};
     </select>
 
@@ -43,17 +68,17 @@
     <select id="getOrdersByDestinationAndDate" resultType="app.labs.model.Order">
         SELECT * FROM `order`
         WHERE (destination = #{destination} OR #{destination} IS NULL)
-        AND orderTime BETWEEN COALESCE(#{startOfDay}, '2000-01-01 00:00:00')
+        AND order_time BETWEEN COALESCE(#{startOfDay}, '2000-01-01 00:00:00')
                           AND COALESCE(#{endOfDay}, '2100-12-31 23:59:59')
-        ORDER BY orderId ASC
+        ORDER BY order_id ASC
         LIMIT #{size} OFFSET #{offset};
     </select>
     
     <select id="getFilteredOrders" resultType="app.labs.model.Order">
         SELECT * FROM `order`
         WHERE (#{destination} IS NULL OR destination = #{destination})
-        AND (#{startOfDay} IS NULL OR orderTime BETWEEN #{startOfDay} AND #{endOfDay})
-        ORDER BY orderTime DESC
+        AND (#{startOfDay} IS NULL OR order_time BETWEEN #{startOfDay} AND #{endOfDay})
+        ORDER BY order_time DESC
         LIMIT #{size} OFFSET #{offset};
     </select>
     
@@ -70,27 +95,27 @@
     <!-- ✅ 특정 날짜의 주문 개수 조회 -->
     <select id="getTotalOrderCountByDate" resultType="int">
         SELECT COUNT(*) FROM `order`
-        WHERE orderTime BETWEEN #{startOfDay} AND #{endOfDay};
+        WHERE order_time BETWEEN #{startOfDay} AND #{endOfDay};
     </select>
 
     <!-- ✅ 특정 목적지 + 날짜의 주문 개수 조회 -->
     <select id="getTotalOrderCountByDestinationAndDate" resultType="int">
         SELECT COUNT(*) FROM `order`
         WHERE destination = #{destination}
-        AND orderTime BETWEEN #{startOfDay} AND #{endOfDay};
+        AND order_time BETWEEN #{startOfDay} AND #{endOfDay};
     </select>
     
     <!-- ✅ 주문번호로 주문 조회 -->
 	<select id="getOrdersByOrderNum" resultType="app.labs.model.Order">
     SELECT * FROM `order`
-    WHERE TRIM(orderNum) = #{orderNum}
-    ORDER BY orderTime ASC;
+    WHERE TRIM(order_num) = #{orderNum}
+    ORDER BY order_time ASC;
 	</select>
     
 
     <!-- ✅ 주문 저장 -->
     <insert id="insertOrder" useGeneratedKeys="true" keyProperty="orderId">
-        INSERT INTO `order` (orderNum, orderTime, destination, box_state, progress_state, productId, palletId)
+        INSERT INTO `order` (order_num, order_time, destination, box_state, progress_state, product_id, pallet_id)
         VALUES (#{orderNum}, #{orderTime}, #{destination}, #{boxState}, #{progressState}, #{productId}, #{palletId});
     </insert>
 
@@ -106,7 +131,7 @@
 
     <!-- ✅ 여러 개의 주문을 한 번에 저장 -->
     <insert id="batchInsertOrders" parameterType="java.util.List">
-        INSERT INTO `order` (orderNum, orderTime, destination, box_state, progress_state, productId, palletId)
+        INSERT INTO `order` (order_num, order_time, destination, box_state, progress_state, product_id, pallet_id)
         VALUES
         <foreach collection="list" item="order" separator=",">
             (#{order.orderNum}, #{order.orderTime}, #{order.destination}, #{order.boxState}, #{order.progressState}, #{order.productId}, #{order.palletId})
