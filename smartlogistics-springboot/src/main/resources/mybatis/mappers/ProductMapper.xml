@@ -13,7 +13,7 @@
         <result property="weight" column="weight" />
         <result property="category" column="category" />
         <result property="isFragile" column="is_fragile" />
-        <result property="spec" column="sepc" />
+        <result property="spec" column="spec" />
     </resultMap>
 
     <!-- 전체 물품 목록 조회 -->
