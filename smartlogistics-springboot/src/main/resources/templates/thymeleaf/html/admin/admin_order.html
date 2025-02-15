@@ -116,37 +116,32 @@
         let orderNum = document.getElementById("orderNumSearch").value.trim();
 
         if (orderNum === "") {
-            loadOrders();  // 주문번호 입력이 비어 있으면 전체 주문을 다시 불러오기
+            loadOrders(); // 입력값 없으면 전체 주문 불러오기
             return;
         }
 
-        fetch(`/admin/order/api/search?orderNum=${orderNum}`)
-            .then(response => {
-                if (!response.ok) {
-                    if (response.status === 404) {
-                        throw new Error("❌ 해당 주문번호로 조회된 주문이 없습니다.");
-                    }
-                    throw new Error("❌ 서버 오류 발생");
-                }
-                return response.json();
-            })
+        fetch(`/admin/order/api/search?orderNum=${encodeURIComponent(orderNum)}`)
+            .then(response => response.json().catch(() => ({ error: "Invalid JSON", message: "❌ 서버 오류 발생" }))) // JSON이 아니면 강제 처리
             .then(data => {
+                if (data.error) {
+                    alert(data.message); // JSON이 아니면 에러 메시지 출력
+                    console.error("서버 오류:", data);
+                    return;
+                }
                 if (!data.orders || data.orders.length === 0) {
                     alert("❌ 해당 주문번호로 조회된 주문이 없습니다.");
                     document.getElementById("orderTableBody").innerHTML =
                         "<tr><td colspan='6' style='text-align:center;'>❌ 주문이 없습니다.</td></tr>";
                 } else {
-                    orders = data.orders;  // ✅ 주문 데이터 업데이트
-                    updateOrderList(orders);  // ✅ 검색된 주문 리스트를 UI에 반영
+                    orders = data.orders;
+                    updateOrderList(orders);
                 }
             })
             .catch(error => {
-                alert(error.message); // ❌ 에러 메시지를 사용자에게 알림
-                document.getElementById("orderTableBody").innerHTML =
-                    "<tr><td colspan='6' style='text-align:center;'>❌ 주문이 없습니다.</td></tr>";
+                console.error("검색 오류:", error);
+                alert("❌ 서버 오류 발생: " + error.message);
             });
     }
-
 
     document.getElementById("downloadExcelBtn").addEventListener("click", function () {
         window.location.href = "/admin/order/download/excel";
@@ -203,6 +198,7 @@
         console.log("🔥 렌더링할 주문 데이터:", orderData); // ✅ 주문 데이터 확인
 
         orderData.forEach(order => {
+<<<<<<< HEAD
             let formattedDate = order.order_time
                 ? order.order_time.split("T")[0]
                 : order.formattedOrderTime
@@ -218,6 +214,14 @@
             let row = `<tr>
                 <td>${order.order_id || '-'}</td>
                 <td>${order.order_num || '-'}</td>
+=======
+            let formattedDate = order.orderTime ? order.orderTime.split("T")[0] : "-"; // ✅ NULL 처리
+            let formattedTime = order.orderTime ? order.orderTime.split("T")[1]?.split(".")[0] : "-"; // ✅ NULL 처리
+
+            let row = `<tr>
+                <td>${order.orderId || '-'}</td>
+                <td>${order.orderNum || '-'}</td>
+>>>>>>> 7bb82774819ba69d352cfbb2111587583a42113b
                 <td>${formattedDate}</td>
                 <td>${formattedTime}</td>
                 <td>${order.destination || '-'}</td>
