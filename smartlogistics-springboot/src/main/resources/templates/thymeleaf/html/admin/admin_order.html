@@ -185,6 +185,12 @@
                     "<tr><td colspan='8' style='text-align:center;'>❌ 주문이 없습니다.</td></tr>";
             });
     }
+    
+    document.getElementById("filterBtn").addEventListener("click", function () {
+        console.log("📌 필터 버튼 클릭됨");
+        currentPage = 1;
+        loadProgress(currentPage);
+    });
 
     function updateOrderList(orderData = orders) {
         let orderTable = document.getElementById("orderTableBody");
