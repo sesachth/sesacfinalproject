@@ -21,8 +21,8 @@ public class OrderService {
     }
 
     // ✅ 주문 ID로 단건 조회
-    public Order getOrderById(Long order_id) {
-        return sqlSession.selectOne("smartlogistics.OrderMapper.getOrderById", order_id);
+    public Order getOrderById(Long orderId) {
+        return sqlSession.selectOne("smartlogistics.OrderMapper.getOrderById", orderId);
     }
 
     // ✅ 전체 주문 개수 조회
@@ -62,6 +62,11 @@ public class OrderService {
         return sqlSession.selectList("smartlogistics.OrderMapper.getAllOrders", params);
     }
 
+    // ✅ 엑셀 다운로드용 전체 주문 조회 (페이징 X)
+    public List<Order> getAllOrdersForExport() {
+        return sqlSession.selectList("smartlogistics.OrderMapper.getAllOrdersForExport");
+    }
+
     // ✅ 특정 목적지의 주문 조회 (페이징)
     public List<Order> getOrdersByDestination(String destination, int size, int offset) {
         Map<String, Object> params = new HashMap<>();
@@ -93,8 +98,8 @@ public class OrderService {
     }
 
     // ✅ 주문 삭제
-    public void deleteOrder(Long order_id) {
-        sqlSession.delete("smartlogistics.OrderMapper.deleteOrder", order_id);
+    public void deleteOrder(Long orderId) {
+        sqlSession.delete("smartlogistics.OrderMapper.deleteOrder", orderId);
     }
     
     // ✅ 기존 데이터 삭제 + AUTO_INCREMENT 초기화
@@ -109,20 +114,20 @@ public class OrderService {
     }
 
     // ✅ 주문 상태 업데이트
-    public void updateOrderStatus(Long order_id, String status) {
+    public void updateOrderStatus(Long orderId, String status) {
         Map<String, Object> params = new HashMap<>();
-        params.put("order_id", order_id);
+        params.put("orderId", orderId);
         params.put("status", status);
         sqlSession.update("smartlogistics.OrderMapper.updateOrderStatus", params);
     }
 
-    // ✅ 랜덤 주문 생성
+ // ✅ 랜덤 주문 생성 (같은 orderNum을 가진 주문은 연속된 orderId 배정)
     public void generateRandomOrders() {
-        resetOrders();
+        resetOrders();  // ✅ 기존 주문 삭제 및 AUTO_INCREMENT 초기화
 
-        int orderCount = random.nextInt(1001) + 1000;
-        Map<String, String> orderNumToDestination = new HashMap<>();
-        Map<String, LocalDateTime> orderNumToTime = new HashMap<>();
+        int orderCount = random.nextInt(1001) + 1000; // ✅ 1000~2000개 주문 생성
+        Map<String, String> orderNumToDestination = new HashMap<>();  // ✅ 주문번호 → 목적지
+        Map<String, LocalDateTime> orderNumToTime = new HashMap<>();  // ✅ 주문번호 → 주문 시간
         List<Order> orders = new ArrayList<>();
 
         LocalDateTime startOfDay = LocalDateTime.now().truncatedTo(ChronoUnit.DAYS);
@@ -133,57 +138,65 @@ public class OrderService {
             Product randomProduct = getRandomProduct();
             if (randomProduct == null) continue;
 
-            String order_num;
+            String orderNum;
             String destination;
-            LocalDateTime order_time;
+            LocalDateTime orderTime;
 
-            if (!orderNumToDestination.isEmpty() && random.nextDouble() < 0.1) {
-                order_num = getRandomExistingOrderNum(orderNumToDestination);
-                destination = orderNumToDestination.get(order_num);
-                order_time = orderNumToTime.get(order_num);
+            if (!orderNumToDestination.isEmpty() && random.nextDouble() < 0.1) {  // ✅ 기존 주문번호 재사용 (10% 확률)
+                orderNum = getRandomExistingOrderNum(orderNumToDestination);  // ✅ 기존 주문번호 선택
+                destination = orderNumToDestination.get(orderNum);  // ✅ 기존 목적지 유지
+                orderTime = orderNumToTime.get(orderNum);  // ✅ 기존 주문 시간 유지
             } else {
-                order_num = generateRandomOrderNum();
-                destination = getRandomCamp();
-                order_time = startOfDay.plusSeconds(interval * i + random.nextInt((int) interval));
-                orderNumToDestination.put(order_num, destination);
-                orderNumToTime.put(order_num, order_time);
+                orderNum = generateRandomOrderNum();
+                destination = getRandomCamp();  // ✅ 새로운 주문번호는 새로운 목적지 지정
+                orderTime = startOfDay.plusSeconds(interval * i + random.nextInt((int) interval));
+                orderNumToDestination.put(orderNum, destination);  // ✅ 주문번호 → 목적지 저장
+                orderNumToTime.put(orderNum, orderTime);  // ✅ 주문번호 → 주문시간 저장
             }
 
             Order order = new Order();
-            order.setOrder_num(order_num);
-            order.setOrder_time(order_time);
-            order.setDestination(destination);
-            order.setBox_state(0);
-            order.setProgress_state(0);
-            order.setProduct_id(randomProduct.getProduct_id());
-            order.setPallet_id(null);
+            order.setOrderNum(orderNum);
+            order.setOrderTime(orderTime);
+            order.setDestination(destination);  // ✅ 동일한 orderNum일 경우 같은 목적지 유지
+            order.setBoxState(0);  // ✅ 기본값: 미검사
+            order.setProgressState(0);  // ✅ 기본값: 물품대기
+            order.setProductId(randomProduct.getProductId());
+            order.setPalletId(null);
 
             orders.add(order);
         }
 
-        orders.sort(Comparator.comparing(Order::getOrder_time));
-        batchInsertOrders(orders);
+        orders.sort(Comparator.comparing(Order::getOrderTime));  // ✅ 주문 시간을 기준으로 정렬
+        batchInsertOrders(orders);  // ✅ 일괄 삽입
     }
 
+
+    // ✅ 주문번호를 YYMMDD + 8자리 랜덤 숫자로 생성
     private String generateRandomOrderNum() {
         String datePrefix = LocalDate.now().format(DateTimeFormatter.ofPattern("yyMMdd"));
         String randomDigits = String.format("%08d", random.nextInt(100000000));
         return datePrefix + randomDigits;
     }
-
-    public List<Order> getOrdersByOrderNum(String order_num) {
-        return sqlSession.selectList("smartlogistics.OrderMapper.getOrdersByOrderNum", order_num);
+    
+ // ✅ 주문번호로 주문 조회
+    public List<Order> getOrdersByOrderNum(String orderNum) {
+        return sqlSession.selectList("smartlogistics.OrderMapper.getOrdersByOrderNum", orderNum);
     }
 
+
+    // ✅ 기존 orderNum 중 랜덤 선택
     private String getRandomExistingOrderNum(Map<String, String> orderNumToDestination) {
         List<String> orderNums = new ArrayList<>(orderNumToDestination.keySet());
         return orderNums.get(random.nextInt(orderNums.size()));
     }
 
+
+    // ✅ 랜덤 상품 가져오기
     public Product getRandomProduct() {
         return sqlSession.selectOne("smartlogistics.OrderMapper.getRandomProduct");
     }
 
+    // ✅ 랜덤 캠프 가져오기
     private String getRandomCamp() {
         List<String> camps = Arrays.asList("서초 캠프", "강남 캠프", "강서 캠프", "중구 캠프", "성동 캠프");
         return camps.get(random.nextInt(camps.size()));

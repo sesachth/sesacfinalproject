@@ -4,23 +4,48 @@
 
 <mapper namespace="smartlogistics.OrderMapper">
 
-    <!-- ✅ 현재 가장 큰 order_id 가져오기 -->
+    <!-- resultMap 정의: 각 컬럼을 명시적으로 매핑 -->
+    <resultMap id="productResultMap" type="app.labs.model.Product">
+        <id property="productId" column="product_id" />
+        <result property="name" column="name" />
+        <result property="width" column="width" />
+        <result property="depth" column="depth" />
+        <result property="height" column="height" />
+        <result property="weight" column="weight" />
+        <result property="category" column="category" />
+        <result property="isFragile" column="is_fragile" />
+        <result property="spec" column="spec" />
+    </resultMap>
+    
+    <resultMap id="orderResultMap" type="app.labs.model.Order">
+	    <id property="orderId" column="order_id" />
+	    <result property="orderNum" column="order_num" />
+	    <result property="orderTime" column="order_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"/>
+	    <result property="destination" column="destination" />
+	    <result property="boxState" column="box_state" />
+	    <result property="progressState" column="progress_state" />
+	    <result property="productId" column="product_id" />
+	    <result property="palletId" column="pallet_id" />
+	</resultMap>
+
+    <!-- ✅ 현재 가장 큰 orderId 가져오기 -->
     <select id="getMaxOrderId" resultType="java.lang.Long">
-        SELECT COALESCE(MAX(order_id), 0) FROM `order`;
+        SELECT COALESCE(MAX(orderId), 0) FROM `order`;
     </select>
 
     <!-- ✅ 랜덤 상품 가져오기 -->
-    <select id="getRandomProduct" resultType="app.labs.model.Product">
+    <select id="getRandomProduct" resultMap="productResultMap">
         SELECT * FROM product ORDER BY RAND() LIMIT 1;
     </select>
 
     <!-- ✅ 주문 리스트 가져오기 (주문 ID를 연속적으로 정렬) -->
-    <select id="getAllOrders" resultType="app.labs.model.Order">
-    	SELECT order_id, order_num, order_time, destination, box_state, progress_state, product_id, pallet_id
-    	FROM `order`
-    	ORDER BY order_time ASC, order_id ASC
-    	LIMIT #{size} OFFSET #{offset};
+	<select id="getAllOrders" resultMap="orderResultMap">
+	    SELECT order_id, order_num, order_time, destination, box_state, progress_state, product_id, pallet_id
+	    FROM `order`
+	    ORDER BY order_time ASC, order_id ASC
+	    LIMIT #{size} OFFSET #{offset};
 	</select>
+
 
     <!-- ✅ 특정 목적지의 주문 조회 (페이징 추가) -->
     <select id="getOrdersByDestination" resultType="app.labs.model.Order">
@@ -82,15 +107,16 @@
     
     <!-- ✅ 주문번호로 주문 조회 -->
 	<select id="getOrdersByOrderNum" resultType="app.labs.model.Order">
-        SELECT * FROM `order`
-        WHERE TRIM(order_num) = #{order_num}
-        ORDER BY order_time ASC;
+    SELECT * FROM `order`
+    WHERE TRIM(order_num) = #{orderNum}
+    ORDER BY order_time ASC;
 	</select>
     
+
     <!-- ✅ 주문 저장 -->
-    <insert id="insertOrder" useGeneratedKeys="true" keyProperty="order_id">
+    <insert id="insertOrder" useGeneratedKeys="true" keyProperty="orderId">
         INSERT INTO `order` (order_num, order_time, destination, box_state, progress_state, product_id, pallet_id)
-        VALUES (#{order_num}, #{order_time}, #{destination}, #{box_state}, #{progress_state}, #{product_id}, #{pallet_id});
+        VALUES (#{orderNum}, #{orderTime}, #{destination}, #{boxState}, #{progressState}, #{productId}, #{palletId});
     </insert>
 
     <!-- ✅ 모든 주문 삭제 -->
@@ -108,7 +134,7 @@
         INSERT INTO `order` (order_num, order_time, destination, box_state, progress_state, product_id, pallet_id)
         VALUES
         <foreach collection="list" item="order" separator=",">
-            (#{order.order_num}, #{order.order_time}, #{order.destination}, #{order.box_state}, #{order.progress_state}, #{order.product_id}, #{order.pallet_id})
+            (#{order.orderNum}, #{order.orderTime}, #{order.destination}, #{order.boxState}, #{order.progressState}, #{order.productId}, #{order.palletId})
         </foreach>
     </insert>
 
