@@ -14,15 +14,7 @@ public class Product {
     float depth;
     float height;
     float weight;
-    boolean fragile;
+    boolean isFragile;
     String category;
-
-    // 명확한 getter/setter 추가
-    public boolean isFragile() {
-        return fragile;
-    }
-
-    public void setFragile(boolean fragile) {
-        this.fragile = fragile;
-    }
+    Long spec;;
 }

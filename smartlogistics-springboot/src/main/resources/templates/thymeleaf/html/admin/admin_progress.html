@@ -1,31 +1,467 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-	  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-	  layout:decorator="~{/thymeleaf/html/common/default_layout}">
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorator="~{/thymeleaf/html/common/default_layout}">
 
-<th:block layout:fragment="css">
-	<link rel="stylesheet" th:href="@{/css/admin/admin.css}" />
+<head>
+    <th:block layout:fragment="css">
+        <link rel="stylesheet" th:href="@{/css/admin/admin.css}" />
+        <script src="https://cdn.jsdelivr.net/npm/sockjs-client/dist/sockjs.min.js"></script>
+	    <script src="https://cdn.jsdelivr.net/npm/stompjs/lib/stomp.min.js"></script>
+	</th:block>
+</head>
+
+<body>
+<th:block layout:fragment="wrapper">
+    <div class="outside-container">
+        <div class="main-container">
+            <div th:replace="~{thymeleaf/html/common/include::profile}"></div>
+            <div th:replace="~{thymeleaf/html/common/include::sidebar}"></div>
+            <div layout:fragment="content" class="main-content">
+
+                <!-- 필터 컨테이너 -->
+                <div class="filter-container">
+                    <label for="dateFilter">날짜:</label>
+                    <input type="date" id="dateFilter"/>
+
+                    <label for="campFilter">캠프:</label>
+                    <select id="campFilter">
+                        <option value="">전체</option>
+                        <option value="서초 캠프">서초 캠프</option>
+                        <option value="강남 캠프">강남 캠프</option>
+                        <option value="강서 캠프">강서 캠프</option>
+                        <option value="중구 캠프">중구 캠프</option>
+                        <option value="성동 캠프">성동 캠프</option>
+                    </select>
+                    
+                    <button id="filterBtn">조회</button>
+
+                    <label for="orderIdSearch">주문 ID:</label>
+					<input type="text" id="orderIdSearch" placeholder="주문 ID 입력" />
+					<button id="searchOrderBtn">검색</button>
+
+                </div>
+
+                <!-- 진행 상태 테이블 -->
+                <div class="table-container">
+                    <table class="progress-table">
+                        <thead>
+                            <tr>
+                                <th>주문 ID</th>
+                                <th>상품명</th>
+                                <th>카테고리</th>
+                                <th>주문 시간</th>
+                                <th>박스규격</th>
+                                <th>팔렛트 ID</th>
+                                <th>박스 상태</th>
+                                <th>진행 상태</th>
+                            </tr>
+                        </thead>
+                        <tbody id="progressTableBody"></tbody>
+                    </table>
+                </div>
+
+                <!-- 페이지네이션 -->
+                <div class="pagination">
+                    <button id="prevGroup">«</button>
+                    <span id="pageNumbers"></span>
+                    <button id="nextGroup">»</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </th:block>
 
-<th:block layout:fragment="wrapper">
-    	<div class="outside-container">
-        	<div class="main-container">
-                <div th:replace="~{thymeleaf/html/common/include::profile}"></div>
-            	<div th:replace="~{thymeleaf/html/common/include::sidebar}"></div>
-            	<div layout:fragment="content" class="main-content">
-            	
-            	
-            	
-            	
-            	
-            	
-            	
-            	
-            	
-            	
-            	
-            	</div>
-        	</div>
-        </div>
-    </th:block>
+<script>
+let currentPage = 1;
+const rowsPerPage = 10;
+const pageGroupSize = 10;
+let totalPages = 1;
+let progressData = [];
+
+window.onload = () => {
+    loadProgress();
+    connectWebSocket(); // ✅ WebSocket 연결 추가
+};
+
+// ✅ WebSocket 연결 설정
+function connectWebSocket() {
+    var socket = new SockJS('/ws'); // WebSocket 엔드포인트
+    var stompClient = Stomp.over(socket);
+
+    stompClient.connect({}, function (frame) {
+        console.log("📌 WebSocket 연결 성공:", frame);
+
+        // ✅ 진행 상태 업데이트 메시지 구독
+        stompClient.subscribe('/topic/updateStatus', function (message) {
+            let updatedProgress = JSON.parse(message.body);
+            console.log("📌 WebSocket으로 받은 업데이트 데이터:", updatedProgress);
+
+            // ✅ 기존 데이터 갱신
+           // updateProgressFromWebSocket(updatedProgress);
+        });
+    });
+}
+
+// ✅ WebSocket으로 받은 데이터 업데이트
+function updateProgressFromWebSocket(updatedData) {
+    let index = progressData.findIndex(item => item.orderId === updatedData.orderId);
+
+    if (index !== -1) {
+        // ✅ 기존 데이터 업데이트
+        progressData[index] = updatedData;
+    } else {
+        // ✅ 새로운 데이터 추가 (데이터가 없을 경우)
+        progressData.unshift(updatedData);
+    }
+
+    updateProgressList(); // ✅ UI 업데이트
+}
+// 조회 버튼 클릭
+document.getElementById("filterBtn").addEventListener("click", function () {
+    currentPage = 1;
+    loadProgress(currentPage);
+});
+
+// 주문번호 검색 버튼 클릭
+document.getElementById("searchOrderBtn").addEventListener("click", function () {
+    searchProgressByNum();
+});
+
+// Enter 키 검색 기능 추가
+document.getElementById("orderNumSearch").addEventListener("keypress", function (event) {
+    if (event.key === "Enter") {
+        searchProgressByNum();
+    }
+});
+
+// 이전 / 다음 버튼 이벤트
+document.getElementById("prevGroup").addEventListener("click", function () {
+    if (currentPage > 1) {
+        currentPage--; // ✅ 한 페이지씩 감소
+        loadProgress(currentPage);
+    }
+});
+
+document.getElementById("nextGroup").addEventListener("click", function () {
+    if (currentPage < totalPages) {
+        currentPage++; // ✅ 한 페이지씩 증가
+        loadProgress(currentPage);
+    }
+});
+
+//페이지네이션 업데이트
+function updatePagination() {
+    let pageNumbers = document.getElementById("pageNumbers");
+    pageNumbers.innerHTML = "";
+
+    let startPage = Math.max(1, Math.floor((currentPage - 1) / pageGroupSize) * pageGroupSize + 1);
+    let endPage = Math.min(startPage + pageGroupSize - 1, totalPages);
+
+    console.log("📌 페이지네이션 업데이트:", startPage, "→", endPage, "총 페이지 수:", totalPages);
+
+    for (let i = startPage; i <= endPage; i++) {
+        let pageButton = document.createElement("button");
+        pageButton.innerText = i;
+        pageButton.classList.add("page-btn");
+
+        if (i === currentPage) {
+            pageButton.classList.add("active");
+        }
+
+        pageButton.addEventListener("click", function () {
+            console.log("📌 페이지 클릭됨:", i);
+            if (currentPage !== i) { // 중복 요청 방지
+                currentPage = i;
+                loadProgress(i);
+            }
+        });
+
+        pageNumbers.appendChild(pageButton);
+    }
+
+    // ✅ 버튼 요소 찾기
+    let prevButton = document.getElementById("prevGroup");
+    let nextButton = document.getElementById("nextGroup");
+
+    if (!prevButton || !nextButton) {
+        console.error("❌ 페이지네이션 버튼을 찾을 수 없습니다.");
+        return;
+    }
+
+    // ✅ 기존 이벤트 제거 (이벤트 중복 방지)
+    prevButton.replaceWith(prevButton.cloneNode(true));
+    nextButton.replaceWith(nextButton.cloneNode(true));
+
+    // ✅ 새로 버튼 요소 가져오기 (이벤트가 없는 새 노드)
+    prevButton = document.getElementById("prevGroup");
+    nextButton = document.getElementById("nextGroup");
+
+    // ✅ 버튼 상태 설정
+    prevButton.disabled = (currentPage === 1);
+    nextButton.disabled = (currentPage >= totalPages);
+
+    // ✅ 이전 버튼 이벤트 등록
+    prevButton.addEventListener("click", function () {
+        if (currentPage > 1) {
+            currentPage--;
+            loadProgress(currentPage);
+        }
+    });
+
+    // ✅ 다음 버튼 이벤트 등록
+    nextButton.addEventListener("click", function () {
+        if (currentPage < totalPages) {
+            currentPage++;
+            loadProgress(currentPage);
+        }
+    });
+
+    console.log("📌 이전 버튼 상태:", prevButton.disabled);
+    console.log("📌 다음 버튼 상태:", nextButton.disabled);
+}
+
+
+// 진행 상태 조회
+function loadProgress(page = currentPage) {
+    let date = document.getElementById("dateFilter").value;
+    let camp = document.getElementById("campFilter").value;
+
+    let queryParams = new URLSearchParams({ page, size: 20 });
+    if (date) queryParams.append("date", date);
+    if (camp) queryParams.append("camp", camp);
+
+    fetch(`/admin/progress/data?${queryParams.toString()}`)
+    .then(response => response.json())
+    .then(data => {
+        progressData = data.progressList;
+        totalPages = data.totalPages || 1;  // ✅ totalPages 값이 1 이상인지 확인
+
+        console.log("📌 서버에서 받은 totalPages:", totalPages);
+        
+        updateProgressList();
+        updatePagination();
+    })
+    .catch(error => {
+        console.error("Error:", error);
+    });
+
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    console.log("📌 DOM 로드 완료");
+
+    let prevButton = document.getElementById("prevGroup");
+    let nextButton = document.getElementById("nextGroup");
+
+    if (prevButton) {
+        prevButton.addEventListener("click", function () {
+            console.log("⬅ 이전 페이지 버튼 클릭됨, 현재 페이지:", currentPage);
+            if (currentPage > 1) {
+                currentPage--;
+                loadProgress(currentPage);
+            }
+        });
+    } else {
+        console.error("❌ 이전 버튼(prevGroup)을 찾을 수 없습니다.");
+    }
+
+    if (nextButton) {
+        nextButton.addEventListener("click", function () {
+            console.log("➡ 다음 페이지 버튼 클릭됨, 현재 페이지:", currentPage, "총 페이지 수:", totalPages);
+            if (currentPage < totalPages) {
+                currentPage++;
+                loadProgress(currentPage);
+            }
+        });
+    } else {
+        console.error("❌ 다음 버튼(nextGroup)을 찾을 수 없습니다.");
+    }
+});
+
+
+// 주문번호 검색 기능
+// ✅ 주문 ID 검색 기능
+function searchProgressById() {
+    let orderId = document.getElementById("orderIdSearch").value.trim();
+
+    if (!orderId) {
+        loadProgress(1);
+        return;
+    }
+
+    fetch(`/admin/progress/data?orderId=${orderId}`) // ✅ orderNum → orderId로 변경
+        .then(response => response.json())
+        .then(data => {
+            progressData = data.progressList;
+            updateProgressList();
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            document.getElementById("progressTableBody").innerHTML =
+                "<tr><td colspan='8' style='text-align:center;'>❌ 데이터가 없습니다.</td></tr>";
+        });
+}
+
+// ✅ 검색 버튼 이벤트 리스너 (기존 `orderNumSearch` → `orderIdSearch`로 변경)
+document.getElementById("searchOrderBtn").addEventListener("click", function () {
+    searchProgressById();
+});
+
+// ✅ Enter 키로 검색 가능하도록 수정
+document.getElementById("orderIdSearch").addEventListener("keypress", function (event) {
+    if (event.key === "Enter") {
+        searchProgressById();
+    }
+});
+
+
+
+//UTC → KST 변환 함수
+// ✅ UTC → KST 변환 함수 (시간 변환 문제 해결)
+function convertUtcToKst(utcTime) {
+    if (!utcTime) return '-'; // 값이 없으면 '-' 반환
+
+    let orderDate = new Date(Date.parse(utcTime)); // UTC 기준 Date 객체 생성
+    orderDate.setHours(orderDate.getHours() ); // KST 변환 적용
+    let formattedTime = orderDate.toTimeString().split(" ")[0]; // HH:MM:SS 형식 변환
+    return formattedTime;
+}
+
+// ✅ 진행 상태 리스트 업데이트
+function updateProgressList() {
+    let progressTable = document.getElementById("progressTableBody");
+    progressTable.innerHTML = "";
+
+    console.log("📌 현재 progressData:", progressData);  // ✅ 데이터 확인
+
+    if (!progressData || progressData.length === 0) {
+        progressTable.innerHTML = "<tr><td colspan='8' style='text-align:center;'>❌ 데이터가 없습니다.</td></tr>";
+        return;
+    }
+
+    progressData.forEach(progress => {
+        let orderTime = convertUtcToKst(progress.orderTime); // ✅ 변환된 KST 시간 적용
+        
+        let row = `<tr>
+            <td>${progress.orderId || '-'}</td> <!-- 주문 ID -->
+            <td>${progress.productName || '-'}</td>
+            <td>${progress.productCategory || '-'}</td>
+            <td>${orderTime}</td>
+            <td>${progress.boxSize || '-'}</td> <!-- 박스 규격 -->
+            <td>${progress.palletId || '-'}</td>
+            <td>${progress.boxState == 0 ? '미검사' : progress.boxState == 1 ? '정상' : '파손'}</td>
+            <td>${progress.progressState == 0 ? '물품 대기' : progress.progressState == 1 ? '포장 완료' : '적재 완료'}</td>
+        </tr>`;
+        progressTable.innerHTML += row;
+    });
+}
+
+</script>
+<style>
+    .table-container { max-height: 500px; overflow-y: auto; margin-top: 10px; }
+    .order-table { width: 100%; border-collapse: collapse; }
+    .order-table th, .order-table td { padding: 10px; border: 1px solid #ddd; text-align: center; }
+    .pagination { display: flex; justify-content: center; margin-top: 10px; }
+    .pagination button { padding: 5px 10px; margin: 2px; border: none; background: #eee; cursor: pointer; }
+    .pagination .active { background: #6200ea; color: white; }
+    
+    /* 테이블 컨테이너 */
+    .table-container {
+        width: 100%;
+        max-height: 500px;
+        overflow-y: auto;
+        overflow-x: auto;
+        margin-top: 10px;
+    }
+
+    /* 테이블 */
+    .progress-table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed; /* 열 너비 고정 */
+    }
+
+    /* 테이블 헤더 */
+    .progress-table th {
+        background: #f4f4f4;
+        padding: 12px;
+        border: 1px solid #ddd;
+        text-align: center;
+        font-weight: bold;
+    }
+
+    /* 테이블 본문 */
+    .progress-table td {
+        padding: 10px;
+        border: 1px solid #ddd;
+        text-align: center;
+        white-space: nowrap; /* 텍스트 줄 바꿈 방지 */
+        overflow: hidden;
+        text-overflow: ellipsis; /* 너무 길면 ... 처리 */
+    }
+
+    /* 각 열 크기 고정 */
+    .progress-table th:nth-child(1),
+    .progress-table td:nth-child(1) {
+        width: 15%; /* 주문번호 */
+    }
+
+    .progress-table th:nth-child(2),
+    .progress-table td:nth-child(2) {
+        width: 20%; /* 상품명 */
+    }
+
+    .progress-table th:nth-child(3),
+    .progress-table td:nth-child(3) {
+        width: 10%; /* 카테고리 */
+    }
+
+    .progress-table th:nth-child(4),
+    .progress-table td:nth-child(4) {
+        width: 15%; /* 주문 시간 */
+    }
+
+    .progress-table th:nth-child(5),
+    .progress-table td:nth-child(5) {
+        width: 10%; /* 배송지 */
+    }
+
+    .progress-table th:nth-child(6),
+    .progress-table td:nth-child(6) {
+        width: 10%; /* 팔렛트 ID */
+    }
+
+    .progress-table th:nth-child(7),
+    .progress-table td:nth-child(7) {
+        width: 10%; /* 박스 상태 */
+    }
+
+    .progress-table th:nth-child(8),
+    .progress-table td:nth-child(8) {
+        width: 10%; /* 진행 상태 */
+    }
+
+    /* 페이지네이션 스타일 */
+    .pagination {
+        display: flex;
+        justify-content: center;
+        margin-top: 10px;
+    }
+
+    .pagination button {
+        padding: 8px 12px;
+        margin: 2px;
+        border: none;
+        background: #eee;
+        cursor: pointer;
+        border-radius: 4px;
+    }
+
+    .pagination .active {
+        background: #6200ea;
+        color: white;
+    }
+</style>
+</body>
 </html>

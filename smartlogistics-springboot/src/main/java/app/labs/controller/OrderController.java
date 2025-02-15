@@ -5,6 +5,7 @@ import app.labs.service.OrderService;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -117,18 +118,18 @@ public class OrderController {
  // ✅ 주문번호로 주문 조회 API (JSON 반환)
     @GetMapping("/api/search")
     @ResponseBody
-    public ResponseEntity<?> searchOrderByOrderNum(@RequestParam(name = "orderNum") String orderNum) {
+    public ResponseEntity<?> searchOrderByNum(@RequestParam(name = "orderNum") String orderNum) {
         try {
             List<Order> orders = orderService.getOrdersByOrderNum(orderNum);
             if (orders.isEmpty()) {
-                return ResponseEntity.status(404).body("❌ 해당 주문이 존재하지 않습니다.");
+                return ResponseEntity.ok(Map.of("orders", List.of(), "message", "❌ 해당 주문번호로 조회된 주문이 없습니다."));
             }
-            return ResponseEntity.ok(Collections.singletonMap("orders", orders));
+            return ResponseEntity.ok(Map.of("orders", orders, "total", orders.size()));
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("❌ 주문 조회 중 오류 발생: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "서버 오류 발생", "message", e.getMessage()));
         }
     }
-
 
 
     // ✅ 주문 상태 업데이트 API
