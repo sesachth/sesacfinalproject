@@ -107,10 +107,17 @@
     
     <!-- ✅ 주문번호로 주문 조회 -->
 	<select id="getOrdersByOrderNum" resultType="app.labs.model.Order">
-    SELECT * FROM `order`
+    SELECT 
+        order_id, 
+        order_num, 
+        DATE(order_time) AS order_date, 
+        TIME(order_time) AS order_time, 
+        destination, 
+        product_id
+    FROM `order`
     WHERE TRIM(order_num) = #{orderNum}
-    ORDER BY order_time ASC;
 	</select>
+
     
 
     <!-- ✅ 주문 저장 -->

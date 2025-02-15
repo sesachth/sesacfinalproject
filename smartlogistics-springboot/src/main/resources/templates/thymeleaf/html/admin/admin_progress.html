@@ -6,7 +6,9 @@
 <head>
     <th:block layout:fragment="css">
         <link rel="stylesheet" th:href="@{/css/admin/admin.css}" />
-    </th:block>
+        <script src="https://cdn.jsdelivr.net/npm/sockjs-client/dist/sockjs.min.js"></script>
+	    <script src="https://cdn.jsdelivr.net/npm/stompjs/lib/stomp.min.js"></script>
+	</th:block>
 </head>
 
 <body>
@@ -77,8 +79,44 @@ const pageGroupSize = 10;
 let totalPages = 1;
 let progressData = [];
 
-window.onload = () => loadProgress();
+window.onload = () => {
+    loadProgress();
+    connectWebSocket(); // ✅ WebSocket 연결 추가
+};
 
+// ✅ WebSocket 연결 설정
+function connectWebSocket() {
+    var socket = new SockJS('/ws'); // WebSocket 엔드포인트
+    var stompClient = Stomp.over(socket);
+
+    stompClient.connect({}, function (frame) {
+        console.log("📌 WebSocket 연결 성공:", frame);
+
+        // ✅ 진행 상태 업데이트 메시지 구독
+        stompClient.subscribe('/topic/updateStatus', function (message) {
+            let updatedProgress = JSON.parse(message.body);
+            console.log("📌 WebSocket으로 받은 업데이트 데이터:", updatedProgress);
+
+            // ✅ 기존 데이터 갱신
+           // updateProgressFromWebSocket(updatedProgress);
+        });
+    });
+}
+
+// ✅ WebSocket으로 받은 데이터 업데이트
+function updateProgressFromWebSocket(updatedData) {
+    let index = progressData.findIndex(item => item.orderId === updatedData.orderId);
+
+    if (index !== -1) {
+        // ✅ 기존 데이터 업데이트
+        progressData[index] = updatedData;
+    } else {
+        // ✅ 새로운 데이터 추가 (데이터가 없을 경우)
+        progressData.unshift(updatedData);
+    }
+
+    updateProgressList(); // ✅ UI 업데이트
+}
 // 조회 버튼 클릭
 document.getElementById("filterBtn").addEventListener("click", function () {
     currentPage = 1;
