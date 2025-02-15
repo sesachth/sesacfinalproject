@@ -43,33 +43,47 @@ public class OrderController {
     public ResponseEntity<?> getOrders(@RequestParam(value = "destination", required = false) String destination,
                                        @RequestParam(value = "date", required = false) String date,
                                        @RequestParam(value = "page", required = false, defaultValue = "1") int page,
-                                       @RequestParam(value = "size", required = false, defaultValue = "5000") int size) {
+                                       @RequestParam(value = "size", required = false, defaultValue = "20") int size) {
+
         List<Order> orders;
         int offset = (page - 1) * size;
         int totalCount;
 
         try {
+            // ✅ 날짜 포맷 변환
+            String startOfDay = null;
+            String endOfDay = null;
+            if (date != null && !date.isEmpty()) {
+                startOfDay = date + " 00:00:00";
+                endOfDay = date + " 23:59:59";
+            }
+
+            // ✅ 필터 조건에 따라 조회
             if (destination == null && date == null) {
                 orders = orderService.getAllOrders(size, offset);
                 totalCount = orderService.getTotalOrderCount();
             } else if (destination != null && date == null) {
                 orders = orderService.getOrdersByDestination(destination, size, offset);
                 totalCount = orderService.getTotalOrderCountByDestination(destination);
-            } else if (destination == null && date != null) {
-                String startOfDay = date + " 00:00:00";
-                String endOfDay = date + " 23:59:59";
+            } else if (destination == null) {
                 orders = orderService.getOrdersByDate(startOfDay, endOfDay, size, offset);
                 totalCount = orderService.getTotalOrderCountByDate(startOfDay, endOfDay);
             } else {
-                String startOfDay = date + " 00:00:00";
-                String endOfDay = date + " 23:59:59";
                 orders = orderService.getOrdersByDestinationAndDate(destination, startOfDay, endOfDay, size, offset);
                 totalCount = orderService.getTotalOrderCountByDestinationAndDate(destination, startOfDay, endOfDay);
             }
 
+            // ✅ 날짜 및 시간 변환 (NULL 처리 추가)
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-            orders.forEach(order -> order.setFormattedOrderTime(order.getOrderTime().format(formatter)));
+            orders.forEach(order -> {
+                if (order.getOrderTime() != null) {
+                    order.setFormattedOrderTime(order.getOrderTime().format(formatter));
+                } else {
+                    order.setFormattedOrderTime("-");  // ✅ NULL이면 기본값으로 '-'
+                }
+            });
 
+            // ✅ 응답 데이터 생성
             Map<String, Object> response = new HashMap<>();
             response.put("orders", orders);
             response.put("totalCount", totalCount);
@@ -80,6 +94,7 @@ public class OrderController {
             return ResponseEntity.status(500).body("❌ 주문 조회 중 오류 발생: " + e.getMessage());
         }
     }
+
 
     // ✅ 랜덤 주문 생성 API
     @PostMapping("/generate")
