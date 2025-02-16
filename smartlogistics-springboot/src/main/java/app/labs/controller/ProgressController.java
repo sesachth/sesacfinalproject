@@ -2,7 +2,11 @@ package app.labs.controller;
 
 import app.labs.service.ProgressService;
 import app.labs.model.ProgressDTO;
+
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
@@ -63,4 +67,25 @@ public class ProgressController {
         response.put("totalPages", totalPages);
         return response;
     }
+    
+	 // ✅ WebSocket을 통해 "포장 완료" 메시지를 받으면 실행됨
+	    @MessageMapping("/updateStatus")
+	    @Transactional
+	    public void updateOrderStatus(@Payload Map<String, Object> payload) {
+	        System.out.println("📌 [WebSocket] 메시지 수신 - 데이터: " + payload);
+	
+	        List<Integer> orderIds = (List<Integer>) payload.get("orderIds");
+	        int progressState = (int) payload.get("progressState");
+	
+	        if (orderIds == null || orderIds.isEmpty()) {
+	            System.out.println("⚠️ [WebSocket] 주문 ID 없음, 업데이트 수행하지 않음");
+	            return;
+	        }
+	
+	        // ✅ 선택된 주문만 업데이트하도록 변경
+	        progressService.updateOrdersProgress(orderIds, progressState);
+	
+	        System.out.println("📌 [WebSocket] DB 업데이트 완료 - 업데이트된 주문 ID: " + orderIds);
+	    }
+
 }
