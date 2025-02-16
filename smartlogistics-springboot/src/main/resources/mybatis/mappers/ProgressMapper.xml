@@ -61,5 +61,14 @@
           AND (#{orderNum} IS NULL OR o.order_num = #{orderNum})  -- ✅ `orderNum` → `order_num`
 >>>>>>> ac7b0e0de107d84f812ef42342b19c2de86144bf
     </select>
+    
+    <update id="updateOrdersProgress">
+    UPDATE `order`
+    SET progress_state = #{progressState}
+    WHERE order_id IN
+    <foreach item="orderId" collection="orderIds" open="(" separator="," close=")">
+        #{orderId}
+    </foreach>
+</update>
 
 </mapper>

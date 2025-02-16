@@ -97,26 +97,41 @@ function connectWebSocket() {
             let updatedProgress = JSON.parse(message.body);
             console.log("📌 WebSocket으로 받은 업데이트 데이터:", updatedProgress);
 
-            // ✅ 기존 데이터 갱신
-           // updateProgressFromWebSocket(updatedProgress);
+            // ✅ UI 업데이트
+            updateProgressFromWebSocket(updatedProgress);
         });
     });
 }
 
-// ✅ WebSocket으로 받은 데이터 업데이트
+//✅ WebSocket으로 받은 데이터 업데이트 (UI 반영)
 function updateProgressFromWebSocket(updatedData) {
-    let index = progressData.findIndex(item => item.orderId === updatedData.orderId);
+    console.log("📌 [WebSocket] 업데이트 데이터:", updatedData);
 
-    if (index !== -1) {
-        // ✅ 기존 데이터 업데이트
-        progressData[index] = updatedData;
-    } else {
-        // ✅ 새로운 데이터 추가 (데이터가 없을 경우)
-        progressData.unshift(updatedData);
+    // 데이터 형식 검증
+    if (!updatedData.orderIds || !Array.isArray(updatedData.orderIds)) {
+        console.warn("📌 [WebSocket] 잘못된 데이터 형식:", updatedData);
+        return;
     }
 
-    updateProgressList(); // ✅ UI 업데이트
+    // ✅ 특정 주문 ID만 업데이트
+    updatedData.orderIds.forEach(orderId => {
+        let row = document.querySelector(`tr[data-order-id='${orderId}']`);
+        
+        if (row) {
+            console.log("📌 [WebSocket] 주문 ID:", orderId, "진행 상태 업데이트");
+
+            let progressStateCell = row.querySelector(".progress-state");
+            if (progressStateCell) {
+                progressStateCell.innerText = 
+                    updatedData.progressState == 1 ? "포장 완료" : 
+                    updatedData.progressState == 2 ? "적재 완료" : "물품 대기";
+            }
+        } else {
+            console.warn("📌 [WebSocket] 해당 주문 ID를 찾을 수 없음:", orderId);
+        }
+    });
 }
+
 // 조회 버튼 클릭
 document.getElementById("filterBtn").addEventListener("click", function () {
     currentPage = 1;
@@ -343,7 +358,7 @@ function updateProgressList() {
     progressData.forEach(progress => {
         let orderTime = convertUtcToKst(progress.orderTime); // ✅ 변환된 KST 시간 적용
         
-        let row = `<tr>
+        let row = `<tr data-order-id="${progress.orderId}">
             <td>${progress.orderId || '-'}</td> <!-- 주문 ID -->
             <td>${progress.productName || '-'}</td>
             <td>${progress.productCategory || '-'}</td>
@@ -351,7 +366,9 @@ function updateProgressList() {
             <td>${progress.boxSize || '-'}</td> <!-- 박스 규격 -->
             <td>${progress.palletId || '-'}</td>
             <td>${progress.boxState == 0 ? '미검사' : progress.boxState == 1 ? '정상' : '파손'}</td>
-            <td>${progress.progressState == 0 ? '물품 대기' : progress.progressState == 1 ? '포장 완료' : '적재 완료'}</td>
+            <td class="progress-state">
+                ${progress.progressState == 0 ? '물품 대기' : progress.progressState == 1 ? '포장 완료' : '적재 완료'}
+            </td>
         </tr>`;
         progressTable.innerHTML += row;
     });
