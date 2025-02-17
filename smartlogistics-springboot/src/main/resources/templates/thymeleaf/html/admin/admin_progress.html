@@ -377,7 +377,7 @@ function updateProgressList() {
             <td>${progress.productName || '-'}</td>
             <td>${progress.productCategory || '-'}</td>
             <td>${orderTime}</td>
-            <td>${progress.boxSize || '-'}</td> <!-- 박스 규격 -->
+            <td>${progress.boxSpec || '-'}</td> <!-- 박스 규격 -->
             <td>${progress.palletId || '-'}</td>
             <td>${progress.boxState == 0 ? '미검사' : progress.boxState == 1 ? '정상' : '파손'}</td>
             <td class="progress-state">
