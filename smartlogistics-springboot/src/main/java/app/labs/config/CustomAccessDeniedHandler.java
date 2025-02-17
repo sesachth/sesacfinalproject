@@ -35,21 +35,7 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
                 "/admin/pallet", 
                 "/admin/stacking"
             );
-            
-            /*
-            // 요청된 URL이 /admin 관련 경로일 경우 리다이렉트할 URL을 설정
-            String redirectUrl = "/worker/packaging"; // 기본적으로 패키징 페이지로 리다이렉트
-            
-            // /admin 관련 URL에 대해서만 작업자 페이지로 리다이렉트
-            if (requestedUrl.contains("/admin")) {
-                // 요청된 URL에 따라 다른 작업자 페이지로 리다이렉트
-                if (requestedUrl.contains("/stacking")) {
-                    redirectUrl = "/worker/stacking";
-                } else {
-                    redirectUrl = "/worker/packaging";
-                }
-            }
-            */
+
             if (adminUrls.contains(requestedUrl)) {
                 // 작업자 페이지로 리다이렉트할 URL 설정 (현재 작업자 페이지에 따라 다르게 설정)
                 String redirectUrl = "/worker/packaging"; // 기본적으로 패키징 페이지로 설정
