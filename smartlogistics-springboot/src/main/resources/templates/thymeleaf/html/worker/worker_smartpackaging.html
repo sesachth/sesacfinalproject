@@ -111,62 +111,109 @@
             .catch(error => console.error("📌 Worker 페이지 주문 목록 로딩 실패:", error));
     }
 
-    // ✅ 포장 완료 버튼 클릭 시 선택된 주문 상태 변경
-    function completeSelectedPackaging() {
-        let selectedOrders = [];
-        document.querySelectorAll(".order-checkbox:checked").forEach(checkbox => {
-            selectedOrders.push(checkbox.dataset.id);
-        });
+    // ✅ WebSocket 연결 설정
+	function connectWebSocket() {
+	    let socket = new SockJS('/ws');
+	    stompClient = Stomp.over(socket);
+	
+	    stompClient.connect({}, function(frame) {
+	        console.log('📌 Worker 페이지 WebSocket 연결됨:', frame);
+	
+	        stompClient.send("/topic/workerUpdate", {}, JSON.stringify(message));
+	
+	        
+	        // ✅ 진행 상태 변경 구독 (Worker & Admin 동기화)
+	        stompClient.subscribe('/topic/updateStatus', function(message) {
+	            let updatedProgress = JSON.parse(message.body);
+	            console.log("📌 Worker가 받은 WebSocket 메시지:", updatedProgress);
+	            updateProgressState(updatedProgress.orderIds, updatedProgress.progressState, updatedProgress.boxState, updatedProgress.imageNumber);
+	        });
+	        
+	     // ✅ Worker가 자기 자신이 보낸 메시지도 수신할 수 있도록 추가
+	        stompClient.subscribe('/topic/workerUpdate', function(message) {
+	            let updatedProgress = JSON.parse(message.body);
+	            console.log("📌 Worker 자기 자신이 보낸 메시지 수신:", updatedProgress);
+	            updateProgressState(updatedProgress.orderIds, updatedProgress.progressState);
+	        });
+	
+	    }, function(error) {
+	        console.error('📌 WebSocket 연결 실패:', error);
+	        setTimeout(connectWebSocket, 5000);  // 5초 후 재연결 시도
+	    });
+	}
+	
+	// ✅ 포장 완료 버튼 클릭 시 WebSocket 메시지 전송
+	function completeSelectedPackaging() {
+	    let selectedOrders = [];
+	    document.querySelectorAll(".order-checkbox:checked").forEach(checkbox => {
+	        selectedOrders.push(checkbox.dataset.id);
+	    });
+	
+	    if (selectedOrders.length === 0) {
+	        alert("✅ 포장할 주문을 선택하세요.");
+	        return;
+	    }
+	
+	    let imageNumber = Math.floor(Math.random() * 100) + 1; // 1~100 랜덤 이미지
+	
+	    let message = {
+	        orderIds: selectedOrders,
+	        progressState: 1, // 포장 완료
+	        imageNumber: imageNumber
+	    };
+	
+	    console.log("📌 WebSocket 전송 메시지 (Worker → Server):", message);
+	
+	    // ✅ WebSocket을 통해 상태 변경 요청 전송
+	    stompClient.send("/app/updateStatus", {}, JSON.stringify(message));
+	    stompClient.send("/topic/updateStatus", {}, JSON.stringify(message));
+	
+	    
+		alert("✅ 선택한 주문이 포장 완료되었습니다.");
+	
+	}
+	
+	// ✅ 특정 주문만 상태 업데이트 (Worker & Admin UI 동기화)
+	function updateProgressState(orderIds, progressState, boxState = null, imageNumber = null) {
+	    orderIds.forEach(orderId => {
+	        let row = document.querySelector(`tr[data-order-id='${orderId}']`);
+	        if (row) {
+	            console.log(`📌 [Worker UI 업데이트] 주문 ID: ${orderId}, 진행 상태: ${progressState}, 박스 상태: ${boxState}, 이미지 번호: ${imageNumber}`);
+	
+	            // ✅ 진행 상태 업데이트
+	            let progressStateCell = row.querySelector(".progress-state");
+	            if (progressStateCell) {
+	                progressStateCell.innerText =
+	                    progressState === 1 ? '✅ 포장 완료' :
+	                    progressState === 2 ? '📦 적재 완료' : '⏳ 물품 대기';
+	            }
+	
+	            // ✅ 박스 상태 업데이트
+	            if (boxState !== null) {
+	                let boxStateCell = row.querySelector(".box-state");
+	                if (boxStateCell) {
+	                    boxStateCell.innerText =
+	                        boxState === 0 ? '⏳ 미검사' :
+	                        boxState === 1 ? '✅ 정상' : '❌ 파손';
+	                }
+	            }
+	
+	            // ✅ 랜덤 이미지 번호 업데이트
+	            if (imageNumber !== null) {
+	                let imageCell = row.querySelector(".image-number");
+	                if (imageCell) {
+	                    imageCell.innerText = `📦 ${imageNumber}`;
+	                }
+	            }
+	        } else {
+	            console.warn(`📌 [Worker WebSocket] 해당 주문 ID(${orderId})를 찾을 수 없음 (UI 미반영)`);
+	        }
+	    });
+	}
+	
+	// ✅ WebSocket 연결 실행
+	connectWebSocket();
 
-        if (selectedOrders.length === 0) {
-            alert("✅ 포장할 주문을 선택하세요.");
-            return;
-        }
-
-        let message = {
-            orderIds: selectedOrders,
-            progressState: 1 // 포장 완료
-        };
-
-        console.log("📌 WebSocket 전송 메시지:", message);
-
-        stompClient.send("/app/updateStatus", {}, JSON.stringify(message));
-
-        alert("✅ 선택한 주문이 포장 완료되었습니다.");
-
-        selectedOrders.forEach(orderId => {
-            let row = document.querySelector(`tr[data-order-id='${orderId}']`);
-            if (row) {
-                row.querySelector(".progress-state").innerText = "포장 완료";
-            }
-        });
-    }
-
-    // ✅ WebSocket 설정
-    function connectWebSocket() {
-        let socket = new SockJS('/ws');
-        stompClient = Stomp.over(socket);
-
-        stompClient.connect({}, function(frame) {
-            console.log('📌 WebSocket 연결됨:', frame);
-            stompClient.subscribe('/topic/progress', function(message) {
-                let data = JSON.parse(message.body);
-                updateProgressState(data.orderIds, data.progressState);
-            });
-        });
-    }
-
-    // ✅ 특정 주문만 상태 업데이트
-    function updateProgressState(orderIds, progressState) {
-        orderIds.forEach(orderId => {
-            let row = document.querySelector(`tr[data-order-id='${orderId}']`);
-            if (row) {
-                row.querySelector(".progress-state").innerText =
-                    progressState === 1 ? '포장 완료' :
-                    progressState === 2 ? '적재 완료' : '물품 대기';
-            }
-        });
-    }
     
  	// ✅ 전체 선택 체크박스 기능 (수정됨)
     function toggleSelectAll() {
