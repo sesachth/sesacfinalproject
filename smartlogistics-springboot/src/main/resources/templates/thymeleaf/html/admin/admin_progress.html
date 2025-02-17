@@ -86,30 +86,43 @@ window.onload = () => {
 
 // ✅ WebSocket 연결 설정
 function connectWebSocket() {
-    var socket = new SockJS('/ws'); // WebSocket 엔드포인트
-    var stompClient = Stomp.over(socket);
+    let socket = new SockJS('/ws');
+    stompClient = Stomp.over(socket);
 
-    stompClient.connect({}, function (frame) {
-        console.log("📌 WebSocket 연결 성공:", frame);
+    stompClient.connect({}, function(frame) {
+        console.log('📌 WebSocket 연결됨:', frame);
 
-        // ✅ 진행 상태 업데이트 메시지 구독
-        stompClient.subscribe('/topic/updateStatus', function (message) {
+        // ✅ 진행 상태 변경 구독 (Worker & Progress 페이지 동기화)
+        stompClient.subscribe('/topic/updateStatus', function(message) {
             let updatedProgress = JSON.parse(message.body);
             console.log("📌 WebSocket으로 받은 업데이트 데이터:", updatedProgress);
-
-            // ✅ UI 업데이트
             updateProgressFromWebSocket(updatedProgress);
         });
+
+        // ✅ 진행 상태 업데이트
+        stompClient.subscribe('/topic/progress', function(message) {
+            let data = JSON.parse(message.body);
+            console.log("📌 WebSocket 수신 데이터:", data);
+            updateProgressFromWebSocket(data);
+        });
+    }, function(error) {
+        console.error('📌 WebSocket 연결 실패:', error);
+        setTimeout(connectWebSocket, 5000);  // 5초 후 재연결 시도
     });
 }
+
 
 //✅ WebSocket으로 받은 데이터 업데이트 (UI 반영)
 function updateProgressFromWebSocket(updatedData) {
     console.log("📌 [WebSocket] 업데이트 데이터:", updatedData);
 
-    // 데이터 형식 검증
+    // ✅ 데이터 검증
     if (!updatedData.orderIds || !Array.isArray(updatedData.orderIds)) {
         console.warn("📌 [WebSocket] 잘못된 데이터 형식:", updatedData);
+        return;
+    }
+    if (updatedData.progressState === undefined || updatedData.progressState === null) {
+        console.warn("📌 [WebSocket] progressState 없음:", updatedData);
         return;
     }
 
@@ -131,6 +144,7 @@ function updateProgressFromWebSocket(updatedData) {
         }
     });
 }
+
 
 // 조회 버튼 클릭
 document.getElementById("filterBtn").addEventListener("click", function () {
