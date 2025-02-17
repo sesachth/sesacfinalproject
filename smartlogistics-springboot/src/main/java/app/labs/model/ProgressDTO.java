@@ -9,17 +9,6 @@ import java.sql.Timestamp;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ProgressDTO {
-<<<<<<< HEAD
-    private int order_id;          // 주문 ID
-    private String order_num;      // 주문 번호
-    private Timestamp order_time;  // 주문 시간
-    private String destination;    // 배송 목적지
-    private Integer pallet_id;     // 팔렛트 ID (NULL 가능)
-    private int box_state;         // 박스 상태 (0: 미검사, 1: 정상, 2: 파손)
-    private int progress_state;    // 진행 상태 (0: 물품 대기, 1: 포장 완료, 2: 적재 완료)
-    private String product_name;   // 상품명 (`p.name AS product_name`에 매핑됨)
-    private String category;       // 상품 카테고리 (`p.category`에 매핑됨)
-=======
     private int orderId;            // 주문 ID
     private String orderNum;        // 주문 번호
     private Timestamp orderTime;    // 주문 시간
@@ -39,5 +28,4 @@ public class ProgressDTO {
     public void setBoxSpec(String boxSpec) {
         this.boxSpec = boxSpec;
     }
->>>>>>> 116872ede78789d4a746c0759eac72345b59d749
 }
