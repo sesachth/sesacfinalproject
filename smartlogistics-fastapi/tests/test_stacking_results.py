@@ -1,5 +1,10 @@
 from fastapi.testclient import TestClient
+from core.db.database import get_db
 from main import app
+
+import core.helpers.stacking_data_manager as sdm
+import asyncio
+import pytest
 
 client = TestClient(app)
 
@@ -37,6 +42,15 @@ def test_read_stacking_results():
 
     print('/api/v1/stacking_results 엔드포인트에 대한 FastAPI 검증 테스트가 정상적으로 완료되었습니다!')
 
+@pytest.mark.asyncio
+async def test_stacking_process():
+    # 비동기 데이터베이스 세션 생성
+    async for db in get_db():
+        # stacking_process 함수 실행
+        await sdm.stacking_process(db)
+        
+    print('적재 시뮬레이터 페이지 측 데이터 처리 과정 테스트가 정상적으로 완료되었습니다!')
+
 # ✅ FastAPI 엔드포인트 검증 실행 (포트 8000)
 if __name__ == "__main__":
-    test_read_stacking_results()
+    asyncio.run(test_stacking_process())
