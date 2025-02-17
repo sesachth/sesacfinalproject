@@ -15,32 +15,70 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 50px;
-    margin-top: 200px;
+    gap: 200px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    /*margin-top: 200px;*/
 }
 
-.icon-box {
+@keyframes rotateLeftRight {
+    0% {
+        transform: rotate(0deg);
+    }
+    25% {
+        transform: rotate(-20deg);
+    }
+    75% {
+        transform: rotate(20deg);
+    }
+    100% {
+        transform: rotate(0deg);
+    }
+}
+
+.icon-box-admin, .icon-box-worker {
     display: flex;
     flex-direction: column;
     align-items: center;
     text-decoration: none;
     color: black;
-    font-size: 18px;
+    font-size: 30px;
     font-weight: bold;
     cursor: pointer;
+    /* 높이를 동일하게 설정 */
+    height: 400px; /* 전체 높이 설정 */
+    justify-content: center; /* 수직 중앙 정렬 */
 }
 
-.icon-box img {
-    width: 300px; 
-    height: auto;
+.icon-box-admin svg, .icon-box-worker svg {
+    width: 300px;
+    height: 300px;
+    transition: transform 0.8s ease;
+}
+
+/* hover 효과도 동일하게 적용 */
+.icon-box-admin:hover svg, .icon-box-worker:hover svg {
+    animation: rotateLeftRight 1s ease;
+}
+
+.icon-box-admin:hover, .icon-box-worker:hover {
+    color: #68269E;
 }
 
 .modal-dialog {
-    max-width: 500px;
-    width: 100%;
+    max-width: 450px !important;
+    width: 100% !important;
     z-index: 1050 !important; /* 모달이 화면 위에 표시되도록 */
 }
 
 .modal-backdrop {
     display: none !important;
+}
+
+.form-control:focus {
+    border-color: #68269E !important;
+    box-shadow: 0 0 0 0.25rem rgba(104, 38, 158, 0.25) !important;
+    outline: 0 !important;
 }

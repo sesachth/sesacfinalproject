@@ -6,6 +6,8 @@
 <head>
     <th:block layout:fragment="css">
         <link rel="stylesheet" th:href="@{/css/admin/admin.css}" />
+        <link rel="stylesheet" th:href="@{/css/admin/admin_order.css}" />
+        <link rel="stylesheet" th:href="@{https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css}">
     </th:block>
 </head>
 
@@ -15,245 +17,142 @@
         <div class="main-container">
             <div th:replace="~{thymeleaf/html/common/include::profile}"></div>
             <div th:replace="~{thymeleaf/html/common/include::sidebar}"></div>
+            <div th:replace="~{thymeleaf/html/common/include::logout}"></div>
             <div layout:fragment="content" class="main-content">
+                <!-- 상단 컨트롤 바 --> 
+                <div class="control-bar">
+                    <div class="left-controls">
+                        <!-- 주문 번호 검색바 -->
+                        <div class="search-container">
+                            <input type="text" id="orderNumSearch" class="search-input" placeholder="주문번호 입력">
+                            <div class="search-icon">
+                                <div class="magnifier">
+                                    <div class="magnifier-circle"></div>
+                                    <div class="magnifier-line"></div>
+                                </div>
+                            </div>
+                            <button id="searchOrderBtn">검색</button>
+                        </div>
+                        
+                        <!-- 전체 필터 -->
+                        <div class="dropdown-group">
+                            <!-- 날짜 필터 -->
+                            <div class="dropdown-container">
+                                <div class="dropdown-select">
+                                    <svg class="calendar-icon" width="20" height="20" viewBox="0 0 20 20" fill="currentColor" stroke-width="0.8" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M15.8334 3.33366H14.1667V2.50033C14.1667 2.27931 14.079 2.06735 13.9227 1.91107C13.7664 1.75479 13.5544 1.66699 13.3334 1.66699C13.1124 1.66699 12.9004 1.75479 12.7442 1.91107C12.5879 2.06735 12.5001 2.27931 12.5001 2.50033V3.33366H7.50008V2.50033C7.50008 2.27931 7.41228 2.06735 7.256 1.91107C7.09972 1.75479 6.88776 1.66699 6.66675 1.66699C6.44573 1.66699 6.23377 1.75479 6.07749 1.91107C5.92121 2.06735 5.83341 2.27931 5.83341 2.50033V3.33366H4.16675C3.50371 3.33366 2.86782 3.59705 2.39898 4.06589C1.93014 4.53473 1.66675 5.17062 1.66675 5.83366V15.8337C1.66675 16.4967 1.93014 17.1326 2.39898 17.6014C2.86782 18.0703 3.50371 18.3337 4.16675 18.3337H15.8334C16.4965 18.3337 17.1323 18.0703 17.6012 17.6014C18.07 17.1326 18.3334 16.4967 18.3334 15.8337V5.83366C18.3334 5.17062 18.07 4.53473 17.6012 4.06589C17.1323 3.59705 16.4965 3.33366 15.8334 3.33366ZM16.6667 15.8337C16.6667 16.0547 16.579 16.2666 16.4227 16.4229C16.2664 16.5792 16.0544 16.667 15.8334 16.667H4.16675C3.94573 16.667 3.73377 16.5792 3.57749 16.4229C3.42121 16.2666 3.33341 16.0547 3.33341 15.8337V10.0003H16.6667V15.8337ZM16.6667 8.33366H3.33341V5.83366C3.33341 5.61265 3.42121 5.40068 3.57749 5.2444C3.73377 5.08812 3.94573 5.00033 4.16675 5.00033H5.83341V5.83366C5.83341 6.05467 5.92121 6.26663 6.07749 6.42291C6.23377 6.57919 6.44573 6.66699 6.66675 6.66699C6.88776 6.66699 7.09972 6.57919 7.256 6.42291C7.41228 6.26663 7.50008 6.05467 7.50008 5.83366V5.00033H12.5001V5.83366C12.5001 6.05467 12.5879 6.26663 12.7442 6.42291C12.9004 6.57919 13.1124 6.66699 13.3334 6.66699C13.5544 6.66699 13.7664 6.57919 13.9227 6.42291C14.079 6.26663 14.1667 6.05467 14.1667 5.83366V5.00033H15.8334C16.0544 5.00033 16.2664 5.08812 16.4227 5.2444C16.579 5.40068 16.6667 5.61265 16.6667 5.83366V8.33366Z"/>
+                                    </svg>
+                                    <input type="date" id="dateFilter" class="date-input"/>
+                                    <span class="date-placeholder">Choose a date</span>
+                                </div>
+                            </div>
+                        
+                            <!-- 목적지 필터 -->
+                            <div class="dropdown-container">
+                                <div class="dropdown-select" onclick="toggleDropdown('campMenu')">
+                                    Destination
+                                    <svg class="arrow-icon" width="10" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M1 1L5.97126 6L11 1" stroke="#68269E" stroke-width="1.2" stroke-linecap="round"/>
+                                    </svg>
+                                </div>
+                                <div class="dropdown-menu" id="campMenu">
+                                    <div class="dropdown-item" data-value="" onclick="selectItem(this, 'campMenu', '')">Destination</div>
+                                    <div class="dropdown-item" data-value="서초 캠프" onclick="selectItem(this, 'campMenu', '서초 캠프')">서초 캠프</div>
+                                    <div class="dropdown-item" data-value="강남 캠프" onclick="selectItem(this, 'campMenu', '강남 캠프')">강남 캠프</div>
+                                    <div class="dropdown-item" data-value="강서 캠프" onclick="selectItem(this, 'campMenu', '강서 캠프')">강서 캠프</div>
+                                    <div class="dropdown-item" data-value="중구 캠프" onclick="selectItem(this, 'campMenu', '중구 캠프')">중구 캠프</div>
+                                    <div class="dropdown-item" data-value="성동 캠프" onclick="selectItem(this, 'campMenu', '성동 캠프')">성동 캠프</div>
+                                </div>
+                                <!-- hidden input 추가 -->
+                                <input type="hidden" id="campFilter" value="" />
+                            </div>
+                        </div>
+                        <button class="inquiry-btn" id="filterBtn">조회</button>
 
-                <!-- 날짜, 캠프, 주문번호 필터 한 줄 정렬 -->
-                <div class="filter-container">
-                    <label for="dateFilter">날짜:</label>
-                    <input type="date" id="dateFilter"/>
 
-                    <label for="campFilter">캠프:</label>
-                    <select id="campFilter">
-                        <option value="">전체</option>
-                        <option value="서초 캠프">서초 캠프</option>
-                        <option value="강남 캠프">강남 캠프</option>
-                        <option value="강서 캠프">강서 캠프</option>
-                        <option value="중구 캠프">중구 캠프</option>
-                        <option value="성동 캠프">성동 캠프</option>
-                    </select>
+                        <!-- 날짜, 캠프, 주문번호 필터 한 줄 정렬 -->
+                        <!--
+                        <div class="filter-container">
+                            <label for="dateFilter">날짜:</label>
+                            <input type="date" id="dateFilter"/>
+
+                            <label for="campFilter">캠프:</label>
+                            <select id="campFilter">
+                                <option value="">전체</option>
+                                <option value="서초 캠프">서초 캠프</option>
+                                <option value="강남 캠프">강남 캠프</option>
+                                <option value="강서 캠프">강서 캠프</option>
+                                <option value="중구 캠프">중구 캠프</option>
+                                <option value="성동 캠프">성동 캠프</option>
+                            </select>
                     
-                    <button id="filterBtn">조회</button>
+                            <button id="filterBtn">조회</button>
 
-                    <!-- 주문번호 검색 추가 -->
-                    <label for="orderNumSearch">주문번호:</label>
-                    <input type="text" id="orderNumSearch" placeholder="주문번호 입력" />
-                    <button id="searchOrderBtn">검색</button>
+                        </div>
+                        -->
+				    </div>
+                    <div class="right-controls">
+                        <!-- Export 버튼 -->
+                        <button class="btn btn-export" id="downloadExcelBtn">
+                          <i class="export-icon"></i>
+                          Export
+                        </button>
+            
+                        <!-- Add product 버튼 -->
+                        <button class="btn btn-add" id="generateOrderBtn">
+                          <span class="plus-icon">+</span>
+                          Make Order
+                        </button>
+                    </div>
+            	</div> <!-- 상단 컨트롤 바 끝 -->
 
-                </div>
+            <!-- 주문 목록 테이블 -->
+            <div class="table-container">
+                <table class="order-table">
+                    <colgroup>
+                        <col style="width: 5%">   <!-- order_id (#) -->
+                        <col style="width: 25%">  <!-- order_number -->
+                        <col style="width: 20%">  <!-- order_date -->
+                        <col style="width: 20%">  <!-- order_time -->
+                        <col style="width: 15%">  <!-- destination -->
+                        <col style="width: 15%">  <!-- product_id -->
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th class="align-center">#</th>
+                            <th class="align-center">Order Number</th>
+                            <th class="align-center">Order Date</th>
+                            <th class="align-center">Order Time</th>
+                            <th class="align-center">Destination</th>
+                            <th class="align-center">Product ID</th>
+                        </tr>
+                    </thead>
+                    <tbody id="orderTableBody">
+                        <!-- 주문 데이터가 여기에 추가됨 -->
+                    </tbody>
+                </table>
+            </div>
 
-                <!-- 주문 생성 & 엑셀 다운로드 버튼 -->
-                <div class="order-actions">
-                    <button id="generateOrderBtn">주문 생성</button>
-                    <button id="downloadExcelBtn">엑셀 다운로드</button>
-                </div>
-
-                <!-- 주문 목록 테이블 -->
-                <div class="table-container">
-                    <table class="order-table">
-                        <thead>
-                            <tr>
-                                <th>주문 ID</th>
-                                <th>주문 번호</th>
-                                <th>주문 날짜</th>
-                                <th>주문 시간</th>
-                                <th>목적지</th>
-                                <th>상품 ID</th>
-                            </tr>
-                        </thead>
-                        <tbody id="orderTableBody">
-                            <!-- 주문 데이터가 여기에 추가됨 -->
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- 페이지네이션 -->
-                <div class="pagination">
-                    <button id="prevGroup">«</button>
-                    <span id="pageNumbers"></span>
-                    <button id="nextGroup">»</button>
-                </div>
-
+            <!-- 페이지네이션 -->
+            <div class="pagination">
+                <button id="prevGroup">
+                    <svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9.01488 2.61115C9.07878 2.54353 9.12874 2.46398 9.1619 2.37704C9.19506 2.29011 9.21077 2.1975 9.20814 2.10449C9.20551 2.01149 9.18459 1.91991 9.14657 1.83499C9.10854 1.75007 9.05417 1.67347 8.98654 1.60957C8.91892 1.54566 8.83937 1.4957 8.75243 1.46254C8.6655 1.42938 8.57289 1.41367 8.47988 1.4163C8.38688 1.41893 8.2953 1.43985 8.21038 1.47788C8.12546 1.5159 8.04886 1.57028 7.98496 1.6379L1.96413 8.0129C1.83979 8.14442 1.77051 8.31854 1.77051 8.49953C1.77051 8.68051 1.83979 8.85463 1.96413 8.98615L7.98496 15.3619C8.04844 15.431 8.12502 15.4868 8.21025 15.526C8.29549 15.5653 8.38767 15.5872 8.48145 15.5906C8.57523 15.5939 8.66873 15.5785 8.75654 15.5454C8.84434 15.5123 8.92469 15.4621 8.99291 15.3977C9.06114 15.3332 9.11589 15.2559 9.15397 15.1701C9.19206 15.0844 9.21272 14.9919 9.21476 14.8981C9.21681 14.8043 9.20019 14.711 9.16587 14.6236C9.13156 14.5363 9.08023 14.4567 9.01488 14.3893L3.45304 8.49953L9.01488 2.61115Z" fill="black"/>
+                    </svg>
+                </button>
+                <span id="pageNumbers"></span>
+                <button id="nextGroup">
+                    <svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M7.98512 2.61115C7.92122 2.54353 7.87126 2.46398 7.8381 2.37704C7.80494 2.29011 7.78923 2.1975 7.79186 2.10449C7.79449 2.01149 7.81541 1.91991 7.85343 1.83499C7.89146 1.75007 7.94583 1.67347 8.01346 1.60957C8.08108 1.54566 8.16063 1.4957 8.24757 1.46254C8.3345 1.42938 8.42711 1.41367 8.52012 1.4163C8.61312 1.41893 8.7047 1.43985 8.78962 1.47788C8.87454 1.5159 8.95114 1.57028 9.01504 1.6379L15.0359 8.0129C15.1602 8.14442 15.2295 8.31854 15.2295 8.49953C15.2295 8.68051 15.1602 8.85463 15.0359 8.98615L9.01504 15.3619C8.95156 15.431 8.87498 15.4868 8.78975 15.526C8.70451 15.5653 8.61233 15.5872 8.51855 15.5906C8.42477 15.5939 8.33127 15.5785 8.24346 15.5454C8.15566 15.5123 8.07531 15.4621 8.00709 15.3977C7.93886 15.3332 7.88411 15.2559 7.84603 15.1701C7.80794 15.0844 7.78728 14.9919 7.78524 14.8981C7.78319 14.8043 7.79981 14.711 7.83413 14.6236C7.86844 14.5363 7.91977 14.4567 7.98512 14.3893L13.547 8.49953L7.98512 2.61115Z" fill="black"/>
+                    </svg>
+                </button>
+            </div>
             </div>
         </div>
     </div>
 </th:block>
 
-<script>
-    let currentPage = 1;
-    const rowsPerPage = 20;
-    const pageGroupSize = 10;
-    let totalPages = 1;
-    let orders = [];
+<script th:src="@{/js/admin/admin_order.js}"></script>
 
-    window.onload = () => loadOrders();
-
-    document.getElementById("filterBtn").addEventListener("click", function () {
-        currentPage = 1;
-        loadOrders();
-    });
-
-    document.getElementById("generateOrderBtn").addEventListener("click", function () {
-        fetch("/admin/order/generate", { method: "POST" })
-            .then(response => response.json())
-            .then(data => {
-                alert(data.message);
-                setTimeout(() => location.reload(), 1000);  // ✅ 주문 생성 후 자동 새로고침
-            })
-            .catch(error => console.error("Error:", error));
-    });
-
-    document.getElementById("searchOrderBtn").addEventListener("click", function () {
-        searchOrderByNum();
-    });
-
-    document.getElementById("orderNumSearch").addEventListener("keypress", function (event) {
-        if (event.key === "Enter") {
-            searchOrderByNum();
-        }
-    });
-
-    function searchOrderByNum() {
-        let orderNum = document.getElementById("orderNumSearch").value.trim();
-
-        if (orderNum === "") {
-            loadOrders(); // 입력값 없으면 전체 주문 불러오기
-            return;
-        }
-
-        fetch(`/admin/order/api/search?orderNum=${encodeURIComponent(orderNum)}`)
-            .then(response => response.json().catch(() => ({ error: "Invalid JSON", message: "❌ 서버 오류 발생" }))) // JSON이 아니면 강제 처리
-            .then(data => {
-                if (data.error) {
-                    alert(data.message); // JSON이 아니면 에러 메시지 출력
-                    console.error("서버 오류:", data);
-                    return;
-                }
-                if (!data.orders || data.orders.length === 0) {
-                    alert("❌ 해당 주문번호로 조회된 주문이 없습니다.");
-                    document.getElementById("orderTableBody").innerHTML =
-                        "<tr><td colspan='6' style='text-align:center;'>❌ 주문이 없습니다.</td></tr>";
-                } else {
-                    orders = data.orders;
-                    updateOrderList(orders);
-                }
-            })
-            .catch(error => {
-                console.error("검색 오류:", error);
-                alert("❌ 서버 오류 발생: " + error.message);
-            });
-    }
-
-    document.getElementById("downloadExcelBtn").addEventListener("click", function () {
-        window.location.href = "/admin/order/download/excel";
-    });
-
-    document.getElementById("prevGroup").addEventListener("click", function () {
-        if (currentPage > 1) {
-            currentPage--;
-            loadOrders();
-        }
-    });
-
-    document.getElementById("nextGroup").addEventListener("click", function () {
-        if (currentPage < totalPages) {
-            currentPage++;
-            loadOrders();
-        }
-    });
-
-    function loadOrders(page = currentPage) {
-        let date = document.getElementById("dateFilter").value;
-        let camp = document.getElementById("campFilter").value;
-
-        let queryParams = new URLSearchParams({ page, size: 20 });
-        if (date) queryParams.append("date", date);
-        if (camp) queryParams.append("destination", camp);
-
-        fetch(`/admin/order/api?${queryParams.toString()}`)
-            .then(response => response.json())
-            .then(data => {
-                orders = data.orders;
-                totalPages = data.totalPages || 1;  // ✅ `totalPages` 값이 1일 때도 기본 설정
-
-                updateOrderList();
-                updatePagination();  // ✅ 페이지네이션 강제 실행
-            })
-            .catch(error => {
-                console.error("Error:", error);
-                document.getElementById("orderTableBody").innerHTML =
-                    "<tr><td colspan='8' style='text-align:center;'>❌ 주문이 없습니다.</td></tr>";
-            });
-    }
-    
-    document.getElementById("filterBtn").addEventListener("click", function () {
-        console.log("📌 필터 버튼 클릭됨");
-        currentPage = 1;
-        loadProgress(currentPage);
-    });
-
-
-    function updateOrderList(orderData = orders) {
-        let orderTable = document.getElementById("orderTableBody");
-        orderTable.innerHTML = "";
-
-        if (!orderData || orderData.length === 0) {
-            orderTable.innerHTML = "<tr><td colspan='6' style='text-align:center;'>❌ 주문이 없습니다.</td></tr>";
-            return;
-        }
-
-        orderData.forEach(order => {
-            let formattedDate = order.orderTime ? order.orderTime.split("T")[0] : "-"; // ✅ NULL 처리
-            let formattedTime = order.orderTime ? order.orderTime.split("T")[1]?.split(".")[0] : "-"; // ✅ NULL 처리
-
-            let row = `<tr>
-                <td>${order.orderId || '-'}</td>
-                <td>${order.orderNum || '-'}</td>
-                <td>${formattedDate}</td>
-                <td>${formattedTime}</td>
-                <td>${order.destination || '-'}</td>
-                <td>${order.productId || '-'}</td>
-            </tr>`;
-            orderTable.innerHTML += row;
-        });
-
-    }
-
-    function updatePagination() {
-        let pageNumbers = document.getElementById("pageNumbers");
-        pageNumbers.innerHTML = "";
-
-        let startPage = Math.max(1, Math.floor((currentPage - 1) / pageGroupSize) * pageGroupSize + 1);
-        let endPage = Math.min(startPage + pageGroupSize - 1, totalPages);
-
-        for (let i = startPage; i <= endPage; i++) {
-            let pageButton = document.createElement("button");
-            pageButton.innerText = i;
-            pageButton.classList.add("page-btn");
-
-            if (i === currentPage) {
-                pageButton.classList.add("active");
-            }
-
-            pageButton.addEventListener("click", function () {
-                currentPage = i;
-                loadOrders(i);
-            });
-
-            pageNumbers.appendChild(pageButton);
-        }
-
-        document.getElementById("prevGroup").disabled = (currentPage === 1);
-        document.getElementById("nextGroup").disabled = (currentPage === totalPages);
-    }
-</script>
-
-<style>
-    .table-container { max-height: 500px; overflow-y: auto; margin-top: 10px; }
-    .order-table { width: 100%; border-collapse: collapse; }
-    .order-table th, .order-table td { padding: 10px; border: 1px solid #ddd; text-align: center; }
-    .pagination { display: flex; justify-content: center; margin-top: 10px; }
-    .pagination button { padding: 5px 10px; margin: 2px; border: none; background: #eee; cursor: pointer; }
-    .pagination .active { background: #6200ea; color: white; }
-</style>
 </body>
 </html>
