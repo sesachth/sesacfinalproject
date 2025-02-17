@@ -1,33 +1,35 @@
 package app.labs.dao;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+
 import app.labs.model.Product;
 import java.util.List;
 
 @Mapper
 public interface ProductlistRepository {
-    // 전체 물품 목록 조회
+    // �꾩껜 臾쇳뭹 紐⑸줉 議고쉶
     List<Product> findAll();
     
-    // 특정 물품 카테고리 조회 (파라미터로 category를 받음)
-    List<Product> findByCategory(String category);
+    // �뱀젙 臾쇳뭹 移댄뀒怨좊━ 議고쉶 (�뚮씪誘명꽣濡� category瑜� 諛쏆쓬)
+    List<Product> findByCategory(@Param("category")String category);
  
-    // 특정 물품 취급주의 조회 
-    List<Product> findByFragile(boolean fragile);
+    // �뱀젙 臾쇳뭹 痍④툒二쇱쓽 議고쉶 
+    List<Product> findByFragile(@Param("isFragile")boolean isFragile);
  
-    // 특정 물품 취급주의&카테고리 조회
-    List<Product> findByCategoryAndFragile(String category, boolean fragile);
+    // �뱀젙 臾쇳뭹 痍④툒二쇱쓽&移댄뀒怨좊━ 議고쉶
+    List<Product> findByCategoryAndFragile(@Param("category")String category, @Param("isFragile")boolean isFragile);
     
-    // 신규 물품 추가
+    // �좉퇋 臾쇳뭹 異붽�
     void insert(Product product);
     
-    // 기존 물품 수정
+    // 湲곗〈 臾쇳뭹 �섏젙
     int update(Product product);
     
-    // 특정 물품 삭제
+    // �뱀젙 臾쇳뭹 ��젣
     int delete(int productId);
     
- // 특정 이름으로 제품 검색
+ // �뱀젙 �대쫫�쇰줈 �쒗뭹 寃���
     List<Product> findByNameContaining(String name);
 	
 }
