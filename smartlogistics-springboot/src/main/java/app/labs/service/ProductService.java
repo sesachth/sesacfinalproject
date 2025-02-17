@@ -2,6 +2,8 @@ package app.labs.service;
 
 import app.labs.dao.ProductlistRepository;
 import app.labs.model.Product;
+
+import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -20,19 +22,19 @@ public class ProductService {
         return productlistRepository.findAll();
     }
 
-    // 카테고리별 제품 조회 
+    // 移댄뀒怨좊━蹂� �쒗뭹 議고쉶 
     public List<Product> getProductByCategory(String category) {
         return productlistRepository.findByCategory(category);
     }
     
-    // 취급주의별 제품 조회
-    public List<Product> getProductByFragile(boolean fragile) {
-        return productlistRepository.findByFragile(fragile);
+    // 痍④툒二쇱쓽蹂� �쒗뭹 議고쉶
+    public List<Product> getProductByFragile(boolean isFragile) {
+        return productlistRepository.findByFragile(isFragile);
     }
 
-    // 카테고리와 취급 주의(Fragile) 값에 따른 제품 조회
-    public List<Product> getProductByCategoryAndFragile(String category, boolean fragile) {
-        return productlistRepository.findByCategoryAndFragile(category, fragile);
+    // 移댄뀒怨좊━�� 痍④툒 二쇱쓽(Fragile) 媛믪뿉 �곕Ⅸ �쒗뭹 議고쉶
+    public List<Product> getProductByCategoryAndFragile(String category, boolean isFragile) {
+        return productlistRepository.findByCategoryAndFragile(category, isFragile);
     }
     
     public void addProduct(Product product) {
@@ -47,7 +49,7 @@ public class ProductService {
         return productlistRepository.delete(productId) > 0;
     }
     
-    // 이름으로 제품 검색
+    // �대쫫�쇰줈 �쒗뭹 寃���
     public List<Product> getProductsByName(String name) {
         return productlistRepository.findByNameContaining(name);
     }
