@@ -23,8 +23,27 @@
 		integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
 		crossorigin="anonymous"></script>
 
+	<style>
+	/* 드롭다운 버튼 테두리 제거 */
+	.btn-reveal-trigger .btn-reveal {
+		border: none !important;
+		box-shadow: none !important;
+		background: transparent !important;
+	}
 
-</th:block>
+	.btn-reveal-trigger .btn-reveal:hover,
+	.btn-reveal-trigger .btn-reveal:focus,
+	.btn-reveal-trigger .btn-reveal:active {
+		border: none !important;
+		box-shadow: none !important;
+		background: transparent !important;
+	}
+
+	/* 드롭다운 화살표 제거 */
+	.dropdown-caret-none::after {
+		display: none !important;
+	}
+	</style>
 
 </head>
 
@@ -119,11 +138,7 @@
 									<td class="category" th:text="${product.category}"></td>
 									<td class="fragile"
 										th:text="${product.fragile != null ? (product.fragile ? 'Yes' : 'No') : 'No'}"></td>
-									<td>
-										<button type="button" class="btn btn-primary editBtn">Edit</button>
-										<br> <a
-										th:href="@{/admin/product/delete/{id}(id=${product.productId})}">Delete</a>
-									</td>
+
 								</tr>
 
 								<tr th:if="${products.size() == 0}">
@@ -214,6 +229,7 @@
 			initializePaginationButtons(); // 페이지네이션 버튼 초기화 추가
 			searchProducts();
 		});
+		
 
 		// 모든 이벤트 핸들러 초기화
 		function initializeEventHandlers() {
@@ -283,7 +299,7 @@
 				html = '<tr><td colspan="9" class="text-center">검색 결과가 없습니다.</td></tr>';
 			} else {
 				currentPageProducts.forEach((product, index) => {
-					html += `<tr>
+					html += `<tr >
 						<td class="productId d-none">${product.productId}</td>
 						<td class="index">${startIndex + index + 1}</td>
 						<td class="name">${product.name}</td>
@@ -294,10 +310,17 @@
 						<td class="category">${product.category}</td>
 						<td class="fragile">${product.fragile ? 'Yes' : 'No'}</td>
 						<td>
-							<button type="button" class="btn btn-primary editBtn" onclick="handleEdit(this)">Edit</button>
-							<br>
-							<button type="button" class="btn btn-danger deleteBtn">Delete</button>
+							<div class="btn-reveal-trigger position-static">
+								<button class="btn btn-sm dropdown-toggle dropdown-caret-none transition-none btn-reveal" type="button" data-bs-toggle="dropdown" data-boundary="window" aria-haspopup="true" aria-expanded="true" data-bs-reference="parent">
+									•••
+								</button>
+								<div class="dropdown-menu py-2">
+									<a class="dropdown-item editBtn" onclick="handleEdit(this)">Edit</a>
+									<a class="dropdown-item deleteBtn">Delete</a>
+								</div>
+							</div>
 						</td>
+						
 					</tr>`;
 				});
 			}

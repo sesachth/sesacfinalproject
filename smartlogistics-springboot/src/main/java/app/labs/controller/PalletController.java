@@ -6,9 +6,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Controller
 @RequestMapping("/admin/pallet")
@@ -23,44 +21,64 @@ public class PalletController {
     @GetMapping
     public String getPalletList(
             @RequestParam(value = "page", defaultValue = "1") int page,
-            // @RequestParam(value = "date", required = false) String date,
+            @RequestParam(value = "palletId", required = false) String palletId,
             @RequestParam(value = "destination", required = false) String destination,
             @RequestParam(value = "vehicleNumber", required = false) String vehicleNumber,
             Model model) {
 
-        int pageSize = 20;
-        int offset = (page - 1) * pageSize;
+        try {
+            int pageSize = 20;
+            int offset = (page - 1) * pageSize;
 
-        List<Pallet> palletList = palletService.getFilteredPalletList(offset, pageSize, destination, vehicleNumber);
-        int totalRecords = palletService.getTotalFilteredRecords( destination, vehicleNumber);
-        int totalPages = (int) Math.ceil((double) totalRecords / pageSize);
+            // 데이터 조회
+            List<Pallet> palletList = palletService.getFilteredPalletList(
+                offset, pageSize, palletId, destination, vehicleNumber
+            );
+            
+            // 전체 레코드 수 조회
+            int totalRecords = palletService.getTotalFilteredRecords(
+                palletId, destination, vehicleNumber
+            );
+            
+            // 전체 페이지 수 계산
+            int totalPages = (int) Math.ceil((double) totalRecords / pageSize);
 
-        model.addAttribute("palletList", palletList);
-        model.addAttribute("currentPage", page);
-        model.addAttribute("totalPages", totalPages);
-        model.addAttribute("page", "pallet");
+            // 모델에 데이터 추가
+            model.addAttribute("palletList", palletList);
+            model.addAttribute("currentPage", page);
+            model.addAttribute("totalPages", totalPages);
+            model.addAttribute("palletId", palletId);
+            model.addAttribute("destination", destination);
+            model.addAttribute("vehicleNumber", vehicleNumber);
+            model.addAttribute("page", "pallet");
 
-        return "thymeleaf/html/admin/admin_pallet";
+            return "thymeleaf/html/admin/admin_pallet";
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            model.addAttribute("error", "데이터 조회 중 오류가 발생했습니다.");
+            return "thymeleaf/html/admin/admin_pallet";
+        }
     }
 
-    @GetMapping("/data")
+    // 데이터 조회용 API 엔드포인트 (필요한 경우)
+    @GetMapping("/api/list")
     @ResponseBody
-    public Map<String, Object> getPalletData(
+    public List<Pallet> getPalletListApi(
             @RequestParam(value = "page", defaultValue = "1") int page,
-            // @RequestParam(value = "date", required = false) String date,
+            @RequestParam(value = "palletId", required = false) String palletId,
             @RequestParam(value = "destination", required = false) String destination,
             @RequestParam(value = "vehicleNumber", required = false) String vehicleNumber) {
 
         int pageSize = 20;
         int offset = (page - 1) * pageSize;
 
-        List<Pallet> palletList = palletService.getFilteredPalletList(offset, pageSize, destination, vehicleNumber);
-        int totalRecords = palletService.getTotalFilteredRecords( destination, vehicleNumber);
-        int totalPages = (int) Math.ceil((double) totalRecords / pageSize);
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("palletList", palletList);
-        response.put("totalPages", totalPages);
-        return response;
+        return palletService.getFilteredPalletList(
+            offset, 
+            pageSize, 
+            palletId, 
+            destination, 
+            vehicleNumber
+        );
     }
 }
