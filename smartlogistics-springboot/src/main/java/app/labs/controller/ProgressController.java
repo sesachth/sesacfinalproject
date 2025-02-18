@@ -72,7 +72,7 @@ public class ProgressController {
         return response;
     }
     
-    // ✅ WebSocket을 통해 "포장 완료" 메시지를 받으면 실행됨
+ // ✅ WebSocket을 통해 "포장 완료" 메시지를 받으면 실행됨
     @MessageMapping("/updateStatus")
     @Transactional
     public void updateOrderStatus(@Payload Map<String, Object> payload) {
@@ -80,15 +80,18 @@ public class ProgressController {
 
         List<Integer> orderIds = (List<Integer>) payload.get("orderIds");
         int progressState = (int) payload.get("progressState");
+        
+        // ✅ imageNumber가 존재하지 않는 경우 기본값 null 처리
+        Integer imageNumber = payload.containsKey("imageNumber") ? (Integer) payload.get("imageNumber") : null;
 
         if (orderIds == null || orderIds.isEmpty()) {
             System.out.println("⚠️ [WebSocket] 주문 ID 없음, 업데이트 수행하지 않음");
             return;
         }
 
-        // ✅ 선택된 주문만 업데이트하도록 변경
-        progressService.updateOrdersProgress(orderIds, progressState);
+        // ✅ 선택된 주문 업데이트 (imageNumber 포함)
+        progressService.updateOrdersProgress(orderIds, progressState, imageNumber);
 
-        System.out.println("📌 [WebSocket] DB 업데이트 완료 - 업데이트된 주문 ID: " + orderIds);
+        System.out.println("📌 [WebSocket] DB 업데이트 완료 - 업데이트된 주문 ID: " + orderIds + ", imageNumber: " + imageNumber);
     }
 }
