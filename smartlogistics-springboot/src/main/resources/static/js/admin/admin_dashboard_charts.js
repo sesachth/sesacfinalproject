@@ -154,7 +154,7 @@ new Chart(ctx3, {
 
 // Chart 4: 캠프 별 상품 유동량 차트(Choropleth Chart)
 async function createSeoulMap() {
-	const seoul = await fetch('https://sesac-smartlogistics-bucket.s3.eu-north-1.amazonaws.com/json/seoul_HangJeongDong.json').then((r) => r.json());
+	const seoul = await fetch('https://sesac-project-bucket.s3.ap-northeast-2.amazonaws.com/json/seoul_HangJeongDong.json').then((r) => r.json());
 
 	const nation = ChartGeo.topojson.feature(seoul, seoul.objects.seoul_HangJeongDong).features[0];
 	const states = ChartGeo.topojson.feature(seoul, seoul.objects.seoul_HangJeongDong).features;

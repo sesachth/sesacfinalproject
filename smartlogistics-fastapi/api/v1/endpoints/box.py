@@ -9,7 +9,7 @@ import models.model as model
 
 router = APIRouter()
 
-@router.get("/boxes", response_model=schemas.Box)
+@router.get("/boxes", response_model=schemas.BoxModel)
 async def read_boxes(db: AsyncSession = Depends(get_db)):
     db_boxes = await crud.get_boxes(db)
     
@@ -21,9 +21,7 @@ async def read_boxes(db: AsyncSession = Depends(get_db)):
             "spec": model.Box.spec,
             "width": model.Box.width,
             "depth": model.Box.depth,
-            "height": model.Box.height,
-            "palletId": model.Box.palletId,
-            "productId": model.Box.productId,
+            "height": model.Box.height
         }
         for model.Box in db_boxes
     ]

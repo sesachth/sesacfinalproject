@@ -1,5 +1,13 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse
+from sqlalchemy.ext.asyncio import AsyncSession
+from core.db.database import get_db
+from core.db.schemas import CustomJSONEncoder
+
+import core.db.crud as crud
+import core.db.schemas as schemas
+import models.model as model
+import json
 
 router = APIRouter()
 
@@ -103,3 +111,27 @@ async def read_stacking_results():
     ]}
 
     return JSONResponse(content=stacking_results, media_type="application/json")
+
+@router.get("/order_with_details")
+async def read_stacking_results(db: AsyncSession = Depends(get_db)):
+    db_orders = await crud.get_order_with_details(db)
+
+    if db_orders is None:
+        raise HTTPException(status_code=404, detail="Order not found")
+
+    print(db_orders)
+
+    # ORM 객체를 Pydantic 모델로 변환
+    orders_data = [
+        schemas.OrderWithDetailsModel(
+            order=schemas.OrderModel.model_validate(model.Order),
+            product=schemas.ProductModel.model_validate(model.Product),
+            box=schemas.BoxModel.model_validate(model.Box) if model.Box else None
+        )
+        for model.Order, model.Product, model.Box in db_orders
+    ]
+
+    # CustomJSONEncoder를 사용하여 JSON 직렬화
+    json_data = json.dumps([model.model_dump() for model in orders_data], cls=CustomJSONEncoder)
+
+    return JSONResponse(content=json.loads(json_data))
