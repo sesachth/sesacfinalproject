@@ -21,25 +21,34 @@
 
                 <!-- 필터 컨테이너 -->
                 <div class="filter-container">
-                    <label for="dateFilter">날짜:</label>
-                    <input type="date" id="dateFilter"/>
-
-                    <label for="campFilter">캠프:</label>
-                    <select id="campFilter">
+                    <label for="boxSpecFilter">박스 규격:</label>
+                    <select id="boxSpecFilter">
                         <option value="">전체</option>
-                        <option value="서초 캠프">서초 캠프</option>
-                        <option value="강남 캠프">강남 캠프</option>
-                        <option value="강서 캠프">강서 캠프</option>
-                        <option value="중구 캠프">중구 캠프</option>
-                        <option value="성동 캠프">성동 캠프</option>
+                        <option value="1">1호</option>
+                        <option value="2">2호</option>
+                        <option value="3">3호</option>
+                        <option value="4">4호</option>
+                        <option value="5">5호</option>
+                        <option value="6">6호</option>
                     </select>
-                    
+
+                    <label for="boxStateFilter">박스 상태:</label>
+                    <select id="boxStateFilter">
+                        <option value="">전체</option>
+                        <option value="0">미검사</option>
+                        <option value="1">정상</option>
+                        <option value="2">파손</option>
+                    </select>
+
+                    <label for="progressStateFilter">진행 상태:</label>
+                    <select id="progressStateFilter">
+                        <option value="">전체</option>
+                        <option value="0">물품 대기</option>
+                        <option value="1">포장 완료</option>
+                        <option value="2">적재 완료</option>
+                    </select>
+
                     <button id="filterBtn">조회</button>
-
-                    <label for="orderIdSearch">주문 ID:</label>
-					<input type="text" id="orderIdSearch" placeholder="주문 ID 입력" />
-					<button id="searchOrderBtn">검색</button>
-
                 </div>
 
                 <!-- 진행 상태 테이블 -->
@@ -71,7 +80,6 @@
         </div>
     </div>
 </th:block>
-
 <script>
 let currentPage = 1;
 const rowsPerPage = 10;
@@ -81,10 +89,9 @@ let progressData = [];
 
 window.onload = () => {
     loadProgress();
-    connectWebSocket(); // ✅ WebSocket 연결 추가
+    connectWebSocket();
 };
 
-// ✅ WebSocket 연결 설정
 function connectWebSocket() {
     let socket = new SockJS('/ws');
     stompClient = Stomp.over(socket);
@@ -92,14 +99,12 @@ function connectWebSocket() {
     stompClient.connect({}, function(frame) {
         console.log('📌 WebSocket 연결됨:', frame);
 
-        // ✅ 진행 상태 변경 구독 (Worker & Progress 페이지 동기화)
         stompClient.subscribe('/topic/updateStatus', function(message) {
             let updatedProgress = JSON.parse(message.body);
             console.log("📌 WebSocket으로 받은 업데이트 데이터:", updatedProgress);
             updateProgressFromWebSocket(updatedProgress);
         });
 
-        // ✅ 진행 상태 업데이트
         stompClient.subscribe('/topic/progress', function(message) {
             let data = JSON.parse(message.body);
             console.log("📌 WebSocket 수신 데이터:", data);
@@ -107,87 +112,65 @@ function connectWebSocket() {
         });
     }, function(error) {
         console.error('📌 WebSocket 연결 실패:', error);
-        setTimeout(connectWebSocket, 5000);  // 5초 후 재연결 시도
+        setTimeout(connectWebSocket, 5000);
     });
 }
 
 
-//✅ WebSocket으로 받은 데이터 업데이트 (UI 반영)
 function updateProgressFromWebSocket(updatedData) {
-    console.log("📌 [WebSocket] 업데이트 데이터:", updatedData);
+    if (!updatedData.orderIds || !Array.isArray(updatedData.orderIds)) return;
 
-    // ✅ 데이터 검증
-    if (!updatedData.orderIds || !Array.isArray(updatedData.orderIds)) {
-        console.warn("📌 [WebSocket] 잘못된 데이터 형식:", updatedData);
-        return;
-    }
-    if (updatedData.progressState === undefined || updatedData.progressState === null) {
-        console.warn("📌 [WebSocket] progressState 없음:", updatedData);
-        return;
-    }
-
-    // ✅ 특정 주문 ID만 업데이트
     updatedData.orderIds.forEach(orderId => {
         let row = document.querySelector(`tr[data-order-id='${orderId}']`);
-        
         if (row) {
-            console.log("📌 [WebSocket] 주문 ID:", orderId, "진행 상태 업데이트");
-
             let progressStateCell = row.querySelector(".progress-state");
             if (progressStateCell) {
-                progressStateCell.innerText = 
-                    updatedData.progressState == 1 ? "포장 완료" : 
+                progressStateCell.innerText =
+                    updatedData.progressState == 1 ? "포장 완료" :
                     updatedData.progressState == 2 ? "적재 완료" : "물품 대기";
             }
-        } else {
-            console.warn("📌 [WebSocket] 해당 주문 ID를 찾을 수 없음:", orderId);
         }
     });
 }
 
+// 필터 이벤트 리스너 등록
+document.addEventListener("DOMContentLoaded", function () {
+    document.getElementById("boxSpecFilter").addEventListener("change", applyFilters);
+    document.getElementById("boxStateFilter").addEventListener("change", applyFilters);
+    document.getElementById("progressStateFilter").addEventListener("change", applyFilters);
+    document.getElementById("filterBtn").addEventListener("click", applyFilters);
+    document.getElementById("prevGroup").addEventListener("click", prevPageGroup);
+    document.getElementById("nextGroup").addEventListener("click", nextPageGroup);
+});
 
-// 조회 버튼 클릭
-document.getElementById("filterBtn").addEventListener("click", function () {
+//✅ 필터 적용 후 데이터 다시 로드
+function applyFilters() {
+    console.log("📌 필터 적용됨 ✅ 현재 페이지를 1로 초기화 후 데이터 로드");
     currentPage = 1;
-    loadProgress(currentPage);
-});
+    loadProgress();
+}
 
-// 주문번호 검색 버튼 클릭
-document.getElementById("searchOrderBtn").addEventListener("click", function () {
-    searchProgressByNum();
-});
-
-// Enter 키 검색 기능 추가
-document.getElementById("orderNumSearch").addEventListener("keypress", function (event) {
-    if (event.key === "Enter") {
-        searchProgressByNum();
-    }
-});
-
-// 이전 / 다음 버튼 이벤트
-document.getElementById("prevGroup").addEventListener("click", function () {
+function prevPageGroup() {
     if (currentPage > 1) {
-        currentPage--; // ✅ 한 페이지씩 감소
-        loadProgress(currentPage);
+        currentPage--;
+        loadProgress();
     }
-});
+}
 
-document.getElementById("nextGroup").addEventListener("click", function () {
+function nextPageGroup() {
     if (currentPage < totalPages) {
-        currentPage++; // ✅ 한 페이지씩 증가
-        loadProgress(currentPage);
+        currentPage++;
+        loadProgress();
     }
-});
+}
 
-//페이지네이션 업데이트
+//✅ 페이지네이션 업데이트
 function updatePagination() {
     let pageNumbers = document.getElementById("pageNumbers");
     pageNumbers.innerHTML = "";
 
     let startPage = Math.max(1, Math.floor((currentPage - 1) / pageGroupSize) * pageGroupSize + 1);
     let endPage = Math.min(startPage + pageGroupSize - 1, totalPages);
-
-    console.log("📌 페이지네이션 업데이트:", startPage, "→", endPage, "총 페이지 수:", totalPages);
 
     for (let i = startPage; i <= endPage; i++) {
         let pageButton = document.createElement("button");
@@ -199,185 +182,93 @@ function updatePagination() {
         }
 
         pageButton.addEventListener("click", function () {
-            console.log("📌 페이지 클릭됨:", i);
-            if (currentPage !== i) { // 중복 요청 방지
-                currentPage = i;
-                loadProgress(i);
-            }
+            currentPage = i;
+            loadProgress();
         });
 
         pageNumbers.appendChild(pageButton);
     }
 
-    // ✅ 버튼 요소 찾기
-    let prevButton = document.getElementById("prevGroup");
-    let nextButton = document.getElementById("nextGroup");
-
-    if (!prevButton || !nextButton) {
-        console.error("❌ 페이지네이션 버튼을 찾을 수 없습니다.");
-        return;
-    }
-
-    // ✅ 기존 이벤트 제거 (이벤트 중복 방지)
-    prevButton.replaceWith(prevButton.cloneNode(true));
-    nextButton.replaceWith(nextButton.cloneNode(true));
-
-    // ✅ 새로 버튼 요소 가져오기 (이벤트가 없는 새 노드)
-    prevButton = document.getElementById("prevGroup");
-    nextButton = document.getElementById("nextGroup");
-
-    // ✅ 버튼 상태 설정
-    prevButton.disabled = (currentPage === 1);
-    nextButton.disabled = (currentPage >= totalPages);
-
-    // ✅ 이전 버튼 이벤트 등록
-    prevButton.addEventListener("click", function () {
-        if (currentPage > 1) {
-            currentPage--;
-            loadProgress(currentPage);
-        }
-    });
-
-    // ✅ 다음 버튼 이벤트 등록
-    nextButton.addEventListener("click", function () {
-        if (currentPage < totalPages) {
-            currentPage++;
-            loadProgress(currentPage);
-        }
-    });
-
-    console.log("📌 이전 버튼 상태:", prevButton.disabled);
-    console.log("📌 다음 버튼 상태:", nextButton.disabled);
+    document.getElementById("prevGroup").disabled = (currentPage === 1);
+    document.getElementById("nextGroup").disabled = (currentPage === totalPages);
 }
 
+//✅ 데이터 로드 함수 (필터 적용)
+function loadProgress() {
+    let boxSpec = document.getElementById("boxSpecFilter").value;
+    let boxState = document.getElementById("boxStateFilter").value;
+    let progressState = document.getElementById("progressStateFilter").value;
 
-// 진행 상태 조회
-function loadProgress(page = currentPage) {
-    let date = document.getElementById("dateFilter").value;
-    let camp = document.getElementById("campFilter").value;
+    let queryParams = new URLSearchParams({ page: currentPage, size: rowsPerPage });
 
-    let queryParams = new URLSearchParams({ page, size: 20 });
-    if (date) queryParams.append("date", date);
-    if (camp) queryParams.append("camp", camp);
+    // ✅ 필터 값이 존재할 경우에만 추가
+    if (boxSpec && boxSpec !== "전체") queryParams.append("boxSpec", boxSpec);
+    if (boxState && boxState !== "전체") queryParams.append("boxState", boxState);
+    if (progressState && progressState !== "전체") queryParams.append("progressState", progressState);
+
+    console.log("📌 필터링 요청 URL:", `/admin/progress/data?${queryParams.toString()}`);
 
     fetch(`/admin/progress/data?${queryParams.toString()}`)
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) throw new Error(`HTTP 오류! 상태 코드: ${response.status}`);
+        return response.json();
+    })
     .then(data => {
-        progressData = data.progressList;
-        totalPages = data.totalPages || 1;  // ✅ totalPages 값이 1 이상인지 확인
+        console.log("📌 서버 응답 데이터:", data);
 
-        console.log("📌 서버에서 받은 totalPages:", totalPages);
-        
-        updateProgressList();
+        if (!data || !data.progressList) {
+            console.error("🚨 서버 응답 데이터가 유효하지 않습니다.", data);
+            updateProgressList([]); 
+            return;
+        }
+
+        progressData = data.progressList || [];
+        totalPages = data.totalPages || 1;
+
+        console.log("📌 서버에서 받은 데이터 개수:", progressData.length);
+        console.log("📌 총 페이지 수 업데이트:", totalPages);
+
+        updateProgressList(progressData);
         updatePagination();
     })
     .catch(error => {
-        console.error("Error:", error);
+        console.error("🚨 데이터 로드 오류:", error);
+        updateProgressList([]);
     });
-
 }
 
-document.addEventListener("DOMContentLoaded", function () {
-    console.log("📌 DOM 로드 완료");
-
-    let prevButton = document.getElementById("prevGroup");
-    let nextButton = document.getElementById("nextGroup");
-
-    if (prevButton) {
-        prevButton.addEventListener("click", function () {
-            console.log("⬅ 이전 페이지 버튼 클릭됨, 현재 페이지:", currentPage);
-            if (currentPage > 1) {
-                currentPage--;
-                loadProgress(currentPage);
-            }
-        });
-    } else {
-        console.error("❌ 이전 버튼(prevGroup)을 찾을 수 없습니다.");
-    }
-
-    if (nextButton) {
-        nextButton.addEventListener("click", function () {
-            console.log("➡ 다음 페이지 버튼 클릭됨, 현재 페이지:", currentPage, "총 페이지 수:", totalPages);
-            if (currentPage < totalPages) {
-                currentPage++;
-                loadProgress(currentPage);
-            }
-        });
-    } else {
-        console.error("❌ 다음 버튼(nextGroup)을 찾을 수 없습니다.");
-    }
-});
-
-
-// 주문번호 검색 기능
-// ✅ 주문 ID 검색 기능
-function searchProgressById() {
-    let orderId = document.getElementById("orderIdSearch").value.trim();
-
-    if (!orderId) {
-        loadProgress(1);
-        return;
-    }
-
-    fetch(`/admin/progress/data?orderId=${orderId}`) // ✅ orderNum → orderId로 변경
-        .then(response => response.json())
-        .then(data => {
-            progressData = data.progressList;
-            updateProgressList();
-        })
-        .catch(error => {
-            console.error("Error:", error);
-            document.getElementById("progressTableBody").innerHTML =
-                "<tr><td colspan='8' style='text-align:center;'>❌ 데이터가 없습니다.</td></tr>";
-        });
-}
-
-// ✅ 검색 버튼 이벤트 리스너 (기존 `orderNumSearch` → `orderIdSearch`로 변경)
-document.getElementById("searchOrderBtn").addEventListener("click", function () {
-    searchProgressById();
-});
-
-// ✅ Enter 키로 검색 가능하도록 수정
-document.getElementById("orderIdSearch").addEventListener("keypress", function (event) {
-    if (event.key === "Enter") {
-        searchProgressById();
-    }
-});
-
-
-
-//UTC → KST 변환 함수
-// ✅ UTC → KST 변환 함수 (시간 변환 문제 해결)
 function convertUtcToKst(utcTime) {
-    if (!utcTime) return '-'; // 값이 없으면 '-' 반환
+    if (!utcTime) return '-';
 
-    let orderDate = new Date(Date.parse(utcTime)); // UTC 기준 Date 객체 생성
-    orderDate.setHours(orderDate.getHours() ); // KST 변환 적용
-    let formattedTime = orderDate.toTimeString().split(" ")[0]; // HH:MM:SS 형식 변환
+    let orderDate = new Date(Date.parse(utcTime));
+    let formattedTime = orderDate.toTimeString().split(" ")[0];
     return formattedTime;
 }
 
-// ✅ 진행 상태 리스트 업데이트
-function updateProgressList() {
+//✅ 테이블 업데이트
+function updateProgressList(data) {
     let progressTable = document.getElementById("progressTableBody");
     progressTable.innerHTML = "";
 
-    console.log("📌 현재 progressData:", progressData);  // ✅ 데이터 확인
-
-    if (!progressData || progressData.length === 0) {
-        progressTable.innerHTML = "<tr><td colspan='8' style='text-align:center;'>❌ 데이터가 없습니다.</td></tr>";
+    if (!data || data.length === 0) {
+        progressTable.innerHTML = "<tr><td colspan='8' style='text-align:center;'>❌ 조회된 주문이 없습니다.</td></tr>";
         return;
     }
 
-    progressData.forEach(progress => {
-        let orderTime = convertUtcToKst(progress.orderTime); // ✅ 변환된 KST 시간 적용
+    data.forEach(progress => {
+        let orderTime = convertUtcToKst(progress.orderTime);
         
+        // ✅ boxSpec이 0이거나 NULL이면 "-"로 표시
+        let boxSpecValue = (progress.boxSpec === null || progress.boxSpec === undefined || progress.boxSpec === 0) ? '-' : progress.boxSpec;
+
+        console.log(`📦 [UI 업데이트] 주문 ID: ${progress.orderId}, boxSpec: ${boxSpecValue}`);
+
         let row = `<tr data-order-id="${progress.orderId}">
-            <td>${progress.orderId || '-'}</td> <!-- 주문 ID -->
+            <td>${progress.orderId || '-'}</td>
             <td>${progress.productName || '-'}</td>
             <td>${progress.productCategory || '-'}</td>
             <td>${orderTime}</td>
-            <td>${progress.boxSpec || '-'}</td> <!-- 박스 규격 -->
+            <td>${boxSpecValue}</td>  <!-- ✅ 수정된 부분 -->
             <td>${progress.palletId || '-'}</td>
             <td>${progress.boxState == 0 ? '미검사' : progress.boxState == 1 ? '정상' : '파손'}</td>
             <td class="progress-state">
@@ -388,6 +279,8 @@ function updateProgressList() {
     });
 }
 
+
+
 </script>
 <style>
     .table-container { max-height: 500px; overflow-y: auto; margin-top: 10px; }
@@ -397,7 +290,6 @@ function updateProgressList() {
     .pagination button { padding: 5px 10px; margin: 2px; border: none; background: #eee; cursor: pointer; }
     .pagination .active { background: #6200ea; color: white; }
     
-    /* 테이블 컨테이너 */
     .table-container {
         width: 100%;
         max-height: 500px;
@@ -406,14 +298,12 @@ function updateProgressList() {
         margin-top: 10px;
     }
 
-    /* 테이블 */
     .progress-table {
         width: 100%;
         border-collapse: collapse;
-        table-layout: fixed; /* 열 너비 고정 */
+        table-layout: fixed;
     }
 
-    /* 테이블 헤더 */
     .progress-table th {
         background: #f4f4f4;
         padding: 12px;
@@ -422,58 +312,55 @@ function updateProgressList() {
         font-weight: bold;
     }
 
-    /* 테이블 본문 */
     .progress-table td {
         padding: 10px;
         border: 1px solid #ddd;
         text-align: center;
-        white-space: nowrap; /* 텍스트 줄 바꿈 방지 */
+        white-space: nowrap;
         overflow: hidden;
-        text-overflow: ellipsis; /* 너무 길면 ... 처리 */
+        text-overflow: ellipsis;
     }
 
-    /* 각 열 크기 고정 */
     .progress-table th:nth-child(1),
     .progress-table td:nth-child(1) {
-        width: 15%; /* 주문번호 */
+        width: 15%;
     }
 
     .progress-table th:nth-child(2),
     .progress-table td:nth-child(2) {
-        width: 20%; /* 상품명 */
+        width: 20%;
     }
 
     .progress-table th:nth-child(3),
     .progress-table td:nth-child(3) {
-        width: 10%; /* 카테고리 */
+        width: 10%;
     }
 
     .progress-table th:nth-child(4),
     .progress-table td:nth-child(4) {
-        width: 15%; /* 주문 시간 */
+        width: 15%;
     }
 
     .progress-table th:nth-child(5),
     .progress-table td:nth-child(5) {
-        width: 10%; /* 배송지 */
+        width: 10%;
     }
 
     .progress-table th:nth-child(6),
     .progress-table td:nth-child(6) {
-        width: 10%; /* 팔렛트 ID */
+        width: 10%;
     }
 
     .progress-table th:nth-child(7),
     .progress-table td:nth-child(7) {
-        width: 10%; /* 박스 상태 */
+        width: 10%;
     }
 
     .progress-table th:nth-child(8),
     .progress-table td:nth-child(8) {
-        width: 10%; /* 진행 상태 */
+        width: 10%;
     }
 
-    /* 페이지네이션 스타일 */
     .pagination {
         display: flex;
         justify-content: center;

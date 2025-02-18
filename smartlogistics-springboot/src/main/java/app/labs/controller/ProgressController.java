@@ -35,8 +35,8 @@ public class ProgressController {
         int pageSize = 20;
         int offset = (page - 1) * pageSize;
 
-        List<ProgressDTO> progressList = progressService.getFilteredProgressList(offset, pageSize, date, camp, orderNum);
-        int totalRecords = progressService.getTotalFilteredRecords(date, camp, orderNum);
+        List<ProgressDTO> progressList = progressService.getFilteredProgressList(offset, pageSize, date, camp, orderNum, null, null, null);
+        int totalRecords = progressService.getTotalFilteredRecords(date, camp, orderNum, null, null, null);
         int totalPages = (int) Math.ceil((double) totalRecords / pageSize);
 
         model.addAttribute("progressList", progressList);
@@ -53,39 +53,42 @@ public class ProgressController {
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "date", required = false) String date,
             @RequestParam(value = "camp", required = false) String camp,
-            @RequestParam(value = "orderNum", required = false) String orderNum) {
+            @RequestParam(value = "orderNum", required = false) String orderNum,
+            @RequestParam(value = "boxSpec", required = false) String boxSpec,
+            @RequestParam(value = "boxState", required = false) Integer boxState,
+            @RequestParam(value = "progressState", required = false) Integer progressState) {
 
         int pageSize = 20;
         int offset = (page - 1) * pageSize;
 
-        List<ProgressDTO> progressList = progressService.getFilteredProgressList(offset, pageSize, date, camp, orderNum);
-        int totalRecords = progressService.getTotalFilteredRecords(date, camp, orderNum);
+        List<ProgressDTO> progressList = progressService.getFilteredProgressList(offset, pageSize, date, camp, orderNum, boxSpec, boxState, progressState);
+        int totalRecords = progressService.getTotalFilteredRecords(date, camp, orderNum, boxSpec, boxState, progressState);
         int totalPages = (int) Math.ceil((double) totalRecords / pageSize);
 
         Map<String, Object> response = new HashMap<>();
         response.put("progressList", progressList);
         response.put("totalPages", totalPages);
+        
         return response;
     }
     
-	 // ✅ WebSocket을 통해 "포장 완료" 메시지를 받으면 실행됨
-	    @MessageMapping("/updateStatus")
-	    @Transactional
-	    public void updateOrderStatus(@Payload Map<String, Object> payload) {
-	        System.out.println("📌 [WebSocket] 메시지 수신 - 데이터: " + payload);
-	
-	        List<Integer> orderIds = (List<Integer>) payload.get("orderIds");
-	        int progressState = (int) payload.get("progressState");
-	
-	        if (orderIds == null || orderIds.isEmpty()) {
-	            System.out.println("⚠️ [WebSocket] 주문 ID 없음, 업데이트 수행하지 않음");
-	            return;
-	        }
-	
-	        // ✅ 선택된 주문만 업데이트하도록 변경
-	        progressService.updateOrdersProgress(orderIds, progressState);
-	
-	        System.out.println("📌 [WebSocket] DB 업데이트 완료 - 업데이트된 주문 ID: " + orderIds);
-	    }
+    // ✅ WebSocket을 통해 "포장 완료" 메시지를 받으면 실행됨
+    @MessageMapping("/updateStatus")
+    @Transactional
+    public void updateOrderStatus(@Payload Map<String, Object> payload) {
+        System.out.println("📌 [WebSocket] 메시지 수신 - 데이터: " + payload);
 
+        List<Integer> orderIds = (List<Integer>) payload.get("orderIds");
+        int progressState = (int) payload.get("progressState");
+
+        if (orderIds == null || orderIds.isEmpty()) {
+            System.out.println("⚠️ [WebSocket] 주문 ID 없음, 업데이트 수행하지 않음");
+            return;
+        }
+
+        // ✅ 선택된 주문만 업데이트하도록 변경
+        progressService.updateOrdersProgress(orderIds, progressState);
+
+        System.out.println("📌 [WebSocket] DB 업데이트 완료 - 업데이트된 주문 ID: " + orderIds);
+    }
 }
