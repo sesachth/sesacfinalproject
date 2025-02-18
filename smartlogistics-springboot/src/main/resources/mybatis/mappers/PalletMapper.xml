@@ -18,20 +18,38 @@
 	<select id="getFilteredPalletList" resultMap="palletResultMap">
 	    SELECT pa.pallet_id, pa.load, pa.width, pa.depth, pa.height, pa.destination, 
 	           pa.vehicle_number
-	    FROM `pallet` pa
-	    LEFT JOIN `vehicle` v ON pa.vehicle_number = v.vehicle_number
-	      WHERE (#{destination} IS NULL OR pa.destination = #{destination})
-	      AND (#{vehicleNumber} IS NULL OR v.vehicle_number = #{vehicleNumber})
-	     LIMIT #{pageSize} OFFSET #{offset}
+	    FROM (
+	        SELECT *
+	        FROM pallet
+	        WHERE 1=1
+	        <if test="palletId != null and palletId != ''">
+	            AND pallet_id = #{palletId}
+	        </if>
+	        <if test="destination != null and destination != ''">
+	            AND destination = #{destination}
+	        </if>
+	        <if test="vehicleNumber != null and vehicleNumber != ''">
+	            AND vehicle_number = #{vehicleNumber}
+	        </if>
+	        ORDER BY pallet_id ASC
+	    ) pa
+	    LIMIT #{pageSize} OFFSET #{offset}
 	</select>
 
     <!-- 필터링된 진행 상태 개수 조회 -->
     <select id="countTotalFilteredPallet" resultType="int">
         SELECT COUNT(*)
-        FROM `pallet` pa
-        LEFT JOIN `vehicle` v ON pa.vehicle_number = v.vehicle_number   
-          WHERE (#{destination} IS NULL OR pa.destination = #{destination})
-          AND (#{vehicleNumber} IS NULL OR v.vehicle_number = #{vehicleNumber})
+        FROM pallet pa
+        WHERE 1=1
+        <if test="palletId != null and palletId != ''">
+            AND pa.pallet_id = #{palletId}
+        </if>
+        <if test="destination != null and destination != ''">
+            AND pa.destination = #{destination}
+        </if>
+        <if test="vehicleNumber != null and vehicleNumber != ''">
+            AND pa.vehicle_number = #{vehicleNumber}
+        </if>
     </select>
 
 </mapper>
