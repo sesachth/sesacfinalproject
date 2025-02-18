@@ -4,8 +4,6 @@ import app.labs.model.ProgressDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Update;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 
 @Mapper
@@ -17,24 +15,30 @@ public interface ProgressDao {
         @Param("pageSize") int pageSize,
         @Param("date") String date,
         @Param("camp") String camp,
-        @Param("orderNum") String orderNum
+        @Param("orderNum") String orderNum,
+        @Param("boxSpec") String boxSpec,
+        @Param("boxState") Integer boxState,
+        @Param("progressState") Integer progressState
     );
 
     // 필터링된 진행 상태 개수 조회
-    int countTotalFilteredProgress(
+    int getTotalFilteredRecords(
         @Param("date") String date,
         @Param("camp") String camp,
-        @Param("orderNum") String orderNum
+        @Param("orderNum") String orderNum,
+        @Param("boxSpec") String boxSpec,
+        @Param("boxState") Integer boxState,
+        @Param("progressState") Integer progressState
     );
-    
-	 // ✅ 개별 주문 진행 상태 업데이트
-	    @Update("UPDATE `order` SET progress_state = #{progressState} WHERE order_id = #{orderId}")
-	    void updateOrderProgress(@Param("orderId") int orderId, @Param("progressState") int progressState);
-	
-	    // ✅ 모든 주문 진행 상태 업데이트
-	    @Update("UPDATE `order` SET progress_state = #{progressState}")
-	    void updateAllOrdersProgress(@Param("progressState") int progressState);
-	
-	    // ✅ 다중 주문 ID에 대해 진행 상태를 업데이트하는 메서드 추가
-	    void updateOrdersProgress(@Param("orderIds") List<Integer> orderIds, @Param("progressState") int progressState);
+
+    // ✅ 개별 주문 진행 상태 업데이트
+    @Update("UPDATE `order` SET progress_state = #{progressState} WHERE order_id = #{orderId}")
+    void updateOrderProgress(@Param("orderId") int orderId, @Param("progressState") int progressState);
+
+    // ✅ 다중 주문 ID에 대해 진행 상태 및 이미지 번호를 업데이트하는 메서드 추가
+    void updateOrdersProgress(
+        @Param("orderIds") List<Integer> orderIds, 
+        @Param("progressState") int progressState,
+        @Param("imageNumber") Integer imageNumber  // ✅ imageNumber가 null 허용
+    );
 }

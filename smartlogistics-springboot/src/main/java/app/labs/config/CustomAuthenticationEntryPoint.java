@@ -34,6 +34,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
             "/common/check"
         );
         
+     // 요청된 URL이 allowedUrls일 때만 팝업 띄우기
         if (allowedUrls.contains(uri)) {
             response.setContentType("text/html; charset=UTF-8");
             response.getWriter().write(

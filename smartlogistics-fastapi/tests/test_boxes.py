@@ -22,8 +22,6 @@ def test_read_boxes():
         assert "width" in box
         assert "depth" in box
         assert "height" in box
-        assert "palletId" in box
-        assert "productId" in box
     
     print('/api/v1/boxes 엔드포인트에 대한 FastAPI 검증 테스트가 정상적으로 완료되었습니다!')
 

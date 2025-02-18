@@ -40,7 +40,7 @@ function populatePalletSelect(pallets) {
     selectBox.append('<option value="">Select a pallet</option>');
 
     pallets.forEach(function(pallet) {
-        selectBox.append(`<option value="${pallet.pallet_id}">${pallet.destination}</option>`);
+        selectBox.append(`<option value="${pallet.pallet_id}">${pallet.pallet_id}번 파레트 - ${pallet.destination}</option>`);
     });
 }
 
@@ -140,9 +140,9 @@ function createBoxes(boxesData) {
         const boxMesh = new THREE.Mesh(boxGeometry, boxMaterial);
 
         boxMesh.position.set(
-            boxData.x_coordinate,
-            boxData.y_coordinate + 0.15 / 2, // 바닥 큐브 높이의 절반을 더해 바닥 위에 위치하도록 함
-            boxData.z_coordinate
+            boxData.x_coordinate + boxData.width / 2,
+            boxData.y_coordinate + 0.15 + boxData.height / 2, // 바닥 큐브 높이의 절반을 더해 바닥 위에 위치하도록 함
+            boxData.z_coordinate + boxData.depth / 2
         );
 
         boxes.push({

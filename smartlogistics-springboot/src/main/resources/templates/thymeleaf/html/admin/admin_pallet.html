@@ -1,31 +1,370 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-	  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-	  layout:decorator="~{/thymeleaf/html/common/default_layout}">
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorator="~{/thymeleaf/html/common/default_layout}">
 
 <th:block layout:fragment="css">
 	<link rel="stylesheet" th:href="@{/css/admin/admin.css}" />
 </th:block>
 
 <th:block layout:fragment="wrapper">
-    	<div class="outside-container">
-        	<div class="main-container">
-                <div th:replace="~{thymeleaf/html/common/include::profile}"></div>
-            	<div th:replace="~{thymeleaf/html/common/include::sidebar}"></div>
-            	<div layout:fragment="content" class="main-content">
-            	
-            	
-            	
-            	
-            	
-            	
-            	
-            	
-            	
-            	
-            	
-            	</div>
-        	</div>
-        </div>
-    </th:block>
+	<div class="outside-container">
+		<div class="main-container">
+			<div th:replace="~{thymeleaf/html/common/include::profile}"></div>
+			<div th:replace="~{thymeleaf/html/common/include::sidebar}"></div>
+			<div layout:fragment="content" class="main-content">
+
+
+				<!-- 필터 컨테이너 -->
+				<div class="filter-container">
+					<label for="dateFilter">날짜:</label> <input type="date"
+						id="dateFilter" /> <label for="destinationFilter">캠프:</label> <select
+						id="destinationFilter">
+						<option value="">전체</option>
+						<option value="서초 캠프">서초 캠프</option>
+						<option value="강남 캠프">강남 캠프</option>
+						<option value="강서 캠프">강서 캠프</option>
+						<option value="중구 캠프">중구 캠프</option>
+						<option value="성동 캠프">성동 캠프</option>
+					</select>
+
+					<button id="filterBtn">조회</button>
+
+					<label for="PalletIdSearch">팔렛트 ID:</label> <input type="text"
+						id="PalletIdSearch" placeholder="팔렛트 ID 입력" />
+					<button id="searchPalletBtn">검색</button>
+
+				</div>
+
+				<!-- 팔렛트 테이블 -->
+				<div class="table-container">
+					<table class="pallet-table">
+						<thead>
+							<tr>
+								<th>Pallet ID</th>
+								<th>Load</th>
+								<th>Width</th>
+								<th>Depth</th>
+								<th>Height</th>
+								<th>Destination</th>
+								<th>VehicleNumber</th>
+							</tr>
+						</thead>
+						<tbody>
+							<!-- 모델로 전달된 palletList가 있을 경우 각 항목을 출력 -->
+							<tr th:each="pallet : ${palletList}">
+								<td th:text="${pallet.palletId}">Pallet ID</td>
+								<td th:text="${pallet.load}">Load</td>
+								<td th:text="${pallet.width}">Width</td>
+								<td th:text="${pallet.depth}">Depth</td>
+								<td th:text="${pallet.height}">Height</td>
+								<td th:text="${pallet.destination}">Destination</td>
+								<td th:text="${pallet.vehicleNumber}">VehicleNumber</td>
+							</tr>
+							<!-- 목록이 없을 경우 처리 -->
+							<tr th:if="${#lists.isEmpty(palletList)}">
+								<td colspan="7">등록된 팔레트가 없습니다.</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+
+				<tbody id="palletTableBody"></tbody>
+				</table>
+			</div>
+
+			<!-- 페이지네이션 -->
+			<div class="pagination">
+				<button id="prevGroup">«</button>
+				<span id="pageNumbers"></span>
+				<button id="nextGroup">»</button>
+			</div>
+		</div>
+	</div>
+	</div>
+</th:block>
+
+<script>
+let currentPage = 1;
+const rowsPerPage = 10;
+const pageGroupSize = 10;
+let totalPages = 1;
+let progressData = [];
+
+window.onload = () => loadPallet();
+
+// 조회 버튼 클릭
+document.getElementById("filterBtn").addEventListener("click", function () {
+    currentPage = 1;
+    loadPallet(currentPage);
+});
+
+
+// Enter 키 검색 기능 추가
+document.getElementById("palletIdSearch").addEventListener("keypress", function (event) {
+    if (event.key === "Enter") {
+        searchPalletByNum();
+    }
+});
+
+// 이전 / 다음 버튼 이벤트
+document.getElementById("prevGroup").addEventListener("click", function () {
+    if (currentPage > 1) {
+        currentPage--; // ✅ 한 페이지씩 감소
+        loadProgress(currentPage);
+    }
+});
+
+document.getElementById("nextGroup").addEventListener("click", function () {
+    if (currentPage < totalPages) {
+        currentPage++; // ✅ 한 페이지씩 증가
+        loadProgress(currentPage);
+    }
+});
+
+//페이지네이션 업데이트
+function updatePagination() {
+    let pageNumbers = document.getElementById("pageNumbers");
+    pageNumbers.innerHTML = "";
+
+    let startPage = Math.max(1, Math.floor((currentPage - 1) / pageGroupSize) * pageGroupSize + 1);
+    let endPage = Math.min(startPage + pageGroupSize - 1, totalPages);
+
+    console.log("📌 페이지네이션 업데이트:", startPage, "→", endPage, "총 페이지 수:", totalPages);
+
+    for (let i = startPage; i <= endPage; i++) {
+        let pageButton = document.createElement("button");
+        pageButton.innerText = i;
+        pageButton.classList.add("page-btn");
+
+        if (i === currentPage) {
+            pageButton.classList.add("active");
+        }
+
+        pageButton.addEventListener("click", function () {
+            console.log("📌 페이지 클릭됨:", i);
+            if (currentPage !== i) { // 중복 요청 방지
+                currentPage = i;
+                loadProgress(i);
+            }
+        });
+
+        pageNumbers.appendChild(pageButton);
+    }
+
+    // ✅ 버튼 요소 찾기
+    let prevButton = document.getElementById("prevGroup");
+    let nextButton = document.getElementById("nextGroup");
+
+    if (!prevButton || !nextButton) {
+        console.error("❌ 페이지네이션 버튼을 찾을 수 없습니다.");
+        return;
+    }
+
+    // ✅ 기존 이벤트 제거 (이벤트 중복 방지)
+    prevButton.replaceWith(prevButton.cloneNode(true));
+    nextButton.replaceWith(nextButton.cloneNode(true));
+
+    // ✅ 새로 버튼 요소 가져오기 (이벤트가 없는 새 노드)
+    prevButton = document.getElementById("prevGroup");
+    nextButton = document.getElementById("nextGroup");
+
+    // ✅ 버튼 상태 설정
+    prevButton.disabled = (currentPage === 1);
+    nextButton.disabled = (currentPage >= totalPages);
+
+    // ✅ 이전 버튼 이벤트 등록
+    prevButton.addEventListener("click", function () {
+        if (currentPage > 1) {
+            currentPage--;
+            loadProgress(currentPage);
+        }
+    });
+
+    // ✅ 다음 버튼 이벤트 등록
+    nextButton.addEventListener("click", function () {
+        if (currentPage < totalPages) {
+            currentPage++;
+            loadProgress(currentPage);
+        }
+    });
+
+    console.log("📌 이전 버튼 상태:", prevButton.disabled);
+    console.log("📌 다음 버튼 상태:", nextButton.disabled);
+}
+
+
+
+
+document.addEventListener("DOMContentLoaded", function () {
+    console.log("📌 DOM 로드 완료");
+
+    let prevButton = document.getElementById("prevGroup");
+    let nextButton = document.getElementById("nextGroup");
+
+    if (prevButton) {
+        prevButton.addEventListener("click", function () {
+            console.log("⬅ 이전 페이지 버튼 클릭됨, 현재 페이지:", currentPage);
+            if (currentPage > 1) {
+                currentPage--;
+                loadProgress(currentPage);
+            }
+        });
+    } else {
+        console.error("❌ 이전 버튼(prevGroup)을 찾을 수 없습니다.");
+    }
+
+    if (nextButton) {
+        nextButton.addEventListener("click", function () {
+            console.log("➡ 다음 페이지 버튼 클릭됨, 현재 페이지:", currentPage, "총 페이지 수:", totalPages);
+            if (currentPage < totalPages) {
+                currentPage++;
+                loadProgress(currentPage);
+            }
+        });
+    } else {
+        console.error("❌ 다음 버튼(nextGroup)을 찾을 수 없습니다.");
+    }
+});
+
+
+
+
+
+
+
+
+
+</script>
+<style>
+.table-container {
+	max-height: 500px;
+	overflow-y: auto;
+	margin-top: 10px;
+}
+
+.pallet-table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.pallet-table th, .pallet-table td {
+	padding: 10px;
+	border: 1px solid #ddd;
+	text-align: center;
+}
+
+.pagination {
+	display: flex;
+	justify-content: center;
+	margin-top: 10px;
+}
+
+.pagination button {
+	padding: 5px 10px;
+	margin: 2px;
+	border: none;
+	background: #eee;
+	cursor: pointer;
+}
+
+.pagination .active {
+	background: #6200ea;
+	color: white;
+}
+
+/* 테이블 컨테이너 */
+.table-container {
+	width: 100%;
+	max-height: 500px;
+	overflow-y: auto;
+	overflow-x: auto;
+	margin-top: 10px;
+}
+
+/* 테이블 */
+.pallet-table {
+	width: 100%;
+	border-collapse: collapse;
+	table-layout: fixed; /* 열 너비 고정 */
+}
+
+/* 테이블 헤더 */
+.pallet-table th {
+	background: #f4f4f4;
+	padding: 12px;
+	border: 1px solid #ddd;
+	text-align: center;
+	font-weight: bold;
+}
+
+/* 테이블 본문 */
+.pallet-table td {
+	padding: 10px;
+	border: 1px solid #ddd;
+	text-align: center;
+	white-space: nowrap; /* 텍스트 줄 바꿈 방지 */
+	overflow: hidden;
+	text-overflow: ellipsis; /* 너무 길면 ... 처리 */
+}
+
+/* 각 열 크기 고정 */
+.pallet-table th:nth-child(1), .pallet-table td:nth-child(1) {
+	width: 15%; /* palletId */
+}
+
+.pallet-table th:nth-child(2), .pallet-table td:nth-child(2) {
+	width: 20%; /* load */
+}
+
+.pallet-table th:nth-child(3), .pallet-table td:nth-child(3) {
+	width: 10%; /* width */
+}
+
+.pallet-table th:nth-child(4), .pallet-table td:nth-child(4) {
+	width: 15%; /* Depth */
+}
+
+.pallet-table th:nth-child(5), .pallet-table td:nth-child(5) {
+	width: 10%; /* Height */
+}
+
+.pallet-table th:nth-child(6), .pallet-table td:nth-child(6) {
+	width: 10%; /* Destination */
+}
+
+.pallet-table th:nth-child(7), .pallet-table td:nth-child(7) {
+	width: 10%; /* VehicleNumber */
+}
+
+/* 페이지네이션 스타일 */
+.pagination {
+	display: flex;
+	justify-content: center;
+	margin-top: 10px;
+}
+
+.pagination button {
+	padding: 8px 12px;
+	margin: 2px;
+	border: none;
+	background: #eee;
+	cursor: pointer;
+	border-radius: 4px;
+}
+
+.pagination .active {
+	background: #6200ea;
+	color: white;
+}
+</style>
+</body>
+</html>
+
+
+
+</div>
+</div>
+</div>
+</th:block>
 </html>
