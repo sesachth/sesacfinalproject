@@ -15,6 +15,9 @@ public class Product {
     float height;
     float weight;
     boolean isFragile;
+    int tmpFragile;
     String category;
-    Long spec;;
+    Long spec;
+
+
 }
