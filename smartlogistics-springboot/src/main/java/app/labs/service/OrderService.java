@@ -121,16 +121,32 @@ public class OrderService {
         sqlSession.update("smartlogistics.OrderMapper.updateOrderStatus", params);
     }
 
- // ✅ 랜덤 주문 생성 (같은 orderNum을 가진 주문은 연속된 orderId 배정)
+	// ✅ 일주일치 랜덤 주문 생성 (같은 orderNum을 가진 주문은 연속된 orderId 배정)
     public void generateRandomOrders() {
         resetOrders();  // ✅ 기존 주문 삭제 및 AUTO_INCREMENT 초기화
+        List<Order> orders = new ArrayList<>();
 
+        LocalDate startDate = LocalDate.now().minusDays(6);  // ✅ 최근 7일 (오늘 포함)
+        for (int i = 0; i < 7; i++) {
+            LocalDate currentDate = startDate.plusDays(i);
+            generateDailyOrders(orders, currentDate);  // ✅ 하루 단위 주문 생성 (하지만 삽입은 여기서)
+        }
+
+        // ✅ 주문 시간을 기준으로 정렬하여 순서 보장
+        orders.sort(Comparator.comparing(Order::getOrderTime));
+
+        System.out.println("📌 최종 삽입할 주문 개수: " + orders.size());
+        batchInsertOrders(orders);  // ✅ 최종 한 번만 DB에 삽입
+    }
+
+ // ✅ 하루 1000~2000개 랜덤 주문 생성 (오늘 날짜 주문의 palletId는 NULL)
+    private void generateDailyOrders(List<Order> orders, LocalDate date) {
         int orderCount = random.nextInt(1001) + 1000; // ✅ 1000~2000개 주문 생성
         Map<String, String> orderNumToDestination = new HashMap<>();  // ✅ 주문번호 → 목적지
         Map<String, LocalDateTime> orderNumToTime = new HashMap<>();  // ✅ 주문번호 → 주문 시간
-        List<Order> orders = new ArrayList<>();
 
-        LocalDateTime startOfDay = LocalDateTime.now().truncatedTo(ChronoUnit.DAYS);
+        LocalDate today = LocalDate.now();
+        LocalDateTime startOfDay = date.atStartOfDay();
         long totalSeconds = ChronoUnit.SECONDS.between(startOfDay, startOfDay.plusDays(1));
         long interval = totalSeconds / orderCount;
 
@@ -143,37 +159,44 @@ public class OrderService {
             LocalDateTime orderTime;
 
             if (!orderNumToDestination.isEmpty() && random.nextDouble() < 0.1) {  // ✅ 기존 주문번호 재사용 (10% 확률)
-                orderNum = getRandomExistingOrderNum(orderNumToDestination);  // ✅ 기존 주문번호 선택
-                destination = orderNumToDestination.get(orderNum);  // ✅ 기존 목적지 유지
-                orderTime = orderNumToTime.get(orderNum);  // ✅ 기존 주문 시간 유지
+                orderNum = getRandomExistingOrderNum(orderNumToDestination);
+                destination = orderNumToDestination.get(orderNum);
+                orderTime = orderNumToTime.get(orderNum);
             } else {
-                orderNum = generateRandomOrderNum();
-                destination = getRandomCamp();  // ✅ 새로운 주문번호는 새로운 목적지 지정
+                orderNum = generateRandomOrderNum(date);
+                destination = getRandomCamp();
                 orderTime = startOfDay.plusSeconds(interval * i + random.nextInt((int) interval));
-                orderNumToDestination.put(orderNum, destination);  // ✅ 주문번호 → 목적지 저장
-                orderNumToTime.put(orderNum, orderTime);  // ✅ 주문번호 → 주문시간 저장
+                orderNumToDestination.put(orderNum, destination);
+                orderNumToTime.put(orderNum, orderTime);
             }
 
             Order order = new Order();
             order.setOrderNum(orderNum);
             order.setOrderTime(orderTime);
-            order.setDestination(destination);  // ✅ 동일한 orderNum일 경우 같은 목적지 유지
-            order.setBoxState(0);  // ✅ 기본값: 미검사
-            order.setProgressState(0);  // ✅ 기본값: 물품대기
+            order.setDestination(destination);
             order.setProductId(randomProduct.getProductId());
-            order.setPalletId(null);
+
+            if (date.equals(today)) {
+                order.setBoxState(0);  // ✅ 오늘 날짜 주문은 미검사(0)
+                order.setProgressState(0);  // ✅ 오늘 날짜 주문은 물품대기(0)
+                order.setPalletId(null);  // ✅ 오늘 날짜 주문은 palletId NULL 처리
+                System.out.println("✅ 오늘 날짜 주문 생성됨: " + orderNum + " | boxState: " + order.getBoxState() + " | progressState: " + order.getProgressState() + " | palletId: NULL");
+            } else {
+                order.setBoxState(random.nextDouble() < 0.7 ? 1 : 2);  // ✅ 70% 정상(1), 30% 손상(2)
+                order.setProgressState(2);  // ✅ 적재 완료 상태
+                order.setPalletId((long) (random.nextInt(150) + 1));  // ✅ 과거 주문은 랜덤 palletId 부여
+            }
 
             orders.add(order);
         }
 
-        orders.sort(Comparator.comparing(Order::getOrderTime));  // ✅ 주문 시간을 기준으로 정렬
-        batchInsertOrders(orders);  // ✅ 일괄 삽입
+        System.out.println("📌 " + date + " 주문 개수: " + orders.size());
     }
 
 
     // ✅ 주문번호를 YYMMDD + 8자리 랜덤 숫자로 생성
-    private String generateRandomOrderNum() {
-        String datePrefix = LocalDate.now().format(DateTimeFormatter.ofPattern("yyMMdd"));
+    private String generateRandomOrderNum(LocalDate date) {
+        String datePrefix = date.format(DateTimeFormatter.ofPattern("yyMMdd"));
         String randomDigits = String.format("%08d", random.nextInt(100000000));
         return datePrefix + randomDigits;
     }
@@ -201,4 +224,10 @@ public class OrderService {
         List<String> camps = Arrays.asList("서초 캠프", "강남 캠프", "강서 캠프", "중구 캠프", "성동 캠프");
         return camps.get(random.nextInt(camps.size()));
     }
+    
+ // ✅ 오늘 날짜의 진행 중인 주문 조회
+    public List<Order> getOrdersInProgress() {
+        return sqlSession.selectList("smartlogistics.OrderMapper.getOrdersInProgress");
+    }
+
 }

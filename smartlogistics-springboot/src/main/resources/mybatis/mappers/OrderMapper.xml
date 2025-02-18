@@ -47,6 +47,7 @@
 	</select>
 
 
+
     <!-- ✅ 특정 목적지의 주문 조회 (페이징 추가) -->
 	<select id="getOrdersByDestination" resultMap="orderResultMap">
 	    SELECT order_id, order_num, order_time, destination, box_state, progress_state, product_id, pallet_id
@@ -120,7 +121,6 @@
 	    WHERE TRIM(order_num) = #{orderNum};
 	</select>
 
-
     <!-- ✅ 주문 저장 -->
     <insert id="insertOrder" useGeneratedKeys="true" keyProperty="orderId">
         INSERT INTO `order` (order_num, order_time, destination, box_state, progress_state, product_id, pallet_id)
@@ -137,13 +137,16 @@
         ALTER TABLE `order` AUTO_INCREMENT = 1;
     </update>
 
-    <!-- ✅ 여러 개의 주문을 한 번에 저장 -->
-    <insert id="batchInsertOrders" parameterType="java.util.List">
-        INSERT INTO `order` (order_num, order_time, destination, box_state, progress_state, product_id, pallet_id)
-        VALUES
-        <foreach collection="list" item="order" separator=",">
-            (#{order.orderNum}, #{order.orderTime}, #{order.destination}, #{order.boxState}, #{order.progressState}, #{order.productId}, #{order.palletId})
-        </foreach>
-    </insert>
+	<!-- ✅ 여러 개의 주문을 한 번에 저장 (일주일치 데이터 삽입) -->
+	<insert id="batchInsertOrders" parameterType="java.util.List">
+	    INSERT INTO `order` (order_num, order_time, destination, box_state, progress_state, product_id, pallet_id)
+	    VALUES
+	    <foreach collection="list" item="order" separator=",">
+	        (#{order.orderNum}, #{order.orderTime}, #{order.destination}, 
+	         #{order.boxState},  <!-- ✅ boxState 값을 명확히 설정 -->
+	         #{order.progressState},  <!-- ✅ progressState 값을 명확히 설정 -->
+	         #{order.productId}, COALESCE(#{order.palletId}, NULL))
+	    </foreach>
+	</insert>
 
 </mapper>
