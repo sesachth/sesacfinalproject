@@ -7,7 +7,6 @@ from itertools import permutations
 
 # 박스 매칭 알고리즘
 async def box_standardize(product_list, box_list):
-    print(f"box_standardize 시작, 입력된 box 리스트: {box_list}")
     result_list = []
     box_list_sorted = sorted(box_list, key=lambda x: x['box_num'])
 
@@ -67,7 +66,6 @@ async def box_standardize(product_list, box_list):
 
 # 적재 처리 함수
 async def matching_process(db: AsyncSession = Depends(get_db)):
-    print("박스 매칭 시작")
     
     product_list = await crud.get_products(db)
 
@@ -88,6 +86,3 @@ async def matching_process(db: AsyncSession = Depends(get_db)):
         await crud.update_product_spec(db, r['product_id'], r['packaging'])
         
     await db.commit()
-    print("DB에 변경 사항이 성공적으로 반영되었습니다.")
-
-    print("적재 처리 완료!")
