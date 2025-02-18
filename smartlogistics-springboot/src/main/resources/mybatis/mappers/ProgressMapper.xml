@@ -71,6 +71,23 @@
 	        AND o.progress_state = #{progressState}
 	    </if>
 	</select>
+	
+	<update id="updateOrdersProgress">
+	    UPDATE `order`
+	    SET 
+	        progress_state = #{progressState}, 
+	        image_number = 
+	        <if test="imageNumber != null">
+	            #{imageNumber}
+	        </if>
+	        <if test="imageNumber == null">
+	            NULL
+	        </if>
+	    WHERE order_id IN 
+	    <foreach item="orderId" collection="orderIds" open="(" separator="," close=")">
+	        #{orderId}
+	    </foreach>
+	</update>
 
-
+	
 </mapper>
