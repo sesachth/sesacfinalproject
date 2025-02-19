@@ -30,7 +30,7 @@ class ProductModel(BaseModel):
     depth: float
     height: float
     weight: float
-    fragile: bool 
+    is_fragile: bool 
     category: str = Field(max_length=30)
     spec: Optional[int] = None
 

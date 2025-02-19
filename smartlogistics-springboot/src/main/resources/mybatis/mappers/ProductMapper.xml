@@ -62,15 +62,15 @@
             <if test="depth != null">depth = #{depth},</if>
             <if test="height != null">height = #{height},</if>
             <if test="weight != null">weight = #{weight},</if>
-            <if test="fragile != null">is_fragile = #{fragile},</if>
+            <if test="fragile != null">is_fragile = #{isFragile},</if>
             <if test="category != null">category = #{category}</if>
         </set>
-        WHERE product_id = #{product_id}
+        WHERE product_id = #{productId}
     </update>
 
     <!-- 특정 물품 삭제 -->
     <delete id="delete" parameterType="int">
         DELETE FROM product
-        WHERE product_id = #{product_id}
+        WHERE product_id = #{productId}
     </delete>
 </mapper>
