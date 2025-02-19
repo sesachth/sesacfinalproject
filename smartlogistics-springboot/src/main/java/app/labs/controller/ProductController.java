@@ -127,8 +127,8 @@ public class ProductController {
             products = products.stream()
                 .filter(p -> {
                     try {
-                        Boolean isisFragile = p.isFragile();
-                        return isisFragile != null && isisFragile.equals(targetisFragile);
+                        Boolean productIsFragile = p.isFragile();
+                        return isFragile != null && productIsFragile.equals(targetisFragile);
                     } catch (Exception e) {
                         return false; // 에러 발생 시 해당 항목 제외
                     }
