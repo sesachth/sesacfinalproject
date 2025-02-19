@@ -184,14 +184,20 @@ document.getElementById("filterBtn").addEventListener("click", function () {
 });
 
 document.getElementById("generateOrderBtn").addEventListener("click", function () {
+    showLoading();  // ✅ 로딩 화면 표시
     fetch("/admin/order/generate", { method: "POST" })
         .then(response => response.json())
         .then(data => {
+            hideLoading();  // ✅ 주문 생성 완료 후 로딩 숨김
             alert(data.message);
             setTimeout(() => location.reload(), 1000);  // ✅ 주문 생성 후 자동 새로고침
         })
-        .catch(error => console.error("Error:", error));
+        .catch(error => {
+            hideLoading();  // ✅ 오류 발생 시 로딩 숨김
+            console.error("Error:", error);
+        });
 });
+
 
 document.getElementById("searchOrderBtn").addEventListener("click", function () {
     searchOrderByNum();
@@ -240,8 +246,20 @@ function searchOrderByNum() {
 
 
 document.getElementById("downloadExcelBtn").addEventListener("click", function () {
-    window.location.href = "/admin/order/download/excel";
+    let date = document.getElementById("dateFilter").value || new Date().toISOString().split('T')[0];
+    let camp = document.getElementById("campFilter").value || "";
+    let orderNum = document.getElementById("orderNumSearch").value.trim(); 
+
+    // ✅ URL 파라미터 추가하여 필터링된 데이터 요청
+    let queryParams = new URLSearchParams();
+    queryParams.append("date", date);
+    if (camp) queryParams.append("destination", camp);
+    if (orderNum) queryParams.append("orderNum", orderNum);
+
+    // ✅ 필터링된 데이터 다운로드
+    window.location.href = `/admin/order/download/excel?${queryParams.toString()}`;
 });
+
 
 document.getElementById("prevGroup").addEventListener("click", function () {
     if (currentPage > 1) {
@@ -334,4 +352,14 @@ function updatePagination() {
 
     document.getElementById("prevGroup").disabled = (currentPage === 1);
     document.getElementById("nextGroup").disabled = (currentPage === totalPages);
+}
+
+// ✅ 로딩 화면 표시 함수
+function showLoading() {
+    document.getElementById("loadingOverlay").style.display = "flex";
+}
+
+// ✅ 로딩 화면 숨김 함수
+function hideLoading() {
+    document.getElementById("loadingOverlay").style.display = "none";
 }
