@@ -246,8 +246,20 @@ function searchOrderByNum() {
 
 
 document.getElementById("downloadExcelBtn").addEventListener("click", function () {
-    window.location.href = "/admin/order/download/excel";
+    let date = document.getElementById("dateFilter").value || new Date().toISOString().split('T')[0];
+    let camp = document.getElementById("campFilter").value || "";
+    let orderNum = document.getElementById("orderNumSearch").value.trim(); 
+
+    // ✅ URL 파라미터 추가하여 필터링된 데이터 요청
+    let queryParams = new URLSearchParams();
+    queryParams.append("date", date);
+    if (camp) queryParams.append("destination", camp);
+    if (orderNum) queryParams.append("orderNum", orderNum);
+
+    // ✅ 필터링된 데이터 다운로드
+    window.location.href = `/admin/order/download/excel?${queryParams.toString()}`;
 });
+
 
 document.getElementById("prevGroup").addEventListener("click", function () {
     if (currentPage > 1) {
