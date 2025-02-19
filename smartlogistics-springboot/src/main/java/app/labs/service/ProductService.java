@@ -1,17 +1,22 @@
 package app.labs.service;
 
-import app.labs.dao.ProductlistRepository;
-import app.labs.model.Product;
+import java.util.List;
+import java.util.Map;
 
-import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import java.util.List;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.RestTemplate;
+
+import app.labs.dao.ProductlistRepository;
+import app.labs.model.Product;
 
 @Service
 public class ProductService {
 
     private final ProductlistRepository productlistRepository;
+    private final String FASTAPI_URL = "http://localhost:8000/api/v1/box_matching"; // FastAPI URL
 
     @Autowired
     public ProductService(ProductlistRepository productlistRepository) {
@@ -38,7 +43,34 @@ public class ProductService {
     }
     
     public void addProduct(Product product) {
-        productlistRepository.insert(product);
+        // FastAPI로 박스 매칭 결과 받기
+        RestTemplate restTemplate = new RestTemplate();
+        
+        try {
+            // Product를 JSON 형식으로 FastAPI에 전달
+            Map<String, Object> response = restTemplate.postForObject(FASTAPI_URL, product, Map.class);
+            
+            if (response != null && response.get("spec") != null) {
+                product.setSpec(Long.parseLong(response.get("spec").toString()));
+            } else {
+                product.setSpec(0L); // 박스 매칭 실패 시 default 값
+            }
+
+            productlistRepository.insert(product);
+        } catch (HttpServerErrorException | HttpClientErrorException e) {
+            // FastAPI 서버에서 에러 발생 시 처리
+            System.err.println("Error during FastAPI communication: " + e.getMessage());
+            product.setSpec(0L); // 기본값 처리
+            productlistRepository.insert(product); // 계속해서 DB에 저장
+        } catch (Exception e) {
+            // 기타 예외 처리
+            e.printStackTrace();
+            product.setSpec(0L); // 기본값 처리
+            productlistRepository.insert(product); // 계속해서 DB에 저장
+        }
+
+        // DB에 저장
+        // productlistRepository.insert(product);
     }
 
     public boolean updateProduct(Product product) {
