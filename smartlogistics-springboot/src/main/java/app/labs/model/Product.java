@@ -1,20 +1,16 @@
 package app.labs.model;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.Data;
 
-@Getter
-@Setter
-@ToString
+@Data
 public class Product {
-    Long productId;
-    String name;
-    float width;
-    float depth;
-    float height;
-    float weight;
-    boolean isFragile;
-    String category;
-    Long spec;
+	private Long productId;
+	private String name;
+	private float width;
+	private float depth;
+	private float height;
+	private float weight;
+	private boolean isFragile;
+	private String category;
+	private Long spec;
 }

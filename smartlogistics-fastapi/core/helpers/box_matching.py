@@ -64,8 +64,9 @@ async def box_standardize(product_list, box_list):
 
     return result_list
 
-# 적재 처리 함수
+# 박스 매칭 함수
 async def matching_process(db: AsyncSession = Depends(get_db)):
+    print("박스 매칭 시작")
     
     product_list = await crud.get_products(db)
 

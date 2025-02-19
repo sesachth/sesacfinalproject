@@ -52,12 +52,8 @@
 
     <!-- 제품 등록 -->
     <insert id="insert" useGeneratedKeys="true" keyProperty="productId">
-        INSERT INTO product (name, width, depth, height, weight,
-        is_fragile,
-        category)
-        VALUES (#{name}, #{width}, #{depth}, #{height},
-        #{weight}, #{fragile},
-        #{category})
+        INSERT INTO product (name, width, depth, height, weight, is_fragile, category, spec)
+        VALUES (#{name}, #{width}, #{depth}, #{height}, #{weight}, #{isFragile}, #{category}, #{spec})
     </insert>
 
     <!-- 기존 물품 수정 -->
