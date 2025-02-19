@@ -6,6 +6,24 @@ document.addEventListener('DOMContentLoaded', function() {
     const dropdowns = document.getElementsByClassName('dropdown-menu');
     let isCalendarOpen = false;
 
+    // ✅ 오늘 날짜를 기본값으로 설정
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    const formattedDate = `${year}-${month}-${day}`;
+    
+    // dateFilter input에 오늘 날짜 설정
+    dateFilter.value = formattedDate;
+    
+    // 날짜 표시 텍스트 업데이트
+    const formattedDisplayDate = today.toLocaleDateString('ko-KR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+    document.querySelector('.date-placeholder').textContent = formattedDisplayDate;
+
     // 달력 클릭 이벤트
     dateFilter.addEventListener('click', function(e) {
         // 모든 드롭다운 메뉴 닫기
@@ -239,19 +257,12 @@ document.getElementById("nextGroup").addEventListener("click", function () {
     }
 });
 
-document.addEventListener("DOMContentLoaded", function () {
-    let today = new Date().toISOString().split('T')[0];
-    document.getElementById("dateFilter").value = today;
-});
-
-
 function loadOrders(page = currentPage) {
-    let date = document.getElementById("dateFilter").value;
+    let date = document.getElementById("dateFilter").value || new Date().toISOString().split('T')[0];
     let camp = document.getElementById("campFilter").value;
-	//let camp = selectedCampValue;
 
     let queryParams = new URLSearchParams({ page, size: 20 });
-    if (date) queryParams.append("date", date);
+    queryParams.append("date", date); // date 파라미터를 항상 포함
     if (camp) queryParams.append("destination", camp);
 
     fetch(`/admin/order/api?${queryParams.toString()}`)
