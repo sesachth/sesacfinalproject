@@ -239,6 +239,12 @@ document.getElementById("nextGroup").addEventListener("click", function () {
     }
 });
 
+document.addEventListener("DOMContentLoaded", function () {
+    let today = new Date().toISOString().split('T')[0];
+    document.getElementById("dateFilter").value = today;
+});
+
+
 function loadOrders(page = currentPage) {
     let date = document.getElementById("dateFilter").value;
     let camp = document.getElementById("campFilter").value;
