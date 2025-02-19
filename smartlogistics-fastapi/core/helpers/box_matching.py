@@ -11,8 +11,8 @@ async def box_standardize(product_list, box_list):
     box_list_sorted = sorted(box_list, key=lambda x: x['box_num'])
 
     for product in product_list:
-        pw, pd, ph, weight, fragile = (
-            product['width'], product['depth'], product['height'], product['weight'], product['fragile']
+        pw, pd, ph, weight  = (
+            product['width'], product['depth'], product['height'], product['weight']
         )
         
         # 무게가 30,000g 초과하면 패키징 제외
