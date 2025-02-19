@@ -1,31 +1,373 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-	  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-	  layout:decorator="~{/thymeleaf/html/common/default_layout}">
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorator="~{/thymeleaf/html/common/default_layout}">
 
 <th:block layout:fragment="css">
 	<link rel="stylesheet" th:href="@{/css/admin/admin.css}" />
 </th:block>
 
 <th:block layout:fragment="wrapper">
-    	<div class="outside-container">
-        	<div class="main-container">
-                <div th:replace="~{thymeleaf/html/common/include::profile}"></div>
-            	<div th:replace="~{thymeleaf/html/common/include::sidebar}"></div>
-            	<div layout:fragment="content" class="main-content">
-            	
-            	
-            	
-            	
-            	
-            	
-            	
-            	
-            	
-            	
-            	
-            	</div>
-        	</div>
-        </div>
-    </th:block>
+	<div class="outside-container">
+		<div class="main-container">
+			<div th:replace="~{thymeleaf/html/common/include::profile}"></div>
+			<div th:replace="~{thymeleaf/html/common/include::sidebar}"></div>
+			<div layout:fragment="content" class="main-content">
+
+
+				<!-- 필터 컨테이너 -->
+				<div class="filter-container">
+					<div class="filter-group">
+						<label for="dateFilter">날짜:</label>
+						<input type="date" id="dateFilter" class="form-control" />
+					</div>
+					<div class="filter-group">
+						<label for="destinationFilter">캠프:</label>
+						<select id="destinationFilter" class="form-control">
+							<option value="">전체</option>
+							<option value="서초 캠프">서초 캠프</option>
+							<option value="강남 캠프">강남 캠프</option>
+							<option value="강서 캠프">강서 캠프</option>
+							<option value="중구 캠프">중구 캠프</option>
+							<option value="성동 캠프">성동 캠프</option>
+						</select>
+					</div>
+					<button id="filterBtn" class="btn btn-primary">조회</button>
+
+					<div class="search-group">
+						<label for="PalletIdSearch">팔렛트 ID:</label>
+						<input type="text" id="PalletIdSearch" class="form-control" placeholder="팔렛트 ID 입력" />
+						<button id="searchPalletBtn" class="btn btn-primary">검색</button>
+					</div>
+				</div>
+
+				<!-- 팔렛트 테이블 -->
+				<div class="table-container">
+					<table class="pallet-table">
+						<thead>
+							<tr>
+								<th>Pallet ID</th>
+								<th>Load</th>
+								<th>Width</th>
+								<th>Depth</th>
+								<th>Height</th>
+								<th>Destination</th>
+								<th>Vehicle Number</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr th:each="pallet : ${palletList}">
+								<td th:text="${pallet.palletId}"></td>
+								<td th:text="${pallet.load}"></td>
+								<td th:text="${pallet.width}"></td>
+								<td th:text="${pallet.depth}"></td>
+								<td th:text="${pallet.height}"></td>
+								<td th:text="${pallet.destination}"></td>
+								<td th:text="${pallet.vehicleNumber}"></td>
+							</tr>
+							<tr th:if="${#lists.isEmpty(palletList)}">
+								<td colspan="7">등록된 팔레트가 없습니다.</td>
+							</tr>
+						</tbody>
+					</table>
+
+					<!-- 페이지네이션 -->
+					<div class="pagination" th:if="${totalPages > 0}">
+						<!-- 이전 페이지 -->
+						<a th:if="${currentPage > 1}" 
+						   th:href="@{/admin/pallet(page=${currentPage - 1}, palletId=${palletId}, destination=${destination}, vehicleNumber=${vehicleNumber})}"
+						   class="btn btn-purple">이전</a>
+
+						<!-- 페이지 번호 -->
+						<th:block th:each="pageNum : ${#numbers.sequence(1, totalPages)}">
+							<a th:href="@{/admin/pallet(page=${pageNum}, palletId=${palletId}, destination=${destination}, vehicleNumber=${vehicleNumber})}"
+							   th:text="${pageNum}"
+							   th:class="${pageNum == currentPage ? 'btn btn-purple active' : 'btn btn-purple'}"></a>
+						</th:block>
+
+						<!-- 다음 페이지 -->
+						<a th:if="${currentPage < totalPages}"
+						   th:href="@{/admin/pallet(page=${currentPage + 1}, palletId=${palletId}, destination=${destination}, vehicleNumber=${vehicleNumber})}"
+						   class="btn btn-purple">다음</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	</div>
+</th:block>
+
+<script>
+// 페이지네이션 관련 변수
+let currentPage = 1;
+const rowsPerPage = 20;
+const pageGroupSize = 10;
+
+// 페이지 로드 시 실행
+window.onload = function() {
+    initializeEventHandlers();
+    displayCurrentPage();
+    updatePagination();
+};
+
+// 이벤트 핸들러 초기화
+function initializeEventHandlers() {
+    // 검색 버튼 클릭 이벤트
+    document.getElementById('searchPalletBtn').addEventListener('click', function() {
+        searchPallets();
+    });
+
+    // 필터 버튼 클릭 이벤트
+    document.getElementById('filterBtn').addEventListener('click', function() {
+        searchPallets();
+    });
+
+    // 팔렛트 ID 입력 필드에서 엔터 키 이벤트
+    document.getElementById('PalletIdSearch').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            searchPallets();
+        }
+    });
+}
+
+// 팔렛트 검색 함수
+function searchPallets() {
+    const destination = document.getElementById('destinationFilter').value;
+    const palletId = document.getElementById('PalletIdSearch').value;
+    
+    // URL 파라미터 생성
+    const params = new URLSearchParams();
+    if (destination) params.append('destination', destination);
+    if (palletId) params.append('palletId', palletId);
+
+    // 페이지 리로드
+    window.location.href = `/admin/pallet?${params.toString()}`;
+}
+
+// 현재 페이지 표시
+function displayCurrentPage() {
+    const table = document.querySelector(".pallet-table tbody");
+    const rows = table.getElementsByTagName("tr");
+    const totalRows = rows.length;
+    const totalPages = Math.ceil(totalRows / rowsPerPage);
+
+    // 현재 페이지에 해당하는 행만 표시
+    const start = (currentPage - 1) * rowsPerPage;
+    const end = Math.min(start + rowsPerPage, totalRows);
+
+    for (let i = 0; i < totalRows; i++) {
+        if (i >= start && i < end) {
+            rows[i].style.display = "";
+        } else {
+            rows[i].style.display = "none";
+        }
+    }
+
+    return totalPages;
+}
+
+// 페이지네이션 UI 업데이트
+function updatePagination() {
+    const totalRows = document.querySelector(".pallet-table tbody").getElementsByTagName("tr").length;
+    const totalPages = Math.ceil(totalRows / rowsPerPage);
+    
+    let startPage = Math.floor((currentPage - 1) / pageGroupSize) * pageGroupSize + 1;
+    let endPage = Math.min(startPage + pageGroupSize - 1, totalPages);
+
+    let pageNumbers = document.getElementById("pageNumbers");
+    pageNumbers.innerHTML = "";
+
+    for (let i = startPage; i <= endPage; i++) {
+        let button = document.createElement("button");
+        button.innerText = i;
+        button.classList.add("btn", "mx-1", "btn-purple");
+        
+        if (i === currentPage) {
+            button.classList.add("btn-purple-active");
+        }
+        
+        button.onclick = function() {
+            if (currentPage !== i) {
+                currentPage = i;
+                displayCurrentPage();
+                updatePagination();
+            }
+        };
+        
+        pageNumbers.appendChild(button);
+    }
+
+    document.getElementById("prevGroup").disabled = currentPage === 1;
+    document.getElementById("nextGroup").disabled = currentPage >= totalPages;
+}
+
+// 이전/다음 페이지 그룹 이벤트 핸들러
+document.getElementById("prevGroup").onclick = function() {
+    if (currentPage > 1) {
+        currentPage--;
+        displayCurrentPage();
+        updatePagination();
+    }
+};
+
+document.getElementById("nextGroup").onclick = function() {
+    const totalPages = displayCurrentPage();
+    if (currentPage < totalPages) {
+        currentPage++;
+        displayCurrentPage();
+        updatePagination();
+    }
+};
+</script>
+
+<style>
+    .table-container { 
+        width: 100%;
+        max-height: 500px;
+        overflow-y: auto;
+        overflow-x: auto;
+        margin-top: 10px;
+    }
+
+    .pallet-table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+    }
+
+    .pallet-table th {
+        background: #f4f4f4;
+        padding: 12px;
+        border: 1px solid #ddd;
+        text-align: center;
+        font-weight: bold;
+    }
+
+    .pallet-table td {
+        padding: 10px;
+        border: 1px solid #ddd;
+        text-align: center;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* 각 컬럼 너비 설정 */
+    .pallet-table th:nth-child(1),
+    .pallet-table td:nth-child(1) {
+        width: 15%;  /* Pallet ID */
+    }
+
+    .pallet-table th:nth-child(2),
+    .pallet-table td:nth-child(2) {
+        width: 10%;  /* Load */
+    }
+
+    .pallet-table th:nth-child(3),
+    .pallet-table td:nth-child(3) {
+        width: 10%;  /* Width */
+    }
+
+    .pallet-table th:nth-child(4),
+    .pallet-table td:nth-child(4) {
+        width: 10%;  /* Depth */
+    }
+
+    .pallet-table th:nth-child(5),
+    .pallet-table td:nth-child(5) {
+        width: 10%;  /* Height */
+    }
+
+    .pallet-table th:nth-child(6),
+    .pallet-table td:nth-child(6) {
+        width: 25%;  /* Destination */
+    }
+
+    .pallet-table th:nth-child(7),
+    .pallet-table td:nth-child(7) {
+        width: 20%;  /* Vehicle Number */
+    }
+
+    /* 필터 컨테이너 스타일 */
+    .filter-container {
+        display: flex;
+        gap: 20px;
+        align-items: center;
+        padding: 15px;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+
+.filter-group, .search-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.form-control {
+    padding: 8px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    min-width: 120px;
+}
+
+    /* 페이지네이션 스타일 */
+    .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 5px;
+        margin-top: 20px;
+    }
+
+    .pagination a {
+        padding: 8px 16px;
+        text-decoration: none;
+        border-radius: 4px;
+        color: white;
+    }
+
+    .btn-purple {
+        background-color: #6c5ce7;
+    }
+
+    .btn-purple:hover {
+        background-color: #5f3dc4;
+    }
+
+    .btn-purple.active {
+        background-color: #4c3398;
+    }
+
+    /* 반응형 디자인 */
+    @media (max-width: 768px) {
+        .filter-container {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+    .filter-group, .search-group {
+        flex-wrap: wrap;
+    }
+
+        .form-control {
+            width: 100%;
+        }
+
+        .table-container {
+            margin: 0;
+            border-radius: 0;
+        }
+    }
+</style>
+</body>
+</html>
+
+
+
+</div>
+</div>
+</div>
+</th:block>
 </html>

@@ -14,39 +14,88 @@
         <result property="progressState" column="progress_state"/>
         <result property="productName" column="name"/>
         <result property="productCategory" column="category"/>
-        <result property="boxSpec" column="spec"/>  <!-- ✅ 추가: 박스 규격 매핑 -->
+        <result property="boxSpec" column="boxSpec" javaType="java.lang.Integer"/>  <!-- ✅ 수정 -->
     </resultMap>
-    
+
+    <resultMap id="orderResultMap" type="app.labs.model.Order">
+        <id property="orderId" column="order_id" />
+        <result property="orderNum" column="order_num" />
+        <result property="orderTime" column="order_time" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"/>
+        <result property="destination" column="destination" />
+        <result property="boxState" column="box_state" />
+        <result property="progressState" column="progress_state" />
+        <result property="productId" column="product_id" />
+        <result property="palletId" column="pallet_id" />
+    </resultMap>
+
+    <!-- ✅ 진행 상태 리스트 조회 (기본적으로 오늘 날짜 기준) -->
     <select id="getFilteredProgressList" resultMap="progressResultMap">
         SELECT o.order_id, o.order_num, o.order_time, o.destination, o.pallet_id, 
-               o.box_state, o.progress_state,
-               p.name, p.category, p.spec  <!-- ✅ 추가: 박스 규격(spec) 조회 -->
+               o.box_state, o.progress_state, p.name, p.category, p.spec AS boxSpec
         FROM `order` o
         LEFT JOIN `product` p ON o.product_id = p.product_id
-        WHERE (#{date} IS NULL OR DATE(o.order_time) = #{date})
-          AND (#{camp} IS NULL OR o.destination = #{camp})
-          AND (#{orderNum} IS NULL OR o.order_num = #{orderNum})
+        WHERE DATE(o.order_time) = COALESCE(#{date}, CURDATE())  <!-- ✅ 기본값: 오늘 날짜 -->
+        <if test="camp != null and camp != ''">
+            AND o.destination = #{camp}
+        </if>
+        <if test="orderNum != null and orderNum != ''">
+            AND o.order_num = #{orderNum}
+        </if>
+        <if test="boxSpec != null">
+            AND p.spec = #{boxSpec}
+        </if>
+        <if test="boxState != null">
+            AND o.box_state = #{boxState}
+        </if>
+        <if test="progressState != null">
+            AND o.progress_state = #{progressState}
+        </if>
         ORDER BY o.order_time ASC
-        LIMIT #{pageSize} OFFSET #{offset}
+        LIMIT #{pageSize} OFFSET #{offset};
     </select>
 
-    <!-- 필터링된 진행 상태 개수 조회 -->
-    <select id="countTotalFilteredProgress" resultType="int">
+    <!-- ✅ 오늘 날짜의 진행 상태 개수 조회 -->
+    <select id="getTotalFilteredRecords" resultType="int">
         SELECT COUNT(*)
         FROM `order` o
         LEFT JOIN `product` p ON o.product_id = p.product_id
-        WHERE (#{date} IS NULL OR DATE(o.order_time) = #{date})
-          AND (#{camp} IS NULL OR o.destination = #{camp})
-          AND (#{orderNum} IS NULL OR o.order_num = #{orderNum})
+        WHERE DATE(o.order_time) = COALESCE(#{date}, CURDATE())  <!-- ✅ 기본값: 오늘 날짜 -->
+        <if test="camp != null and camp != ''">
+            AND o.destination = #{camp}
+        </if>
+        <if test="orderNum != null and orderNum != ''">
+            AND o.order_num = #{orderNum}
+        </if>
+        <if test="boxSpec != null">
+            AND p.spec = #{boxSpec}
+        </if>
+        <if test="boxState != null">
+            AND o.box_state = #{boxState}
+        </if>
+        <if test="progressState != null">
+            AND o.progress_state = #{progressState}
+        </if>
     </select>
-    
+
+    <!-- ✅ 진행 상태 및 이미지 번호 업데이트 (NULL 허용) -->
     <update id="updateOrdersProgress">
         UPDATE `order`
-        SET progress_state = #{progressState}
-        WHERE order_id IN
+        SET 
+            progress_state = #{progressState}, 
+            image_number = #{imageNumber, jdbcType=INTEGER}
+        WHERE order_id IN 
         <foreach item="orderId" collection="orderIds" open="(" separator="," close=")">
             #{orderId}
         </foreach>
     </update>
+
+    <!-- ✅ 진행 상태가 있는 주문 조회 (오늘 날짜만) -->
+    <select id="getOrdersInProgress" resultMap="orderResultMap">
+	    SELECT * FROM `order`
+	    WHERE progress_state > 0  <!-- ✅ 진행 상태가 있는 주문만 조회 -->
+	    AND DATE(order_time) = CURDATE()  <!-- ✅ 오늘 날짜 주문만 조회 -->
+	    ORDER BY order_time ASC, order_id ASC;
+	</select>
+
 
 </mapper>

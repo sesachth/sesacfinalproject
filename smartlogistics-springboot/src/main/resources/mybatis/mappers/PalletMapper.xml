@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="app.labs.dao.PalletRepository">
+
+	    <resultMap id="palletResultMap" type="app.labs.model.Pallet">
+	    <id property="palletId" column="pallet_id"/>
+	    <result property="load" column="load"/>
+	    <result property="width" column="width"/>
+	    <result property="depth" column="depth"/>
+	    <result property="height" column="height"/>
+	    <result property="destination" column="destination"/>
+	    <result property="vehicleNumber" column="vehicle_number"/>
+
+	</resultMap>
+	
+	<select id="getFilteredPalletList" resultMap="palletResultMap">
+	    SELECT pa.pallet_id, pa.load, pa.width, pa.depth, pa.height, pa.destination, 
+	           pa.vehicle_number
+	    FROM (
+	        SELECT *
+	        FROM pallet
+	        WHERE 1=1
+	        <if test="palletId != null and palletId != ''">
+	            AND pallet_id = #{palletId}
+	        </if>
+	        <if test="destination != null and destination != ''">
+	            AND destination = #{destination}
+	        </if>
+	        <if test="vehicleNumber != null and vehicleNumber != ''">
+	            AND vehicle_number = #{vehicleNumber}
+	        </if>
+	        ORDER BY pallet_id ASC
+	    ) pa
+	    LIMIT #{pageSize} OFFSET #{offset}
+	</select>
+
+    <!-- 필터링된 진행 상태 개수 조회 -->
+    <select id="countTotalFilteredPallet" resultType="int">
+        SELECT COUNT(*)
+        FROM pallet pa
+        WHERE 1=1
+        <if test="palletId != null and palletId != ''">
+            AND pa.pallet_id = #{palletId}
+        </if>
+        <if test="destination != null and destination != ''">
+            AND pa.destination = #{destination}
+        </if>
+        <if test="vehicleNumber != null and vehicleNumber != ''">
+            AND pa.vehicle_number = #{vehicleNumber}
+        </if>
+    </select>
+
+</mapper>

@@ -40,7 +40,7 @@ function populatePalletSelect(pallets) {
     selectBox.append('<option value="">Select a pallet</option>');
 
     pallets.forEach(function(pallet) {
-        selectBox.append(`<option value="${pallet.pallet_id}">${pallet.destination}</option>`);
+        selectBox.append(`<option value="${pallet.pallet_id}">${pallet.pallet_id}번 파레트 - ${pallet.destination}</option>`);
     });
 }
 

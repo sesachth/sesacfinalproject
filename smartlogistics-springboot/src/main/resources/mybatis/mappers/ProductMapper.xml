@@ -1,55 +1,52 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
 <mapper namespace="app.labs.dao.ProductlistRepository">
-
-    <!-- resultMap 정의: 각 컬럼을 명시적으로 매핑 -->
-    <resultMap id="productResultMap" type="app.labs.model.Product">
-        <id property="productId" column="product_id" />
-        <result property="name" column="name" />
-        <result property="width" column="width" />
-        <result property="depth" column="depth" />
-        <result property="height" column="height" />
-        <result property="weight" column="weight" />
-        <result property="category" column="category" />
-        <result property="isFragile" column="is_fragile" />
-        <result property="spec" column="spec" />
-    </resultMap>
-
-    <!-- 전체 물품 목록 조회 -->
-    <select id="findAll" resultMap="productResultMap">
-        SELECT product_id, name, width,
-        depth, height, weight,
-        is_fragile,
-        category
-        FROM product
-    </select>
-
-    <!-- 카테고리 물품 조회 -->
-    <select id="findByCategory" parameterType="String" resultMap="productResultMap">
-        SELECT product_id, name, width, depth, height, weight,
-        category, is_fragile
-        FROM product
-        WHERE category = #{category}
-    </select>
-
-    <!-- 이름으로 제품 검색 (검색어가 제품명에 포함되어 있는 경우) -->
-    <select id="findByNameContaining" parameterType="String" resultMap="productResultMap">
-        SELECT product_id, name, width, depth, height, weight,
-        is_fragile,
-        category
-        FROM product
-        WHERE name LIKE CONCAT('%', #{name}, '%')
-    </select>
-
-    <!-- 취급주의 물품 조회 -->
-    <select id="findByFragile" parameterType="boolean" resultMap="productResultMap">
-        SELECT product_id, name, width, depth, height, weight,
-        category, is_fragile
-        FROM product
-        WHERE is_fragile = #{fragile}
-    </select>
-
+	<!-- resultMap 정의: 각 컬럼을 명시적으로 매핑 -->
+	<resultMap id="productResultMap" type="app.labs.model.Product">
+		<id property="productId" column="product_id" />
+		<result property="name" column="name" />
+		<result property="width" column="width" />
+		<result property="depth" column="depth" />
+		<result property="height" column="height" />
+		<result property="weight" column="weight" />
+		<result property="category" column="category" />
+		<result property="isFragile" column="is_fragile" />
+		<result property="spec" column="spec" />
+	</resultMap>
+	<!-- 전체 물품 목록 조회 -->
+	<select id="findAll" resultMap="productResultMap">
+		SELECT product_id, name, width, depth, height, weight, is_fragile, category
+		FROM product
+	</select>
+	<!-- 카테고리 물품 조회 -->
+	<select id="findByCategory" parameterType="String" resultMap="productResultMap">
+		SELECT product_id, name, width, depth, height, weight, category, is_fragile
+		FROM product
+		WHERE category = #{category}
+	</select>
+	<!-- 카테고리, 취급주의 물품 조회 -->
+	<select id="findByCategoryAndFragile" resultMap="productResultMap">
+		SELECT product_id, name, width, depth, height, weight, category, is_fragile
+		FROM product
+		WHERE category = #{category} AND is_fragile = #{isFragile}
+	</select>
+	<!-- 이름으로 제품 검색 (검색어가 제품명에 포함되어 있는 경우) -->
+	<select id="findByNameContaining" parameterType="String"
+		resultMap="productResultMap">
+		SELECT product_id, name, width, depth, height, weight, is_fragile, category
+		FROM product
+		WHERE name LIKE CONCAT('%', #{name}, '%')
+	</select>
+	<!-- 취급주의 물품 조회 -->
+	<select id="findByFragile" parameterType="boolean"
+		resultMap="productResultMap">
+		SELECT product_id, name, width, depth, height, weight, category, is_fragile
+		FROM product
+		WHERE is_fragile = #{isFragile}
+	</select>
+  
     <!-- 제품 등록 -->
     <insert id="insert" useGeneratedKeys="true" keyProperty="productId">
         INSERT INTO product (name, width, depth, height, weight, is_fragile, category, spec)
@@ -76,5 +73,4 @@
         DELETE FROM product
         WHERE product_id = #{product_id}
     </delete>
-
 </mapper>

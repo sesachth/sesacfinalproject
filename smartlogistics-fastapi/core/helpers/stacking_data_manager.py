@@ -66,60 +66,65 @@ def add_volume_and_sort_dataframe(df_orders) -> pd.DataFrame:
 
     return df_orders
 
+# 한 파렛트 위에 무조건 동일한 크기의 물품들만 쌓는 휴리스틱 알고리즘
 def stack_boxes_heuristic(df_orders, pallet_width=1100, pallet_depth=1100, max_height=2000):
-    size_counts = df_orders['volume'].value_counts()
-    most_common_size = size_counts.index[0]
-    
-    df_filtered = df_orders[df_orders['volume'] == most_common_size].copy()
-    
-    print(f"선택된 박스 크기: {most_common_size}, 개수: {len(df_filtered)}")
-    
-    stacked_boxes = []
-    occupied_spaces = set()  # 이미 사용된 공간을 추적
+    stacking_results = {"pallets": []}
+    pallet_id = 1
 
-    box_width, box_depth, box_height = df_filtered.iloc[0][['box__width', 'box__depth', 'box__height']].astype(int)
-    
-    for z in range(0, max_height, box_height):
-        for y in range(0, pallet_depth, box_depth):
-            for x in range(0, pallet_width, box_width):
-                if (x + box_width <= pallet_width and 
-                    y + box_depth <= pallet_depth and 
-                    z + box_height <= max_height):
-                    
-                    space_key = (x, y, z)
-                    if space_key not in occupied_spaces:
-                        occupied_spaces.add(space_key)
-                        
-                        if len(stacked_boxes) < len(df_filtered):
-                            box_data = df_filtered.iloc[len(stacked_boxes)]
-                            stacked_boxes.append({
-                                "product_name": box_data['product__name'],
-                                "width": box_width / 1000,  # mm를 m로 변환
-                                "depth": box_depth / 1000,
-                                "height": box_height / 1000,
-                                "x_coordinate": x / 1000,
-                                "y_coordinate": z / 1000,
-                                "z_coordinate": y / 1000
-                            })
-                        else:
-                            break
-            if len(stacked_boxes) == len(df_filtered):
-                break
-        if len(stacked_boxes) == len(df_filtered):
-            break
+    # 모든 고유한 destination에 대해 반복
+    for destination in df_orders['destination'].unique():
+        df_destination = df_orders[df_orders['destination'] == destination]
 
-    # 결과를 요청한 형식으로 구성
-    stacking_results = {
-        "pallets": [
-            {
-                "pallet_id": 0,
-                "destination": df_filtered.iloc[0]['destination'],
-                "boxes": stacked_boxes
-            }
-        ]
-    }
+        # 각 destination 내에서 volume별로 그룹화
+        for volume in df_destination['volume'].unique():
+            df_filtered = df_destination[df_destination['volume'] == volume].copy()
+            
+            if df_filtered.empty:
+                continue
 
-    # CSV 파일로 저장
-    #pd.DataFrame(stacked_boxes).to_csv('stacked_boxes.csv', index=False, encoding='utf-8-sig')
+            print(f"처리 중: 목적지 - {destination}, 박스 크기 - {volume}, 개수: {len(df_filtered)}")
+            
+            stacked_boxes = []
+            occupied_spaces = set()
+
+            box_width, box_depth, box_height = df_filtered.iloc[0][['box__width', 'box__depth', 'box__height']].astype(int)
+            
+            for z in range(0, max_height, box_height):
+                for y in range(0, pallet_depth, box_depth):
+                    for x in range(0, pallet_width, box_width):
+                        if (x + box_width <= pallet_width and 
+                            y + box_depth <= pallet_depth and 
+                            z + box_height <= max_height):
+                            
+                            space_key = (x, y, z)
+                            if space_key not in occupied_spaces:
+                                occupied_spaces.add(space_key)
+                                
+                                if len(stacked_boxes) < len(df_filtered):
+                                    box_data = df_filtered.iloc[len(stacked_boxes)]
+                                    stacked_boxes.append({
+                                        "product_name": box_data['product__name'],
+                                        "width": box_width / 1000,  # mm를 m로 변환
+                                        "depth": box_depth / 1000,
+                                        "height": box_height / 1000,
+                                        "x_coordinate": x / 1000,
+                                        "y_coordinate": z / 1000,
+                                        "z_coordinate": y / 1000
+                                    })
+                                else:
+                                    break
+                    if len(stacked_boxes) == len(df_filtered):
+                        break
+                if len(stacked_boxes) == len(df_filtered):
+                    break
+
+            # 팔레트 정보 추가
+            if stacked_boxes:
+                stacking_results["pallets"].append({
+                    "pallet_id": pallet_id,
+                    "destination": destination,
+                    "boxes": stacked_boxes
+                })
+                pallet_id += 1
 
     return stacking_results
