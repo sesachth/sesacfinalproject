@@ -1,4 +1,257 @@
-/* Modified admin_product.css */
+/* 컨트롤 바 컨테이너 */
+.control-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 30px;
+    background-color: #F8F0FF;
+    border-radius: 14px 14px 0 0;
+}
+
+.left-controls {
+    display: flex;
+    /*gap: 50px; */
+    align-items: center;
+}
+
+.right-controls {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+/* 검색바 스타일 */
+.search-container {
+    position: relative;
+    width: 300px;
+}
+
+.search-input {
+    width: 100%;
+    height: 36px;
+    padding: 0 15px 0 40px;
+    border: 1px solid rgba(104, 38, 158, 0.6);
+    border-radius: 12px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    background-color: transparent;
+    outline: none;
+    color: rgba(104, 38, 158, 0.6);
+}
+
+.search-input::placeholder {
+    color: rgba(104, 38, 158, 0.6); /* placeholder 텍스트 색상 */
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.search-icon {
+    position: absolute;
+    left: 15px;            /* 검색창 오른쪽에 위치 */
+    top: 62%;              /* 수직 중앙 정렬 */
+    transform: translateY(-50%);
+    width: 20px;           /* 아이콘 전체 영역 */
+    height: 20px;
+}
+
+.magnifier {
+    position: relative; 
+    width: 100%;
+    height: 100%;
+}
+
+/* 돋보기 원형 부분 */
+.magnifier-circle {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border: 2px solid rgba(104, 38, 158, 0.6);  /* 보라색 테두리에 투명도 적용 */
+    border-radius: 50%;    /* 완전한 원 모양 */
+}
+
+/* 돋보기 손잡이 부분 */
+.magnifier-line {
+    position: absolute;
+    width: 6px;
+    height: 1.8px;        
+    background: rgba(104, 38, 158, 0.6);
+    top: 10.6px;
+    left: 9.7px; 
+    transform: rotate(45deg);
+    border-radius: 5px;
+}
+
+#searchProductBtn {
+    display: none;  /* 버튼을 완전히 숨김 */
+}
+
+
+/* 드롭다운 스타일 */
+
+/* 드롭다운 그룹 컨테이너 */
+.dropdown-group {
+    display: flex;
+    width: 374px;
+    border: 1px solid rgba(104, 38, 158, 0.6);
+    border-radius: 12px;
+    margin-left: 80px;
+    /* overflow: hidden;   내부 요소들이 border-radius를 벗어나지 않도록 */
+}
+
+.dropdown-container {
+    display: inline-block;
+    position: relative;
+    margin: 0;
+    padding: 0;
+    width: 50%;
+}
+
+/* 첫 번째 드롭다운 */
+.dropdown-container:first-child .dropdown-select {
+    border-right: 1px solid rgba(104, 38, 158, 0.6);  /* 구분선 */
+    border-radius: 12px 0 0 12px;  /* 왼쪽만 둥글게 */
+}
+
+/* 두 번째 드롭다운 */
+.dropdown-container:last-child .dropdown-select {
+    border-radius: 0 12px 12px 0;  /* 오른쪽만 둥글게 */
+}
+
+.dropdown-select {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 36px;
+    padding: 0;
+    border: none;
+    border-radius: 12px;
+
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+    text-align-last: center;
+    
+    background-color: transparent;
+    outline: none;
+    color: #68269E;
+    cursor: pointer;
+    min-width: 120px;
+    overflow: hidden;
+}
+
+/*
+.dropdown-select svg{
+    margin-left: 9px;
+    vertical-align: middle;
+}
+*/
+
+.arrow-icon {
+    margin-left: 9px;
+    margin-top: 5px;
+    vertical-align: middle;
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    width: 100%;
+    background: white;
+    border: 1px solid rgba(104, 38, 158, 0.6);
+    border-radius: 12px;
+
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    
+    overflow: hidden;
+
+    z-index: 1000;
+}
+
+.dropdown-menu.show {
+    display: block
+}
+
+.dropdown-item {
+    padding: 8px 10px;
+    color: #68269E;
+    cursor: pointer;
+}
+
+.dropdown-item:hover,
+.dropdown-item.active {
+    background-color: rgba(104, 38, 158, 0.1);
+}
+
+/* hover 효과 */
+.dropdown-group:hover {
+    border-color: rgba(104, 38, 158, 0.8);
+}
+
+/* 각 container별 hover 효과 
+.dropdown-container:hover,
+.dropdown-container:focus-within {
+    background-color: rgba(104, 38, 158, 0.1);
+    border-radius: 12px;
+}
+*/
+
+/* hover 시 select 색상 변경 (선택사항) 
+.dropdown-container:hover .dropdown-select {
+    color: rgba(104, 38, 158, 0.8);
+}*/
+
+.dropdown-select:hover,
+.dropdown-select.active {
+    background-color: rgba(104, 38, 158, 0.1);
+}
+
+/* 첫 번째 드롭다운 */
+.dropdown-container:first-child:hover {
+    border-radius: 12px 0 0 12px;  /* 왼쪽만 둥글게 */
+}
+
+/* 첫 번째 드롭다운 */
+.dropdown-container:last-child:hover {
+    border-radius: 0 12px 12px 0;  /* 오른쪽만 둥글게 */
+}
+
+
+/* 조회 버튼 스타일 */
+/* .inquiry-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 80px;
+    height: 37px;
+    margin-left: 2px;
+
+    border: 1px solid rgba(104, 38, 158, 0.6);
+    border-radius: 12px;
+    background-color: transparent;
+
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: #68269E;
+    cursor: pointer;
+}
+
+.inquiry-btn:hover {
+    background-color: rgba(104, 38, 158, 0.1);
+} */
+
+#filterBtn {
+    display: none;  /* 버튼을 완전히 숨김 */
+}
+
+
 
 /* 테이블 컨테이너 스타일 */
 .table-container {
@@ -97,4 +350,44 @@
     display: flex;
     justify-content: flex-end;
     margin-bottom: 10px;
+}
+
+
+
+
+
+/* 테이블 드롭다운 스타일 */
+.table-dropdown-menu {
+    min-width: 10rem;
+    padding: 0.5rem 0;
+    margin: 0;
+    font-size: 1rem;
+    color: #5e6e82;
+    text-align: left;
+    background-color: #fff;
+    border: 1px solid #d8e2ef;
+    border-radius: 0.375rem;
+}
+
+.table-dropdown-item {
+    display: block;
+    width: 100%;
+    padding: 0.25rem 1rem;
+    clear: both;
+    font-weight: 400;
+    color: #5e6e82;
+    text-align: inherit;
+    white-space: nowrap;
+    background-color: transparent;
+    border: 0;
+    cursor: pointer;
+}
+
+.table-dropdown-item:hover {
+    color: #5e6e82;
+    background-color: #f9fafd;
+}
+
+.table-dropdown-toggle::after {
+    display: none;
 }

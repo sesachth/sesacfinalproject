@@ -1,11 +1,11 @@
 // 선택된 값을 저장할 변수
 let selectedCampValue = '';
+let isCalendarOpen = false;
 
 document.addEventListener('DOMContentLoaded', function() {
     const dateFilter = document.getElementById('dateFilter');
     const dropdowns = document.getElementsByClassName('dropdown-menu');
-    let isCalendarOpen = false;
-
+    
     // ✅ 오늘 날짜를 기본값으로 설정
     const today = new Date();
     const year = today.getFullYear();
@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // 날짜 선택 이벤트
+    // 날짜 선택 이벤트 수정
     dateFilter.addEventListener('change', function(e) {
         const date = new Date(this.value);
         const formattedDate = date.toLocaleDateString('ko-KR', {
@@ -73,8 +73,11 @@ document.addEventListener('DOMContentLoaded', function() {
         const calendarContainer = this.closest('.dropdown-container');
         const dropdownSelect = calendarContainer.querySelector('.dropdown-select');
         if (dropdownSelect) {
-            dropdownSelect.classList.remove('active');  // active 클래스 제거
+            dropdownSelect.classList.remove('active');
         }
+
+        // 날짜 선택 시 바로 검색 실행
+        loadOrders();
     });
 
     // 외부 클릭 시 달력 닫기
@@ -99,7 +102,7 @@ document.addEventListener('DOMContentLoaded', function() {
     */
 });
 
-// 드롭다운 아이템 선택 함수
+// selectItem 함수 수정
 function selectItem(element, menuId, value) {
     if (element && element.parentElement) {
         // 이전 선택 항목의 active 클래스 제거
@@ -115,6 +118,7 @@ function selectItem(element, menuId, value) {
         const campFilter = document.getElementById('campFilter');
         if (campFilter) {
             campFilter.value = value;
+            selectedCampValue = value; // 전역 변수에 선택된 값 저장
         }
 
         // 선택된 아이템 표시 
@@ -134,6 +138,9 @@ function selectItem(element, menuId, value) {
 
         // 드롭다운 메뉴 닫기
         toggleDropdown(menuId);
+
+        // destination 선택 시 바로 검색 실행
+        loadOrders();
     }
 }
 
@@ -145,6 +152,13 @@ function toggleDropdown(menuId) {
         const dateFilter = document.getElementById('dateFilter');
         if (dateFilter) {
             dateFilter.blur();
+            isCalendarOpen = false;
+            // 달력의 active 상태 제거
+            const calendarContainer = dateFilter.closest('.dropdown-container');
+            const calendarSelect = calendarContainer.querySelector('.dropdown-select');
+            if (calendarSelect) {
+                calendarSelect.classList.remove('active');
+            }
         }
 
         // 다른 드롭다운 메뉴 닫기
@@ -184,13 +198,18 @@ document.getElementById("filterBtn").addEventListener("click", function () {
 });
 
 document.getElementById("generateOrderBtn").addEventListener("click", function () {
+    showLoading();  // ✅ 로딩 화면 표시
     fetch("/admin/order/generate", { method: "POST" })
         .then(response => response.json())
         .then(data => {
+            hideLoading();  // ✅ 주문 생성 완료 후 로딩 숨김
             alert(data.message);
             setTimeout(() => location.reload(), 1000);  // ✅ 주문 생성 후 자동 새로고침
         })
-        .catch(error => console.error("Error:", error));
+        .catch(error => {
+            hideLoading();  // ✅ 오류 발생 시 로딩 숨김
+            console.error("Error:", error);
+        });
 });
 
 document.getElementById("searchOrderBtn").addEventListener("click", function () {
@@ -240,7 +259,18 @@ function searchOrderByNum() {
 
 
 document.getElementById("downloadExcelBtn").addEventListener("click", function () {
-    window.location.href = "/admin/order/download/excel";
+    let date = document.getElementById("dateFilter").value || new Date().toISOString().split('T')[0];
+    let camp = document.getElementById("campFilter").value || "";
+    let orderNum = document.getElementById("orderNumSearch").value.trim(); 
+
+    // ✅ URL 파라미터 추가하여 필터링된 데이터 요청
+    let queryParams = new URLSearchParams();
+    queryParams.append("date", date);
+    if (camp) queryParams.append("destination", camp);
+    if (orderNum) queryParams.append("orderNum", orderNum);
+
+    // ✅ 필터링된 데이터 다운로드
+    window.location.href = `/admin/order/download/excel?${queryParams.toString()}`;
 });
 
 document.getElementById("prevGroup").addEventListener("click", function () {
@@ -334,4 +364,14 @@ function updatePagination() {
 
     document.getElementById("prevGroup").disabled = (currentPage === 1);
     document.getElementById("nextGroup").disabled = (currentPage === totalPages);
+}
+
+// ✅ 로딩 화면 표시 함수
+function showLoading() {
+    document.getElementById("loadingOverlay").style.display = "flex";
+}
+
+// ✅ 로딩 화면 숨김 함수
+function hideLoading() {
+    document.getElementById("loadingOverlay").style.display = "none";
 }

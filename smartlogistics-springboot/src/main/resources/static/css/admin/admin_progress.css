@@ -16,85 +16,20 @@
 
 .right-controls {
     display: flex;
-    gap: 12px;
+    gap: 4px;
     align-items: center;
 }
 
-/* 검색바 스타일 */
-.search-container {
-    position: relative;
-    width: 300px;
-}
-
-.search-input {
-    width: 100%;
-    height: 36px;
-    padding: 0 15px 0 40px;
-    border: 1px solid rgba(104, 38, 158, 0.6);
-    border-radius: 12px;
-    font-family: 'Inter', sans-serif;
-    font-size: 14px;
-    font-weight: 600;
-    background-color: transparent;
-    outline: none;
-    color: rgba(104, 38, 158, 0.6);
-}
-
-.search-input::placeholder {
-    color: rgba(104, 38, 158, 0.6); /* placeholder 텍스트 색상 */
-    text-decoration: none;
-    font-weight: 600;
-}
-
-.search-icon {
-    position: absolute;
-    left: 15px;            /* 검색창 오른쪽에 위치 */
-    top: 62%;              /* 수직 중앙 정렬 */
-    transform: translateY(-50%);
-    width: 20px;           /* 아이콘 전체 영역 */
-    height: 20px;
-}
-
-.magnifier {
-    position: relative; 
-    width: 100%;
-    height: 100%;
-}
-
-/* 돋보기 원형 부분 */
-.magnifier-circle {
-    position: absolute;
-    width: 12px;
-    height: 12px;
-    border: 2px solid rgba(104, 38, 158, 0.6);  /* 보라색 테두리에 투명도 적용 */
-    border-radius: 50%;    /* 완전한 원 모양 */
-}
-
-/* 돋보기 손잡이 부분 */
-.magnifier-line {
-    position: absolute;
-    width: 6px;
-    height: 1.8px;        
-    background: rgba(104, 38, 158, 0.6);
-    top: 10.6px;
-    left: 9.7px; 
-    transform: rotate(45deg);
-    border-radius: 5px;
-}
-
-#searchOrderBtn {
-    display: none;  /* 버튼을 완전히 숨김 */
-}
 
 /* 드롭다운 스타일 */
 
 /* 드롭다운 그룹 컨테이너 */
 .dropdown-group {
     display: flex;
-    width: 374px;
+    width: 480px;
     border: 1px solid rgba(104, 38, 158, 0.6);
     border-radius: 12px;
-    margin-left: 80px;
+    /* margin-left: 80px; */
     /* overflow: hidden;   내부 요소들이 border-radius를 벗어나지 않도록 */
 }
 
@@ -112,7 +47,13 @@
     border-radius: 12px 0 0 12px;  /* 왼쪽만 둥글게 */
 }
 
-/* 두 번째 드롭다운 */
+/* 첫 번째 드롭다운 */
+.dropdown-container:nth-child(2) .dropdown-select {
+    border-right: 1px solid rgba(104, 38, 158, 0.6);  /* 구분선 */
+    border-radius: 0 0 0 0;  /* 오른쪽만 둥글게 */
+}
+
+/* 마지막 번째 드롭다운 */
 .dropdown-container:last-child .dropdown-select {
     border-radius: 0 12px 12px 0;  /* 오른쪽만 둥글게 */
 }
@@ -141,72 +82,11 @@
     overflow: hidden;
 }
 
-/*
-.dropdown-select svg{
-    margin-left: 9px;
-    vertical-align: middle;
-}
-*/
-
-.calendar-icon {
-    margin-top: 2.9px;
-    margin-left: 0px;
-    margin-right: 9px;
-    vertical-align: middle;
-    width: 15px;
-    height: 15px;
-}
-
 .arrow-icon {
     margin-left: 9px;
     margin-top: 5px;
     vertical-align: middle;
 }
-
-.date-input {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    opacity: 0;
-    cursor: pointer;
-
-    /* 텍스트 중앙 정렬을 위한 속성 추가 */
-    display: flex;
-    justify-content: center;  /* 가로 중앙 정렬 */
-    align-items: center;      /* 세로 중앙 정렬 */
-    text-align: center;       /* 텍스트 가운데 정렬 */
-
-    overflow: hidden;
-}
-
-.date-placeholder {
-    color: #68269E;
-    font-size: 14px;
-    pointer-events: none;
-}
-
-/* 날짜 선택 input의 기본 스타일 제거 */
-.date-input::-webkit-calendar-picker-indicator {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    padding: 0;
-    cursor: pointer;
-    opacity: 0;
-}
-
-
-
-
-
-
-
-
 
 
 .dropdown-menu {
@@ -280,31 +160,6 @@
     border-radius: 0 12px 12px 0;  /* 오른쪽만 둥글게 */
 }
 
-
-/* 조회 버튼 스타일 */
-/* .inquiry-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 80px;
-    height: 37px;
-    margin-left: 2px;
-
-    border: 1px solid rgba(104, 38, 158, 0.6);
-    border-radius: 12px;
-    background-color: transparent;
-
-    font-family: 'Inter', sans-serif;
-    font-size: 14px;
-    font-weight: 600;
-    color: #68269E;
-    cursor: pointer;
-}
-
-.inquiry-btn:hover {
-    background-color: rgba(104, 38, 158, 0.1);
-} */
-
 #filterBtn {
     display: none;  /* 버튼을 완전히 숨김 */
 }
@@ -332,15 +187,19 @@
     border: 1px solid rgba(104, 38, 158, 0.6);
 }
 
-.btn-add {
-    background-color: white;
+.date-show {
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
     color: #68269E;
-    border: 1px solid rgba(104, 38, 158, 0.6);
 }
 
-.plus-icon {
-    font-size: 18px;
-    font-weight: bold;
+.date-text {
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: #68269E;
+    margin-right: 20px;
 }
 
 /* Export 아이콘 */
@@ -359,9 +218,11 @@
     background-color: rgba(104, 38, 158, 0.1);
 }
 
-.btn-add:hover {
-    background-color: rgba(104, 38, 158, 0.1);
-}
+
+
+
+
+
 
 /* 테이블 스타일 */
 
@@ -383,7 +244,7 @@ table {
 }
 
 
-.order-table th {
+.progress-table th {
     padding: 12px;
     text-align: center;
     vertical-align: middle;
@@ -394,22 +255,26 @@ table {
 }
 
 /* 테이블 헤더를 고정하기 위한 스타일 */
-.order-table thead th {
+.progress-table thead th {
     position: sticky;
     top: 0;
     background-color: #FFFFFF;
     border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 }
 
-.order-table td {
+.progress-table td {
     padding: 4px 12px;
     border-bottom: 0.8px solid rgba(0, 0, 0, 0.05);
     color: black;
     text-align: center;
     vertical-align: middle;
+
+    white-space: nowrap;        /* 모든 셀에 대해 줄바꿈 방지 */
+    overflow: hidden;           /* 넘치는 텍스트 숨김 */
+    text-overflow: ellipsis;    /* 말줄임표 표시 */
 }
 
-.order-table tbody {
+.progress-table tbody {
     display: block;
     height: 520px;
     overflow-y: scroll;
@@ -426,32 +291,32 @@ table tbody tr {
 }
 
   
-table thead tr th {
+  table thead tr th {
     width: 140px
-}
-
-table tbody tr td {
+  }
+  
+  table tbody tr td {
     width: 140px
-}
-
-table tfoot tr td {
+  }
+  
+  table tfoot tr td {
     width: 140px
-}
+  }
 
-.order-table tbody tr:hover {
+.progress-table tbody tr:hover {
     background-color: #F8F9FA;
 }
 
 
-.order-table .align-left {
+.progress-table .align-left {
     text-align: left;
 }
 
-.order-table .align-right {
+.progress-table .align-right {
     text-align: right;
 }
 
-.order-table .align-center {
+.progress-table .align-center {
     text-align: center;
 }
 
@@ -463,33 +328,37 @@ table tbody tr td:nth-child(1) {
 
 table thead tr th:nth-child(2),
 table tbody tr td:nth-child(2) {
-    width: 25%;  /* product_name */
+    width: 30%;  /* product_name */
+    text-align: left;
+    padding-left: 40px;
 }
 
 table thead tr th:nth-child(3),
 table tbody tr td:nth-child(3) {
-    width: 20%;  /* product_category */
+    width: 12%;  /* product_category */
+    text-align: left;
 }
 
 table thead tr th:nth-child(4),
 table tbody tr td:nth-child(4) {
-    width: 20%;  /* box_spec */
+    width: 12%;  /* box_spec */
 }
 
 table thead tr th:nth-child(5),
 table tbody tr td:nth-child(5) {
-    width: 15%;  /* pallet_id */
+    width: 11%;  /* pallet_id */
 }
 
 table thead tr th:nth-child(6),
 table tbody tr td:nth-child(6) {
-        width: 15%;  /* box_state */
-    }
+    width: 15%;  /* box_state */
+}
 
 table thead tr th:nth-child(7),
 table tbody tr td:nth-child(7) {
     width: 15%;  /* progress_state */
 }
+
 
 
 
@@ -547,50 +416,4 @@ table tbody tr td:nth-child(7) {
     justify-content: center;
     margin: 0 4px;
     box-sizing: border-box;
-}
-
-/* 전체 로딩 화면 (초기에는 숨김) */
-#loadingOverlay {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(255, 255, 255, 0.9); /* 반투명 흰색 */
-    z-index: 9999;
-    justify-content: center;
-    align-items: center;
-}
-
-/* 로딩 UI 컨테이너 */
-.loading-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-}
-
-/* 원형 스피너 (연보라색) */
-.loading-spinner {
-    width: 50px;
-    height: 50px;
-    border: 5px solid rgba(200, 150, 255, 0.3);
-    border-top: 5px solid #c096ff; /* 연보라색 */
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-}
-
-/* 스피너 회전 애니메이션 */
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-/* 로딩 텍스트 (연보라색) */
-.loading-text {
-    font-size: 18px;
-    font-weight: bold;
-    color: #68269E; /* 연보라색 */
-    margin-top: 15px;
 }
