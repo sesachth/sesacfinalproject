@@ -24,13 +24,13 @@ class OrderModel(BaseModel):
         from_attributes = True
 
 class ProductModel(BaseModel):
-    product_id: int
+    product_id: Optional[int] = None
     name: str = Field(max_length=45)
     width: float
     depth: float
     height: float
     weight: float
-    is_fragile: bool
+    is_fragile: bool 
     category: str = Field(max_length=30)
     spec: Optional[int] = None
 

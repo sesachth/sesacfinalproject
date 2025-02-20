@@ -212,6 +212,7 @@ document.getElementById("generateOrderBtn").addEventListener("click", function (
         });
 });
 
+
 document.getElementById("searchOrderBtn").addEventListener("click", function () {
     searchOrderByNum();
 });
@@ -272,6 +273,7 @@ document.getElementById("downloadExcelBtn").addEventListener("click", function (
     // ✅ 필터링된 데이터 다운로드
     window.location.href = `/admin/order/download/excel?${queryParams.toString()}`;
 });
+
 
 document.getElementById("prevGroup").addEventListener("click", function () {
     if (currentPage > 1) {

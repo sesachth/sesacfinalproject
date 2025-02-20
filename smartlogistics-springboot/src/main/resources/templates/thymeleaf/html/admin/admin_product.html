@@ -24,27 +24,25 @@
         crossorigin="anonymous"></script>
 
 	<style>
-	/* 드롭다운 버튼 테두리 제거 */
-	.btn-reveal-trigger .btn-reveal {
-		border: none !important;
-		box-shadow: none !important;
-		background: transparent !important;
-	}
+/* 드롭다운 버튼 테두리 제거 */
+.btn-reveal-trigger .btn-reveal {
+	border: none !important;
+	box-shadow: none !important;
+	background: transparent !important;
+}
 
-	.btn-reveal-trigger .btn-reveal:hover,
-	.btn-reveal-trigger .btn-reveal:focus,
+.btn-reveal-trigger .btn-reveal:hover, .btn-reveal-trigger .btn-reveal:focus,
 	.btn-reveal-trigger .btn-reveal:active {
-		border: none !important;
-		box-shadow: none !important;
-		background: transparent !important;
-	}
+	border: none !important;
+	box-shadow: none !important;
+	background: transparent !important;
+}
 
-	/* 드롭다운 화살표 제거 */
-	.dropdown-caret-none::after {
-		display: none !important;
-	}
-	</style>
-
+/* 드롭다운 화살표 제거 */
+.dropdown-caret-none::after {
+	display: none !important;
+}
+</style>
 </head>
 
 <body>
@@ -60,70 +58,95 @@
 				<button type="button" class="btn btn-primary" id="addBtn">
 					Add Product</button>
 			</div>
+				<!-- 상단 버튼 -->
+				<div class="product-actions">
+					<button type="button" class="btn btn-primary" id="addBtn">
+						Add Product</button>
+				</div>
+				<div layout:fragment="content" class="main-content">
+					<!-- 제품 목록 테이블 -->
+					<div class="table-container">
 
-			<!-- 본문 콘텐츠 영역 -->
-			<div layout:fragment="content" class="main-content">
-				<!-- 상단 컨트롤 바 -->
-				<div class="control-bar">
-					<div class="left-controls">
-						<!-- 물품명 검색바 -->
-						<div class="search-container">
-							<input type="text" id="productNameSearch" class="search-input" placeholder="제품명 입력">
-							<div class="search-icon">
-								<div class="magnifier">
-									<div class="magnifier-circle"></div>
-									<div class="magnifier-line"></div>
-								</div>
-							</div>
-							<button id="searchProductBtn">검색</button>
+						<div class="search-filter-container">
+							<!-- 검색 폼 -->
+							<form class="search-form" style="display: inline-block;">
+								<input type="text" name="name" placeholder="제품명 검색" />
+								<button type="submit">검색</button>
+							</form>
+
+							<!-- 필터 -->
+							<label for="categoryFilter">Category:</label> <select
+								id="categoryFilter">
+								<option value="전체">전체</option>
+								<option value="잡화류" th:selected="${selectedCategory eq '잡화류'}">잡화류</option>
+								<option value="전자제품류"
+									th:selected="${selectedCategory eq '전자제품류'}">전자제품류</option>
+								<option value="가공식품" th:selected="${selectedCategory eq '가공식품'}">가공식품</option>
+								<option value="제과류" th:selected="${selectedCategory eq '제과류'}">제과류</option>
+								<option value="음료" th:selected="${selectedCategory eq '음료'}">음료</option>
+								<option value="의류" th:selected="${selectedCategory eq '의류'}">의류</option>
+								<option value="세정용 화장품류"
+									th:selected="${selectedCategory eq '세정용 화장품류'}">세정용
+									화장품류</option>
+								<option value="그 밖의 화장품류"
+									th:selected="${selectedCategory eq '그 밖의 화장품류'}">그 밖의
+									화장품류</option>
+								<option value="의약외품류"
+									th:selected="${selectedCategory eq '의약외품류'}">의약외품류</option>
+								<option value="세제류" th:selected="${selectedCategory eq '세제류'}">세제류</option>
+								<option value="건강기능식품"
+									th:selected="${selectedCategory eq '건강기능식품'}">건강기능식품</option>
+								<!-- 기존 카테고리 옵션들 -->
+							</select> <label for="fragileFilter">Fragile:</label> <select
+								id="fragileFilter">
+								<option value="전체">전체</option>
+								<option value="true">Yes</option>
+								<option value="false">No</option>
+							</select>
 						</div>
 
-						<!-- 전체 필터 -->
-						<div class="dropdown-group">
-							<!-- 카테고리 필터 -->
-							<div class="dropdown-container">
-								<div class="dropdown-select" onclick="toggleDropdown('categoryMenu')">
-									Category
-									<svg class="arrow-icon" width="10" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-										<path d="M1 1L5.97126 6L11 1" stroke="#68269E" stroke-width="1.2" stroke-linecap="round"/>
-									</svg>
-								</div>
-								<div class="dropdown-menu" id="categoryMenu">
-									<div class="dropdown-item" data-value="" onclick="selectItem(this, 'categoryMenu', '')">Category</div>
-									<div class="dropdown-item" data-value="가공식품" onclick="selectItem(this, 'categoryMenu', '가공식품')">가공식품</div>
-									<div class="dropdown-item" data-value="건강기능식품" onclick="selectItem(this, 'categoryMenu', '건강기능식품')">건강기능식품</div>
-									<div class="dropdown-item" data-value="그 밖의 화장품류" onclick="selectItem(this, 'categoryMenu', '그 밖의 화장품류')">그 밖의 화장품류</div>
-									<div class="dropdown-item" data-value="세정용 화장품류" onclick="selectItem(this, 'categoryMenu', '세정용 화장품류')">세정용 화장품류</div>
-									<div class="dropdown-item" data-value="세제류" onclick="selectItem(this, 'categoryMenu', '세제류')">세제류</div>
-									<div class="dropdown-item" data-value="음료" onclick="selectItem(this, 'categoryMenu', '음료')">음료</div>
-									<div class="dropdown-item" data-value="의류" onclick="selectItem(this, 'categoryMenu', '의류')">의류</div>
-									<div class="dropdown-item" data-value="의약외품류" onclick="selectItem(this, 'categoryMenu', '의약외품류')">의약외품류</div>
-									<div class="dropdown-item" data-value="잡화류" onclick="selectItem(this, 'categoryMenu', '잡화류')">잡화류</div>
-									<div class="dropdown-item" data-value="전자제품류" onclick="selectItem(this, 'categoryMenu', '전자제품류')">전자제품류</div>
-									<div class="dropdown-item" data-value="제과류" onclick="selectItem(this, 'categoryMenu', '제과류')">제과류</div>
-								</div>
-								<!-- hidden input 추가 -->
-								<input type="hidden" id="categoryFilter" value="" />
-							</div>
-						
-							<!-- 취급주의 필터 -->
-							<div class="dropdown-container">
-								<div class="dropdown-select" onclick="toggleDropdown('fragileMenu')">
-									Fragile
-									<svg class="arrow-icon" width="10" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-										<path d="M1 1L5.97126 6L11 1" stroke="#68269E" stroke-width="1.2" stroke-linecap="round"/>
-									</svg>
-								</div>
-								<div class="dropdown-menu" id="fragileMenu">
-									<div class="dropdown-item" data-value="" onclick="selectItem(this, 'fragileMenu', '')">Fragile</div>
-									<div class="dropdown-item" data-value="true" onclick="selectItem(this, 'fragileMenu', 'true')">Yes</div>
-									<div class="dropdown-item" data-value="false" onclick="selectItem(this, 'fragileMenu', 'false')">No</div>
-								</div>
-								<!-- hidden input 추가 -->
-								<input type="hidden" id="fragileFilter" value="" />
-							</div>
-						</div>
-						<button class="inquiry-btn" id="filterBtn">조회</button>
+						<table class="product-table" id="productTable">
+
+							<h1>Product List</h1>
+
+							<thead>
+								<tr>
+									<th class="d-none"></th>
+									<th>NO.</th>
+									<th>Name</th>
+									<th>Width</th>
+									<th>Depth</th>
+									<th>Height</th>
+									<th>Weight</th>
+									<th>Category</th>
+									<th>Fragile</th>
+								</tr>
+							</thead>
+
+
+							<tbody id="listBody">
+								<tr th:each="product, iterStat : ${products}">
+									<td class="productId d-none" th:text="${product.productId}"></td>
+									<td class="index" th:text="${iterStat.index + 1}"></td>
+									<!-- ID 대신 1부터 시작하는 인덱스 -->
+									<td class="name" th:text="${product.name}"></td>
+									<td class="width" th:text="${product.width}"></td>
+									<td class="depth" th:text="${product.depth}"></td>
+									<td class="height" th:text="${product.height}"></td>
+									<td class="weight" th:text="${product.weight}"></td>
+									<td class="category" th:text="${product.category}"></td>
+									<td class="isFragile"
+										th:text="${product.isFragile != null ? (product.isFragile ? 'Yes' : 'No') : 'No'}"></td>
+								</tr>
+
+								<tr th:if="${products.size() == 0}">
+									<td colspan="9" style="text-align: center;">No products
+										found.</td>
+								</tr>
+
+							</tbody>
+
+						</table>
 					</div>
 					<!--상단 컨트롤 바 종료 부분-->
 
@@ -197,75 +220,44 @@
 </th:block>
 
 	<!-- 물품 추가, 수정 시 뜰 모달창 -->
-	<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-		<div class="modal-dialog">
+	<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog"
+		aria-labelledby="exampleModalLabel">
+		<div class="modal-dialog modal-full" role="document">
 			<div class="modal-content">
 				<div class="modal-header">
-					<h1 class="modal-title fs-5" id="exampleModalLabel">Add Product</h1>
-					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
-						<span aria-hidden="true">&times;</span>
+					<h1 class="modal-title fs-5" id="exampleModalLabel">Add
+						Product</h1>
+					<button type="button" class="btn-close" data-bs-dismiss="modal"
+						aria-label="Close">
+						<span class="visually-hidden">Close</span>
 					</button>
 				</div>
 				<div class="modal-body">
-					<form th:action="@{/admin/product/add}" method="post" id="productAdd">
-						<input id="modalIndex" type="hidden" name="index" />
-						
-						<div class="form-group">
-							<label for="modalName">Name:</label>
-							<input id="modalName" type="text" name="name" class="form-control" required />
-						</div>
-				
-						<div class="form-group">
-							<label for="modalWidth">Width:</label>
-							<input id="modalWidth" type="number" name="width" class="form-control" required />
-						</div>
-				
-						<div class="form-group">
-							<label for="modalDepth">Depth:</label>
-							<input id="modalDepth" type="number" name="depth" class="form-control" required />
-						</div>
-				
-						<div class="form-group">
-							<label for="modalHeight">Height:</label>
-							<input id="modalHeight" type="number" name="height" class="form-control" required />
-						</div>
-				
-						<div class="form-group">
-							<label for="modalWeight">Weight:</label>
-							<input id="modalWeight" type="number" name="weight" class="form-control" required />
-						</div>
-				
-						<div class="form-group">
-							<label for="modalCategory">Category:</label>
-							<div class="dropdown-container">
-								<div class="dropdown-select" onclick="toggleDropdown('modalCategoryMenu')">
-									<span id="selectedCategory">선택하세요</span>
-									<svg class="arrow-icon" width="10" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-										<path d="M1 1L5.97126 6L11 1" stroke="#68269E" stroke-width="1.2" stroke-linecap="round"/>
-									</svg>
-								</div>
-								<div class="dropdown-menu" id="modalCategoryMenu">
-									<div class="dropdown-item" onclick="selectModalCategory(this, '')">선택하세요</div>
-									<div class="dropdown-item" onclick="selectModalCategory(this, '잡화류')">잡화류</div>
-									<div class="dropdown-item" onclick="selectModalCategory(this, '전자제품류')">전자제품류</div>
-									<div class="dropdown-item" onclick="selectModalCategory(this, '가공식품')">가공식품</div>
-									<div class="dropdown-item" onclick="selectModalCategory(this, '제과류')">제과류</div>
-									<div class="dropdown-item" onclick="selectModalCategory(this, '음료')">음료</div>
-									<div class="dropdown-item" onclick="selectModalCategory(this, '의류')">의류</div>
-									<div class="dropdown-item" onclick="selectModalCategory(this, '세정용 화장품류')">세정용 화장품류</div>
-									<div class="dropdown-item" onclick="selectModalCategory(this, '그 밖의 화장품류')">그 밖의 화장품류</div>
-									<div class="dropdown-item" onclick="selectModalCategory(this, '의약외품류')">의약외품류</div>
-									<div class="dropdown-item" onclick="selectModalCategory(this, '세제류')">세제류</div>
-									<div class="dropdown-item" onclick="selectModalCategory(this, '건강기능식품')">건강기능식품</div>
-								</div>
-								<input type="hidden" id="modalCategory" name="category" required />
-							</div>
-						</div>
-				
-						<div class="form-group">
-							<label for="fragileCheckbox">Fragile:</label>
-							<input type="checkbox" name="fragile" id="fragileCheckbox" value="true" />
-						</div>
+					<form th:action="@{/admin/product/add}" method="post"
+						id="productAdd">
+						<input id="modalIndex" type="hidden" name="index" /> 
+							Name: <input id="modalName" type="text" name="name" required /><br />
+							Width: <input id="modalWidth" type="number" name="width" required /><br />
+							Depth: <input id="modalDepth" type="number" name="depth" required /><br />
+							Height: <input id="modalHeight" type="number" name="height" required /><br /> 
+							Weight: <input id="modalWeight" type="number"name="weight" required /><br /> 
+							Category: 
+							<select id="modalCategory" name="category" required>
+								<option value="">선택하세요</option>
+								<option value="잡화류">잡화류</option>
+								<option value="전자제품류">전자제품류</option>
+								<option value="가공식품">가공식품</option>
+								<option value="제과류">제과류</option>
+								<option value="음료">음료</option>
+								<option value="의류">의류</option>
+								<option value="세정용 화장품류">세정용 화장품류</option>
+								<option value="그 밖의 화장품류">그 밖의 화장품류</option>
+								<option value="의약외품류">의약외품류</option>
+								<option value="세제류">세제류</option>
+								<option value="건강기능식품">건강기능식품</option>
+							</select><br /> 
+							Fragile: <input type="checkbox" name="isFragile" id="fragileCheckbox" value="1" /> 
+									 <input type="hidden"name="isFragileHidden" id="isFragileHidden" value="0" />>
 					</form>
 				</div>
 				<div class="modal-footer">
@@ -277,7 +269,454 @@
 		</div>
 	</div>
 
+	<script>
+		// 페이지네이션 관련 전역 변수
+		let currentPage = 1;
+		let rowsPerPage = 20;
+		let pageGroupSize = 10;
+		let totalPages = 1;
+		let currentProducts = []; // 전체 제품 데이터 저장용
 
-	<script th:src="@{/js/admin/admin_product.js}"></script>
+		// 페이지 로드 시 실행
+		$(document).ready(function() {
+			initializeEventHandlers();
+			initializePaginationButtons(); // 페이지네이션 버튼 초기화 추가
+			searchProducts();
+		});
+		
+
+		// 모든 이벤트 핸들러 초기화
+		function initializeEventHandlers() {
+			// Add Product 버튼 이벤트
+			$("#addBtn").on("click", function() {
+				clearModalInputs();
+				$("#exampleModalLabel").text("Add Product");
+				$("#exampleModal").modal('show');
+			});
+
+			// Submit 버튼 이벤트
+			$("#submit-btn").on("click", handleSubmit);
+
+			// 검색 폼 제출 이벤트
+			$(".search-form").on("submit", function(e) {
+				e.preventDefault();
+				searchProducts();
+			});
+
+			// 필터 변경 이벤트
+			$("#categoryFilter, #fragileFilter").on("change", function() {
+				searchProducts();
+			});
+		}
+
+		// 통합 검색 함수
+		function searchProducts() {
+			let searchQuery = $(".search-form input[name='name']").val().trim();
+			let filterInfo = {
+				name: searchQuery,
+				filter: $("#categoryFilter").val()?.trim() || "전체",
+				isFragile: $("#fragileFilter").val()?.trim() || "전체"
+			};
+
+			$.ajax({
+				url: "/admin/product/search",
+				type: "GET",
+				data: filterInfo,
+				success: function(data) {
+					updateProductList(data);
+				},
+				error: function(xhr, status, error) {
+					console.error("검색 오류:", error);
+					alert("검색 중 오류가 발생했습니다.");
+				}
+			});
+		}
+
+		// 제품 목록 업데이트
+		function updateProductList(products) {
+			currentProducts = products;
+			// 최소 1페이지는 항상 존재하도록 설정
+			totalPages = Math.max(1, Math.ceil(products.length / rowsPerPage));
+			currentPage = 1; // 검색/필터링 시 첫 페이지로 초기화
+			displayCurrentPage();
+			updatePagination();
+		}
+
+		// 현재 페이지 표시
+		function displayCurrentPage() {
+			let startIndex = (currentPage - 1) * rowsPerPage;
+			let endIndex = Math.min(startIndex + rowsPerPage, currentProducts.length);
+			let currentPageProducts = currentProducts.slice(startIndex, endIndex);
+			
+			let html = '';
+			if (currentPageProducts.length === 0) {
+				html = '<tr><td colspan="9" class="text-center">검색 결과가 없습니다.</td></tr>';
+			} else {
+				currentPageProducts.forEach((product, index) => {
+					// isFragile 값을 명시적으로 확인
+					let isFragileValue = product.fragile === true || product.fragile === 1;
+					
+					html += `<tr>
+						<td class="productId d-none">${product.productId}</td>
+						<td class="index">${startIndex + index + 1}</td>
+						<td class="name">${product.name}</td>
+						<td class="width">${product.width}</td>
+						<td class="depth">${product.depth}</td>
+						<td class="height">${product.height}</td>
+						<td class="weight">${product.weight}</td>
+						<td class="category">${product.category}</td>
+						<td class="isFragile">${isFragileValue ? 'Yes' : 'No'}</td>
+						<td>
+							<div class="btn-reveal-trigger position-static">
+								<button class="btn btn-sm dropdown-toggle dropdown-caret-none transition-none btn-reveal" type="button" data-bs-toggle="dropdown" data-boundary="window" aria-haspopup="true" aria-expanded="false" data-bs-reference="parent">
+									•••
+								</button>
+								<div class="dropdown-menu py-2">
+									<a class="dropdown-item editBtn" onclick="handleEdit(this)">Edit</a>
+									<a class="dropdown-item deleteBtn">Delete</a>
+								</div>
+							</div>
+						</td>
+						
+					</tr>`;
+				});
+			}
+			
+			$("#listBody").html(html);
+			bindDeleteButtons();
+		}
+
+		// 페이지네이션 UI 업데이트
+		function updatePagination() {
+			let pageNumbersElement = $("#pageNumbers");
+			pageNumbersElement.empty();
+			
+			// 검색 결과가 없을 때도 페이지네이션 표시
+			if (currentProducts.length === 0) {
+				$("#prevGroup, #nextGroup").hide();
+				let btn = $("<button>")
+					.text(1)
+					.addClass("btn mx-1 btn-purple btn-purple-active")
+					.prop("disabled", true);
+				pageNumbersElement.append(btn);
+				return;
+			}
+			
+			$("#prevGroup, #nextGroup").show();
+			
+			let startPage = Math.floor((currentPage - 1) / pageGroupSize) * pageGroupSize + 1;
+			let endPage = Math.min(startPage + pageGroupSize - 1, totalPages);
+			
+			// 최소 1페이지는 항상 표시
+			endPage = Math.max(1, endPage);
+			
+			// 이전 그룹 버튼
+			$("#prevGroup")
+				.prop("disabled", startPage <= 1)
+				.removeClass("btn-secondary")
+				.addClass("btn-purple");
+			
+			// 페이지 번호 버튼들
+			for (let i = startPage; i <= endPage; i++) {
+				let btn = $("<button>")
+					.text(i)
+					.addClass("btn mx-1 btn-purple")
+					.on("click", function() {
+						if (currentPage !== i) {
+							currentPage = i;
+							displayCurrentPage();
+							updatePagination();
+						}
+					});
+				
+				if (i === currentPage) {
+					btn.removeClass("btn-purple").addClass("btn-purple-active");
+				}
+				
+				pageNumbersElement.append(btn);
+			}
+			
+			// 다음 그룹 버튼
+			$("#nextGroup")
+				.prop("disabled", endPage >= totalPages)
+				.removeClass("btn-secondary")
+				.addClass("btn-purple");
+		}
+
+		// 이전/다음 그룹 버튼 이벤트 핸들러
+		function initializePaginationButtons() {
+			$("#prevGroup").on("click", function() {
+				if (!$(this).prop("disabled")) {
+					currentPage = Math.max(1, currentPage - pageGroupSize);
+					displayCurrentPage();
+					updatePagination();
+				}
+			});
+
+			$("#nextGroup").on("click", function() {
+				if (!$(this).prop("disabled")) {
+					currentPage = Math.min(totalPages, currentPage + pageGroupSize);
+					displayCurrentPage();
+					updatePagination();
+				}
+			});
+		}
+
+		// Delete 버튼 이벤트 바인딩
+		function bindDeleteButtons() {
+			$(".deleteBtn").off("click").on("click", function() {
+				let productId = $(this).closest("tr").find(".productId").text().trim();
+				handleDelete(productId);
+			});
+		}
+
+		// Delete 처리
+		function handleDelete(productId) {
+			if (confirm("정말로 이 제품을 삭제하시겠습니까?")) {
+				$.ajax({
+					url: `/admin/product/delete/${productId}`,
+					type: "GET",
+					success: function() {
+						searchProducts(); // 삭제 후 목록 새로고침
+					},
+					error: function() {
+						alert("제품 삭제 중 오류가 발생했습니다.");
+					}
+				});
+			}
+		}
+
+		// Edit 처리
+		function handleEdit(button) {
+			let row = $(button).closest("tr");
+			
+			// 모달 제목 변경
+			$("#exampleModalLabel").text("Edit Product");
+			
+			// 값 채우기
+			$("#modalIndex").val(row.find(".productId").text().trim());
+			$("#modalName").val(row.find(".name").text().trim());
+			$("#modalWidth").val(row.find(".width").text().trim());
+			$("#modalDepth").val(row.find(".depth").text().trim());
+			$("#modalHeight").val(row.find(".height").text().trim());
+			$("#modalWeight").val(row.find(".weight").text().trim());
+			$("#modalCategory").val(row.find(".category").text().trim());
+			
+			// Fragile 상태 설정
+			let isFragileText = row.find(".isFragile").text().trim();
+			$("#fragileCheckbox").prop("checked", isFragileText === "Yes");
+			
+		    $("#exampleModal").removeAttr("aria-hidden");
+
+		    // 모달 열기
+		    $("#exampleModal").modal("show");
+		    
+		 	// 🔥 Bootstrap의 `shown.bs.modal` 이벤트를 사용해 포커스 조정
+		    $("#exampleModal").on("shown.bs.modal", function () {
+		        $("#modalName").trigger("focus"); // 첫 번째 입력 필드에 포커스
+		    });
+		 	
+		    // 🔥 추가: 모달이 닫힐 때 이벤트 정리
+		    $("#exampleModal").on("hidden.bs.modal", function () {
+		        $("#exampleModal").off("shown.bs.modal hidden.bs.modal"); // 이벤트 정리
+		    });
+			
+		}
+
+		// Submit 처리
+		function handleSubmit() {
+			let product = {
+				productId: $("#modalIndex").val().trim(),
+				name: $("#modalName").val().trim(),
+				width: $("#modalWidth").val().trim(),
+				depth: $("#modalDepth").val().trim(),
+				height: $("#modalHeight").val().trim(),
+				weight: $("#modalWeight").val().trim(),
+				category: $("#modalCategory").val().trim(),
+				isFragile: $("#fragileCheckbox").is(":checked") ? 1 : 0
+				
+			};
+
+			if (!validateProduct(product)) {
+				alert("모든 필드를 입력해주세요.");
+				return;
+			}
+
+			if (product.productId) {
+				updateProduct(product);
+			} else {
+				addProduct(product);
+			}
+		}
+
+		// 제품 추가
+		function addProduct(product) {
+			$.ajax({
+				url: "/admin/product/add",
+				type: "POST",
+				data: product,
+				success: function() {
+					$("#exampleModal").modal("hide");
+					searchProducts();
+				},
+				error: function() {
+					alert("제품 추가 중 오류가 발생했습니다.");
+				}
+			});
+		}
+
+		// 제품 수정
+		function updateProduct(product) {
+			$.ajax({
+				url: "/admin/product/update",
+				type: "POST",
+				data: product,
+				success: function() {
+					$("#exampleModal").modal("hide");
+					searchProducts();
+				},
+				error: function() {
+					alert("제품 수정 중 오류가 발생했습니다.");
+				}
+			});
+		}
+
+		// 입력값 검증
+		function validateProduct(product) {
+			return product.name && 
+				   product.width && 
+				   product.depth && 
+				   product.height && 
+				   product.weight && 
+				   product.category;
+		}
+
+		// 모달 입력 필드 초기화
+		function clearModalInputs() {
+			$("#modalIndex").val("");
+			$("#modalName").val("");
+			$("#modalWidth").val("");
+			$("#modalDepth").val("");
+			$("#modalHeight").val("");
+			$("#modalWeight").val("");
+			$("#modalCategory").val("");
+			$("#fragileCheckbox").prop("checked", false);
+		}
+
+		// 모달 관련 JavaScript 수정
+		$('#exampleModal').on('show.bs.modal', function () {
+			// 모달이 열릴 때 aria-hidden 속성 제거
+			$(this).removeAttr('aria-hidden');
+		});
+
+		$('#exampleModal').on('shown.bs.modal', function () {
+			// 모달이 완전히 열린 후 첫 번째 입력 필드에 포커스
+			$('#modalName').trigger('focus');
+		});
+
+		$('#exampleModal').on('hidden.bs.modal', function () {
+			// 모달이 닫힐 때 초기화
+			clearModalInputs();
+			$(this).removeAttr('aria-hidden');
+		});
+	</script>
+
+
+	<!-- 페이징 기능 스크립트 -->
+	<script>
+		document.addEventListener("DOMContentLoaded",
+			function() {
+				var currentPage = 1;
+				var rowsPerPage = 10; // 한 페이지당 표시할 행 수
+				var pageGroupSize = 10; // 페이지 번호 그룹 크기
+	
+				var table = document.getElementById("productTable");
+				var tbody = table.querySelector("tbody");
+				var rows = Array.from(tbody
+						.getElementsByTagName("tr"));
+				var totalPages = Math.ceil(rows.length / rowsPerPage);
+				
+				function updateTable() {
+					rows.forEach(function(row) {
+						row.style.display = "none";
+					});
+					var startIndex = (currentPage - 1)
+							* rowsPerPage;
+					var endIndex = Math.min(startIndex
+							+ rowsPerPage, rows.length);
+					for (var i = startIndex; i < endIndex; i++) {
+						rows[i].style.display = "";
+					}
+				}
+	
+				function updatePagination() {
+					var pageNumbersElement = document
+							.getElementById("pageNumbers");
+					pageNumbersElement.innerHTML = "";
+					var startPage = Math.floor((currentPage - 1)
+							/ pageGroupSize)
+							* pageGroupSize + 1;
+					var endPage = Math.min(startPage
+							+ pageGroupSize - 1, totalPages);
+					for (var i = startPage; i <= endPage; i++) {
+						var btn = document.createElement("button");
+						btn.innerText = i;
+						if (i === currentPage) {
+							btn.classList.add("active");
+						}
+						btn.addEventListener("click", (function(
+								page) {
+							return function() {
+								currentPage = page;
+								updateTable();
+								updatePagination();
+							};
+						})(i));
+						pageNumbersElement.appendChild(btn);
+					}
+				}
+	
+				// < 페이지 이동 버튼 클릭시 이벤트
+				document
+						.getElementById("prevGroup")
+						.addEventListener(
+								"click",
+								function() {
+									var startPage = Math
+											.floor((currentPage - 1)
+													/ pageGroupSize)
+											* pageGroupSize + 1;
+									if (startPage > 1) {
+										currentPage = startPage - 1;
+										updateTable();
+										updatePagination();
+									}
+								});
+				
+				// > 페이지 이동 버튼 클릭시 이벤트
+				document
+						.getElementById("nextGroup")
+						.addEventListener(
+								"click",
+								function() {
+									var startPage = Math
+											.floor((currentPage - 1)
+													/ pageGroupSize)
+											* pageGroupSize + 1;
+									var endPage = Math
+											.min(startPage
+													+ pageGroupSize
+													- 1, totalPages);
+									if (endPage < totalPages) {
+										currentPage = endPage + 1;
+										updateTable();
+										updatePagination();
+									}
+								});		
+				
+				updateTable();
+				updatePagination();
+			});
+	</script>
 </body>
 </html>

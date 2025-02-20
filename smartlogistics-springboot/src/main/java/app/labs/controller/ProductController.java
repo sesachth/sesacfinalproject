@@ -24,33 +24,33 @@ public class ProductController {
 	// GET /admin/product 
 	@GetMapping
 	public String showProductPage(Model model, @RequestParam(value = "filter", defaultValue = "전체") String filter,
-			@RequestParam(value = "fragile", defaultValue = "전체") String fragile) {
+			@RequestParam(value = "isFragile", defaultValue = "전체") String isFragile) {
 
 		
-		Boolean fragileBool = null;
-		if ("true".equalsIgnoreCase(fragile) || "yes".equalsIgnoreCase(fragile)) {
-			fragileBool = true;
-		} else if ("false".equalsIgnoreCase(fragile) || "no".equalsIgnoreCase(fragile)) {
-			fragileBool = false;
+		Boolean isFragileBool = null;
+		if ("true".equalsIgnoreCase(isFragile) || "yes".equalsIgnoreCase(isFragile)) {
+			isFragileBool = true;
+		} else if ("false".equalsIgnoreCase(isFragile) || "no".equalsIgnoreCase(isFragile)) {
+			isFragileBool = false;
 		}
 
 		
 		List<Product> products;
-		if ("전체".equals(filter) && fragileBool == null) {
+		if ("전체".equals(filter) && isFragileBool == null) {
 			products = productService.getAllProducts();
-		} else if (!"전체".equals(filter) && fragileBool == null) {
+		} else if (!"전체".equals(filter) && isFragileBool == null) {
 			products = productService.getProductByCategory(filter);
 		} else if ("전체".equals(filter)) {
-			products = productService.getProductByFragile(fragileBool);
+			products = productService.getProductByFragile(isFragileBool);
 		} else {
-			products = productService.getProductByCategoryAndFragile(filter, fragileBool);
+			products = productService.getProductByCategoryAndFragile(filter, isFragileBool);
 		}
 
 		
 		model.addAttribute("page", "product");
 		model.addAttribute("products", products);
 		model.addAttribute("selectedCategory", filter);
-		model.addAttribute("selectedFragile", fragile);
+		model.addAttribute("selectedisFragile", isFragile);
 
 		return "thymeleaf/html/admin/admin_product";
 	}
@@ -58,26 +58,26 @@ public class ProductController {
 	@GetMapping("/search1")
 	@ResponseBody
 	public List<Product> showProductPageSearch(Model model, @RequestParam(value = "filter", defaultValue = "전체") String filter,
-			@RequestParam(value = "fragile", defaultValue = "전체") String fragile) {
+			@RequestParam(value = "isFragile", defaultValue = "전체") String isFragile) {
 
-		// fragile 조회
-		Boolean fragileBool = null;
-		if ("true".equalsIgnoreCase(fragile) || "yes".equalsIgnoreCase(fragile)) {
-			fragileBool = true;
-		} else if ("false".equalsIgnoreCase(fragile) || "no".equalsIgnoreCase(fragile)) {
-			fragileBool = false;
+		// isFragile 조회
+		Boolean isFragileBool = null;
+		if ("true".equalsIgnoreCase(isFragile) || "yes".equalsIgnoreCase(isFragile)) {
+			isFragileBool = true;
+		} else if ("false".equalsIgnoreCase(isFragile) || "no".equalsIgnoreCase(isFragile)) {
+			isFragileBool = false;
 		}
 
 		// 필터링 로직
 		List<Product> products;
-		if ("전체".equals(filter) && fragileBool == null) {
+		if ("전체".equals(filter) && isFragileBool == null) {
 			products = productService.getAllProducts();
-		} else if (!"전체".equals(filter) && fragileBool == null) {
+		} else if (!"전체".equals(filter) && isFragileBool == null) {
 			products = productService.getProductByCategory(filter);
 		} else if ("전체".equals(filter)) {
-			products = productService.getProductByFragile(fragileBool);
+			products = productService.getProductByFragile(isFragileBool);
 		} else {
-			products = productService.getProductByCategoryAndFragile(filter, fragileBool);
+			products = productService.getProductByCategoryAndFragile(filter, isFragileBool);
 		}
 
 		return products;
@@ -89,19 +89,19 @@ public class ProductController {
     public List<Product> searchProducts(
             @RequestParam(value = "name", required = false) String name,
             @RequestParam(value = "filter", defaultValue = "전체") String filter,
-            @RequestParam(value = "fragile", defaultValue = "전체") String fragile) {
+            @RequestParam(value = "isFragile", defaultValue = "전체") String isFragile) {
         
         // 검색어 처리
         name = (name != null) ? name.trim() : "";
         
-        // fragile 값 변환
-        final Boolean fragileBool;
-        if ("true".equalsIgnoreCase(fragile) || "yes".equalsIgnoreCase(fragile)) {
-            fragileBool = Boolean.TRUE;
-        } else if ("false".equalsIgnoreCase(fragile) || "no".equalsIgnoreCase(fragile)) {
-            fragileBool = Boolean.FALSE;
+        // isFragile 값 변환
+        final Boolean isFragileBool;
+        if ("true".equalsIgnoreCase(isFragile) || "yes".equalsIgnoreCase(isFragile)) {
+            isFragileBool = Boolean.TRUE;
+        } else if ("false".equalsIgnoreCase(isFragile) || "no".equalsIgnoreCase(isFragile)) {
+            isFragileBool = Boolean.FALSE;
         } else {
-            fragileBool = null;
+            isFragileBool = null;
         }
 
         // 검색 로직
@@ -121,14 +121,14 @@ public class ProductController {
                 .collect(Collectors.toList());
         }
         
-        // fragile 필터 적용
-        if (fragileBool != null) {
-            final Boolean targetFragile = fragileBool; // 람다에서 사용할 final 변수
+        // isFragile 필터 적용
+        if (isFragileBool != null) {
+            final Boolean targetisFragile = isFragileBool; // 람다에서 사용할 final 변수
             products = products.stream()
                 .filter(p -> {
                     try {
-                        Boolean isFragile = p.isFragile();
-                        return isFragile != null && isFragile.equals(targetFragile);
+                        Boolean productIsFragile = p.isFragile();
+                        return isFragile != null && productIsFragile.equals(targetisFragile);
                     } catch (Exception e) {
                         return false; // 에러 발생 시 해당 항목 제외
                     }
