@@ -27,8 +27,8 @@
                             <th class="p-3 border border-gray-300">주문 ID</th>
                             <th class="p-3 border border-gray-300">상품명</th>
                             <th class="p-3 border border-gray-300">카테고리</th>
-                            <th class="p-3 border border-gray-300">주문 시간</th>
-                            <th class="p-3 border border-gray-300">박스 상태</th>
+                            <th class="p-3 border border-gray-300">박스 규격</th>
+                            <th class="p-3 border border-gray-300">완충재 여부</th>
                             <th class="p-3 border border-gray-300">진행 상태</th>
                         </tr>
                     </thead>
@@ -61,7 +61,7 @@ window.onload = () => {
     loadProgress();
     connectWebSocket();
 };
-//✅ 주문 목록 가져오기 (페이지네이션 적용)
+
 function loadWorkerOrders(page = 1) {
     fetch(`/admin/progress/data?page=${page}`)
         .then(response => response.json())
@@ -77,27 +77,29 @@ function loadWorkerOrders(page = 1) {
             }
 
             data.progressList.forEach(order => {
-                let orderTime = convertUtcToKst(order.orderTime);
+                let boxSpecValue = (order.boxSpec === null || order.boxSpec === undefined || order.boxSpec === 0) ? '-' : order.boxSpec;
+                let isFragileValue = (order.isFragile === true || order.isFragile === 1) ? 'O' : 'X';  // ✅ 수정
+
                 let row = `<tr class="hover:bg-gray-100 transition">
                     <td class="p-3 border border-gray-300">${order.orderId}</td>
                     <td class="p-3 border border-gray-300">${order.productName}</td>
                     <td class="p-3 border border-gray-300">${order.productCategory}</td>
-                    <td class="p-3 border border-gray-300">${orderTime}</td>
-                    <td class="p-3 border border-gray-300">
-                        ${order.boxState === 0 ? '미검사' : order.boxState === 1 ? '정상' : '파손'}
-                    </td>
+                    <td class="p-3 border border-gray-300">${boxSpecValue}</td>
+                    <td class="p-3 border border-gray-300">${isFragileValue}</td>
                     <td class="p-3 border border-gray-300 progress-state">
                         ${order.progressState === 0 
                             ? `<button class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-1 px-3 rounded"
                                        onclick="completePackaging(${order.orderId}, this)">
                                    물품 대기
-                               </button>`
+                               </button>` 
                             : (order.progressState === 1 ? '<span class="text-green-600 font-bold">✅ 포장 완료</span>' 
                             : '<span class="text-gray-600">📦 적재 완료</span>')}
                     </td>
                 </tr>`;
+
                 tableBody.innerHTML += row;
             });
+
 
             // ✅ 페이지 수 업데이트
             totalPages = data.totalPages || 1;

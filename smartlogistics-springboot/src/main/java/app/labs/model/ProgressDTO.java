@@ -19,6 +19,7 @@ public class ProgressDTO {
     private int progressState;
     private String productName;
     private String productCategory;
+    private Boolean isFragile;
 
     // Getter & Setter
     public int getBoxSpec() {
@@ -27,5 +28,10 @@ public class ProgressDTO {
 
     public void setBoxSpec(int boxSpec) {
         this.boxSpec = boxSpec;
+    }
+    
+    // ✅ Getter에서 변환 로직 추가
+    public boolean getIsFragile() {
+        return isFragile != null && isFragile;
     }
 }
