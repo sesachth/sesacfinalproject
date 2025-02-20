@@ -136,8 +136,8 @@
 									<td class="height" th:text="${product.height}"></td>
 									<td class="weight" th:text="${product.weight}"></td>
 									<td class="category" th:text="${product.category}"></td>
-									<td class="fragile"
-										th:text="${product.fragile != null ? (product.fragile ? 'Yes' : 'No') : 'No'}"></td>
+									<td class="isFragile"
+										th:text="${product.isFragile != null ? (product.isFragile ? 'Yes' : 'No') : 'No'}"></td>
 
 								</tr>
 
@@ -261,7 +261,7 @@
 			let filterInfo = {
 				name: searchQuery,
 				filter: $("#categoryFilter").val()?.trim() || "전체",
-				fragile: $("#fragileFilter").val()?.trim() || "전체"
+				isFragile: $("#fragileFilter").val()?.trim() || "전체"
 			};
 
 			$.ajax({
@@ -308,7 +308,7 @@
 						<td class="height">${product.height}</td>
 						<td class="weight">${product.weight}</td>
 						<td class="category">${product.category}</td>
-						<td class="fragile">${product.fragile ? 'Yes' : 'No'}</td>
+						<td class="isFragile">${product.isFragile ? 'Yes' : 'No'}</td>
 						<td>
 							<div class="btn-reveal-trigger position-static">
 								<button class="btn btn-sm dropdown-toggle dropdown-caret-none transition-none btn-reveal" type="button" data-bs-toggle="dropdown" data-boundary="window" aria-haspopup="true" aria-expanded="true" data-bs-reference="parent">
@@ -440,8 +440,8 @@
 			$("#modalHeight").val(row.find(".height").text().trim());
 			$("#modalWeight").val(row.find(".weight").text().trim());
 			
-			let fragile = row.find(".fragile").text().trim();
-			$("#fragileCheckbox").prop("checked", fragile === "Yes");
+			let isFragile = row.find(".isFragile").text().trim();
+			$("#fragileCheckbox").prop("checked", isFragile === "Yes");
 			
 			let category = row.find(".category").text().trim();
 			$("#modalCategory").val(category);

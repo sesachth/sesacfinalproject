@@ -9,6 +9,8 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import app.labs.dao.ProductlistRepository;
 import app.labs.model.Product;
 
@@ -45,11 +47,25 @@ public class ProductService {
     public void addProduct(Product product) {
         // FastAPI로 박스 매칭 결과 받기
         RestTemplate restTemplate = new RestTemplate();
+        Map<String, Object> response = null;
         
         try {
-            // Product를 JSON 형식으로 FastAPI에 전달
-            Map<String, Object> response = restTemplate.postForObject(FASTAPI_URL, product, Map.class);
+        	ObjectMapper mapper = new ObjectMapper();
+
+            // Product 객체를 Map으로 변환
+            Map<String, Object> productMap = mapper.convertValue(product, Map.class);
+           
             
+            // isFragile 필드 이름을 is_fragile로 변경
+            if (productMap.containsKey("fragile")) {
+                productMap.put("is_fragile", productMap.remove("fragile"));
+                // Map을 JSON 형식으로 FastAPI에 전달
+                response = restTemplate.postForObject(FASTAPI_URL, productMap, Map.class);
+            } else {
+                // Product를 JSON 형식으로 FastAPI에 전달
+                response = restTemplate.postForObject(FASTAPI_URL, product, Map.class);   
+            }
+           
             if (response != null && response.get("spec") != null) {
                 product.setSpec(Long.parseLong(response.get("spec").toString()));
             } else {
