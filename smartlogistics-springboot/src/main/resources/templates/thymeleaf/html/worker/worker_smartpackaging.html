@@ -5,111 +5,330 @@
 
 <head>
     <th:block layout:fragment="css">
-        <link rel="stylesheet" th:href="@{/css/admin/admin.css}" />
-        <link rel="stylesheet" th:href="@{/css/worker/worker_smartpackaging.css}" />
-        <!--<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">-->
-        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
         <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/sockjs-client/dist/sockjs.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/stompjs/lib/stomp.min.js"></script>
     </th:block>
 </head>
-<body>
+
 <th:block layout:fragment="wrapper">
-    <div class="outside-container">
-        <div class="main-container">
-            <div class="current-product-box">
-                <div class="current-product-text">현재 물품</div>
-            </div>
-            <!-- 이전 물품, 현재 물품, 다음 물품이 같은 라인에 배치 -->
-            <div class="product-container">
-                <!-- 이전 물품 -->
-                <div class="previous-section">
-                    <div class="previous-product">
-                        <div class="arrow"></div>
-                        <div class="product-text">이전 물품</div>
-                    </div>
-                    <div class="product-name">
-                        여기에 이전 물품 명을 넣어주세요
-                        <div class="underline"></div>
-                    </div>
-                </div>
+    <div class="min-h-screen bg-gray-100 flex flex-col items-center p-6">
+        <div class="w-full max-w-6xl bg-white shadow-lg rounded-lg p-6">
+            <h3 class="text-2xl font-bold text-gray-800 flex items-center mb-4">
+                📦 주문 목록 (포장 담당)
+            </h3>
 
-                <!-- 현재 물품 -->
-                <div class="current-section">
-                    <div class="current-product-ordernumber">25021786593642</div>
-                    <div class="current-product-name">Wahl Power Pro 리튬 이온 충전식 코드리스 반려견 미용 키트</div>
-                </div>
-
-                <!-- 다음 물품 -->
-                <div class="next-section">
-                    <div class="next-product">
-                        <div class="product-text">다음 물품</div>
-                        <div class="arrow"></div>
-                    </div>
-                    <div class="product-name">
-                        여기에 다음 물품 명을 넣어주세요
-                        <div class="underline"></div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- 박스 정보, 포장완료 버튼, 완충재 필요 여부 -->
-            <div class="packaging-part">
-                <!-- 박스 정보 -->
-                <div class="packaging-box">
-                    <img th:src="@{/images/worker/무지 택배박스.jpg}" alt="박스 이미지" class="packaging-box-image">
-                    <div class="packaging-box-text">5호 박스</div>
-                </div>
-
-                <!-- 포장완료 버튼 -->
-                <div class="packaging-completion">
-                    <button class="packaging-button" onclick="completeSelectedPackaging()">
-                        포장완료
-                    </button>
-                </div>
-
-                <!-- 완충재 필요 여부 -->
-                <div class="fender-info">
-                    <img th:src="@{/images/worker/종이 완충재.jpg}" alt="종이 완충재" class="fender-image">
-                    <!-- <div class="${is_fragile ? 'fender-O' : 'fender-X'}" class="fender-OX"></div>-->
-                    <div class="fender-X"></div>
-                    <div class="fender-O"></div>
-                </div>
-            </div>
-            
-			<!-- 패키징할 물품 테이블 5개씩-->
-            <div class="table-container">
-                <table class="packaging-table">
-                    <colgroup>
-                        <col style="width: 10%">   <!-- packaging_order -->
-                        <col style="width: 25%">  <!-- order_number -->
-                        <col style="width: 40%">  <!-- product_name -->
-                        <col style="width: 25%">  <!-- category -->
-                    </colgroup>
-                    <thead>
+           <!-- 주문 테이블 -->
+            <div class="overflow-x-auto">
+                <table class="table-auto w-full text-center border-collapse border border-gray-300 rounded-lg shadow-md">
+                    <thead class="bg-gray-200 text-gray-700">
                         <tr>
-                            <th class="align-center">Packaging Order</th>
-                            <th class="align-center">Order Number</th>
-                            <th class="align-center">Product Name</th>
-                            <th class="align-center">Category</th>
+                            <th class="p-3 border border-gray-300">주문 ID</th>
+                            <th class="p-3 border border-gray-300">상품명</th>
+                            <th class="p-3 border border-gray-300">카테고리</th>
+                            <th class="p-3 border border-gray-300">주문 시간</th>
+                            <th class="p-3 border border-gray-300">박스 상태</th>
+                            <th class="p-3 border border-gray-300">진행 상태</th>
                         </tr>
                     </thead>
-                    <tbody id="workerOrderTableBody">
+                    <tbody id="workerOrderTableBody" class="text-gray-800">
                         <tr>
-                            <td colspan="5" class="p-4 text-center text-gray-500">❌ 주문 데이터를 불러오는 중...</td>
+                            <td colspan="6" class="p-4 text-center text-gray-500">❌ 주문 데이터를 불러오는 중...</td>
                         </tr>
-                        <!-- 주문 데이터가 여기에 추가됨 -->
                     </tbody>
                 </table>
             </div>
-            
 
-            
-            
+            <!-- 페이지네이션 -->
+            <div class="pagination">
+                <button id="prevGroup">«</button>
+                <span id="pageNumbers"></span>
+                <button id="nextGroup">»</button>
+            </div>
         </div>
     </div>
 </th:block>
-<script th:src="@{/js/worker/worker_smartpackaging.js}"></script>
-</body>
+
+<script>
+let currentPage = 1;
+const rowsPerPage = 10;
+const pageGroupSize = 10;
+let totalPages = 1;
+let progressData = [];
+
+window.onload = () => {
+    loadProgress();
+    connectWebSocket();
+};
+//✅ 주문 목록 가져오기 (페이지네이션 적용)
+function loadWorkerOrders(page = 1) {
+    fetch(`/admin/progress/data?page=${page}`)
+        .then(response => response.json())
+        .then(data => {
+            console.log("📌 Worker 페이지 주문 목록 응답:", data); // API 응답 확인
+
+            let tableBody = document.getElementById("workerOrderTableBody");
+            tableBody.innerHTML = "";
+
+            if (!data.progressList || data.progressList.length === 0) {
+                tableBody.innerHTML = "<tr><td colspan='6' class='p-4 text-center text-gray-500'>❌ 데이터가 없습니다.</td></tr>";
+                return;
+            }
+
+            data.progressList.forEach(order => {
+                let orderTime = convertUtcToKst(order.orderTime);
+                let row = `<tr class="hover:bg-gray-100 transition">
+                    <td class="p-3 border border-gray-300">${order.orderId}</td>
+                    <td class="p-3 border border-gray-300">${order.productName}</td>
+                    <td class="p-3 border border-gray-300">${order.productCategory}</td>
+                    <td class="p-3 border border-gray-300">${orderTime}</td>
+                    <td class="p-3 border border-gray-300">
+                        ${order.boxState === 0 ? '미검사' : order.boxState === 1 ? '정상' : '파손'}
+                    </td>
+                    <td class="p-3 border border-gray-300 progress-state">
+                        ${order.progressState === 0 
+                            ? `<button class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-1 px-3 rounded"
+                                       onclick="completePackaging(${order.orderId}, this)">
+                                   물품 대기
+                               </button>`
+                            : (order.progressState === 1 ? '<span class="text-green-600 font-bold">✅ 포장 완료</span>' 
+                            : '<span class="text-gray-600">📦 적재 완료</span>')}
+                    </td>
+                </tr>`;
+                tableBody.innerHTML += row;
+            });
+
+            // ✅ 페이지 수 업데이트
+            totalPages = data.totalPages || 1;
+            currentPage = page;
+            updatePagination();
+        })
+        .catch(error => console.error("📌 Worker 페이지 주문 목록 로딩 실패:", error));
+}
+
+// ✅ 페이지 로드 시 자동 실행
+document.addEventListener("DOMContentLoaded", function () {
+    console.log("📌 Worker 페이지 DOM 로드 완료, 주문 목록 로드 시작");
+    loadWorkerOrders();
+});
+
+    // ✅ WebSocket 연결 설정
+    function connectWebSocket() {
+        let socket = new SockJS('/ws');
+        stompClient = Stomp.over(socket);
+
+        stompClient.connect({}, function(frame) {
+            console.log('📌 Worker 페이지 WebSocket 연결됨:', frame);
+
+            // ✅ 진행 상태 변경 구독 (Worker & Admin 동기화)
+            stompClient.subscribe('/topic/updateStatus', function(message) {
+                let updatedProgress = JSON.parse(message.body);
+                console.log("📌 Worker가 받은 WebSocket 메시지:", updatedProgress);
+                updateProgressState(updatedProgress.orderIds, updatedProgress.progressState);
+            });
+        }, function(error) {
+            console.error('📌 WebSocket 연결 실패:', error);
+            setTimeout(connectWebSocket, 5000);
+        });
+    }
+    
+ // ✅ 페이지네이션 업데이트
+    function updatePagination() {
+        const paginationContainer = document.getElementById("pageNumbers");
+        paginationContainer.innerHTML = ""; // 기존 버튼 초기화
+
+        if (totalPages <= 1) {
+            return; // 한 페이지만 있으면 페이지네이션 숨김
+        }
+
+        let startPage = Math.max(1, currentPage - Math.floor(pageGroupSize / 2));
+        let endPage = Math.min(totalPages, startPage + pageGroupSize - 1);
+
+        if (endPage - startPage + 1 < pageGroupSize) {
+            startPage = Math.max(1, endPage - pageGroupSize + 1);
+        }
+
+        // ✅ 이전 버튼 추가 (맨 처음으로 이동)
+        if (currentPage > 1) {
+            let prevButton = document.createElement("button");
+            prevButton.innerHTML = "«";
+            prevButton.classList.add("px-4", "py-2", "mx-1", "rounded-lg", "transition", "bg-gray-300", "hover:bg-gray-400");
+            prevButton.onclick = () => loadWorkerOrders(1);
+            paginationContainer.appendChild(prevButton);
+        }
+
+        // ✅ 페이지 숫자 버튼 생성
+        for (let i = startPage; i <= endPage; i++) {
+            let pageButton = document.createElement("button");
+            pageButton.innerText = i;
+            pageButton.classList.add("px-4", "py-2", "mx-1", "rounded-lg", "transition");
+
+            if (i === currentPage) {
+                pageButton.classList.add("bg-blue-500", "text-white", "font-bold");
+            } else {
+                pageButton.classList.add("bg-gray-200", "text-gray-700", "hover:bg-gray-300");
+                pageButton.onclick = function () {
+                    loadWorkerOrders(i);
+                };
+            }
+            paginationContainer.appendChild(pageButton);
+        }
+
+        // ✅ 다음 버튼 추가 (맨 끝으로 이동)
+        if (currentPage < totalPages) {
+            let nextButton = document.createElement("button");
+            nextButton.innerHTML = "»";
+            nextButton.classList.add("px-4", "py-2", "mx-1", "rounded-lg", "transition", "bg-gray-300", "hover:bg-gray-400");
+            nextButton.onclick = () => loadWorkerOrders(totalPages);
+            paginationContainer.appendChild(nextButton);
+        }
+    }
+
+
+    // ✅ 개별 포장 완료 버튼 클릭 시 WebSocket 메시지 전송
+    function completePackaging(orderId, buttonElement) {
+        if (confirm("포장이 완료되었습니까?")) {
+            let imageNumber = Math.floor(Math.random() * 100) + 1; // 1~100 랜덤 이미지
+
+            let message = {
+                orderIds: [orderId],
+                progressState: 1, // 포장 완료
+                imageNumber: imageNumber
+            };
+
+            console.log("📌 WebSocket 전송 메시지 (Worker → Server):", message);
+
+            // ✅ WebSocket을 통해 상태 변경 요청 전송
+            stompClient.send("/app/updateStatus", {}, JSON.stringify(message));
+            stompClient.send("/topic/updateStatus", {}, JSON.stringify(message));
+
+            // ✅ UI 업데이트 (버튼을 '포장 완료'로 변경 및 비활성화)
+            buttonElement.outerHTML = '<span class="text-green-600 font-bold">✅ 포장 완료</span>';
+
+            alert("✅ 포장이 완료되었습니다.");
+        }
+    }
+
+    // ✅ UTC → KST 변환 함수
+    function convertUtcToKst(utcTime) {
+        if (!utcTime) return '-';
+        let orderDate = new Date(Date.parse(utcTime));
+        orderDate.setHours(orderDate.getHours());
+        return orderDate.toTimeString().split(" ")[0];
+    }
+
+    // ✅ 페이지 로드 시 자동 실행
+    document.addEventListener("DOMContentLoaded", function () {
+        console.log("📌 Worker 페이지 DOM 로드 완료, 주문 목록 로드 시작");
+        loadWorkerOrders();
+        connectWebSocket();
+    });
+</script>
+<style>
+    .table-container { max-height: 500px; overflow-y: auto; margin-top: 10px; }
+    .order-table { width: 100%; border-collapse: collapse; }
+    .order-table th, .order-table td { padding: 10px; border: 1px solid #ddd; text-align: center; }
+    .pagination { display: flex; justify-content: center; margin-top: 10px; }
+    .pagination button { padding: 5px 10px; margin: 2px; border: none; background: #eee; cursor: pointer; }
+    .pagination .active { background: #6200ea; color: white; }
+    
+    /* 테이블 컨테이너 */
+    .table-container {
+        width: 100%;
+        max-height: 500px;
+        overflow-y: auto;
+        overflow-x: auto;
+        margin-top: 10px;
+    }
+
+    /* 테이블 */
+    .progress-table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed; /* 열 너비 고정 */
+    }
+
+    /* 테이블 헤더 */
+    .progress-table th {
+        background: #f4f4f4;
+        padding: 12px;
+        border: 1px solid #ddd;
+        text-align: center;
+        font-weight: bold;
+    }
+
+    /* 테이블 본문 */
+    .progress-table td {
+        padding: 10px;
+        border: 1px solid #ddd;
+        text-align: center;
+        white-space: nowrap; /* 텍스트 줄 바꿈 방지 */
+        overflow: hidden;
+        text-overflow: ellipsis; /* 너무 길면 ... 처리 */
+    }
+
+    /* 각 열 크기 고정 */
+    .progress-table th:nth-child(1),
+    .progress-table td:nth-child(1) {
+        width: 15%; /* 주문번호 */
+    }
+
+    .progress-table th:nth-child(2),
+    .progress-table td:nth-child(2) {
+        width: 20%; /* 상품명 */
+    }
+
+    .progress-table th:nth-child(3),
+    .progress-table td:nth-child(3) {
+        width: 10%; /* 카테고리 */
+    }
+
+    .progress-table th:nth-child(4),
+    .progress-table td:nth-child(4) {
+        width: 15%; /* 주문 시간 */
+    }
+
+    .progress-table th:nth-child(5),
+    .progress-table td:nth-child(5) {
+        width: 10%; /* 배송지 */
+    }
+
+    .progress-table th:nth-child(6),
+    .progress-table td:nth-child(6) {
+        width: 10%; /* 팔렛트 ID */
+    }
+
+    .progress-table th:nth-child(7),
+    .progress-table td:nth-child(7) {
+        width: 10%; /* 박스 상태 */
+    }
+
+    .progress-table th:nth-child(8),
+    .progress-table td:nth-child(8) {
+        width: 10%; /* 진행 상태 */
+    }
+
+    /* 페이지네이션 스타일 */
+    .pagination {
+        display: flex;
+        justify-content: center;
+        margin-top: 10px;
+    }
+
+    .pagination button {
+        padding: 8px 12px;
+        margin: 2px;
+        border: none;
+        background: #eee;
+        cursor: pointer;
+        border-radius: 4px;
+    }
+
+    .pagination .active {
+        background: #6200ea;
+        color: white;
+    }
+</style>
+
 </html>
