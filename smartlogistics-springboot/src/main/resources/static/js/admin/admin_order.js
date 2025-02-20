@@ -1,11 +1,11 @@
 // 선택된 값을 저장할 변수
 let selectedCampValue = '';
+let isCalendarOpen = false;
 
 document.addEventListener('DOMContentLoaded', function() {
     const dateFilter = document.getElementById('dateFilter');
     const dropdowns = document.getElementsByClassName('dropdown-menu');
-    let isCalendarOpen = false;
-
+    
     // ✅ 오늘 날짜를 기본값으로 설정
     const today = new Date();
     const year = today.getFullYear();
@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // 날짜 선택 이벤트
+    // 날짜 선택 이벤트 수정
     dateFilter.addEventListener('change', function(e) {
         const date = new Date(this.value);
         const formattedDate = date.toLocaleDateString('ko-KR', {
@@ -73,8 +73,11 @@ document.addEventListener('DOMContentLoaded', function() {
         const calendarContainer = this.closest('.dropdown-container');
         const dropdownSelect = calendarContainer.querySelector('.dropdown-select');
         if (dropdownSelect) {
-            dropdownSelect.classList.remove('active');  // active 클래스 제거
+            dropdownSelect.classList.remove('active');
         }
+
+        // 날짜 선택 시 바로 검색 실행
+        loadOrders();
     });
 
     // 외부 클릭 시 달력 닫기
@@ -99,7 +102,7 @@ document.addEventListener('DOMContentLoaded', function() {
     */
 });
 
-// 드롭다운 아이템 선택 함수
+// selectItem 함수 수정
 function selectItem(element, menuId, value) {
     if (element && element.parentElement) {
         // 이전 선택 항목의 active 클래스 제거
@@ -115,6 +118,7 @@ function selectItem(element, menuId, value) {
         const campFilter = document.getElementById('campFilter');
         if (campFilter) {
             campFilter.value = value;
+            selectedCampValue = value; // 전역 변수에 선택된 값 저장
         }
 
         // 선택된 아이템 표시 
@@ -134,6 +138,9 @@ function selectItem(element, menuId, value) {
 
         // 드롭다운 메뉴 닫기
         toggleDropdown(menuId);
+
+        // destination 선택 시 바로 검색 실행
+        loadOrders();
     }
 }
 
@@ -145,6 +152,13 @@ function toggleDropdown(menuId) {
         const dateFilter = document.getElementById('dateFilter');
         if (dateFilter) {
             dateFilter.blur();
+            isCalendarOpen = false;
+            // 달력의 active 상태 제거
+            const calendarContainer = dateFilter.closest('.dropdown-container');
+            const calendarSelect = calendarContainer.querySelector('.dropdown-select');
+            if (calendarSelect) {
+                calendarSelect.classList.remove('active');
+            }
         }
 
         // 다른 드롭다운 메뉴 닫기

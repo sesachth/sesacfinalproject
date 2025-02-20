@@ -56,7 +56,7 @@
                                     </svg>
                                 </div>
                                 <div class="dropdown-menu" id="campMenu">
-                                    <div class="dropdown-item" data-value="" onclick="selectItem(this, 'campMenu', '')">Destination</div>
+                                    <div class="dropdown-item" data-value="" onclick="selectItem(this, 'campMenu', '')">전체</div>
                                     <div class="dropdown-item" data-value="서초 캠프" onclick="selectItem(this, 'campMenu', '서초 캠프')">서초 캠프</div>
                                     <div class="dropdown-item" data-value="강남 캠프" onclick="selectItem(this, 'campMenu', '강남 캠프')">강남 캠프</div>
                                     <div class="dropdown-item" data-value="강서 캠프" onclick="selectItem(this, 'campMenu', '강서 캠프')">강서 캠프</div>
@@ -92,20 +92,20 @@
                         -->
 				    </div>
                     <div class="right-controls">
-					    <!-- ✅ 주문 내보내기 버튼 -->
-					    <button class="btn btn-export" id="downloadExcelBtn">
-					        <i class="export-icon"></i>
-					        Export
-					    </button>
-					
-					    <!-- ✅ 주문 생성 버튼 -->
-					    <button class="btn btn-add" id="generateOrderBtn" onclick="generateOrders()">
-					        <span class="plus-icon">+</span>
-					        <span id="makeOrderText">Make Order</span>
-					    </button>
-					</div>
-					
-					<!-- ✅ 로딩 화면 -->
+                        <!-- Export 버튼 -->
+                        <button class="btn btn-export" id="downloadExcelBtn">
+                          <i class="export-icon"></i>
+                          Export
+                        </button>
+            
+                        <!-- 주문 생성 버튼 -->
+                        <button class="btn btn-add" id="generateOrderBtn" onclick="generateOrders()">
+                          <span class="plus-icon">+</span>
+                          <span id="makeOrderText">Make Order</span>
+                        </button>
+                    </div>
+
+                    <!-- 로딩 화면 -->
 					<div id="loadingOverlay">
 					    <div class="loading-container">
 					        <div class="loading-spinner"></div>
