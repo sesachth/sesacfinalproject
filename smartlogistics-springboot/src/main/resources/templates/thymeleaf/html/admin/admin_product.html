@@ -24,27 +24,25 @@
 		crossorigin="anonymous"></script>
 
 	<style>
-	/* 드롭다운 버튼 테두리 제거 */
-	.btn-reveal-trigger .btn-reveal {
-		border: none !important;
-		box-shadow: none !important;
-		background: transparent !important;
-	}
+/* 드롭다운 버튼 테두리 제거 */
+.btn-reveal-trigger .btn-reveal {
+	border: none !important;
+	box-shadow: none !important;
+	background: transparent !important;
+}
 
-	.btn-reveal-trigger .btn-reveal:hover,
-	.btn-reveal-trigger .btn-reveal:focus,
+.btn-reveal-trigger .btn-reveal:hover, .btn-reveal-trigger .btn-reveal:focus,
 	.btn-reveal-trigger .btn-reveal:active {
-		border: none !important;
-		box-shadow: none !important;
-		background: transparent !important;
-	}
+	border: none !important;
+	box-shadow: none !important;
+	background: transparent !important;
+}
 
-	/* 드롭다운 화살표 제거 */
-	.dropdown-caret-none::after {
-		display: none !important;
-	}
-	</style>
-
+/* 드롭다운 화살표 제거 */
+.dropdown-caret-none::after {
+	display: none !important;
+}
+</style>
 </head>
 
 <body>
@@ -74,8 +72,8 @@
 							</form>
 
 							<!-- 필터 -->
-							<label for="categoryFilter">Category:</label>
-							<select id="categoryFilter">
+							<label for="categoryFilter">Category:</label> <select
+								id="categoryFilter">
 								<option value="전체">전체</option>
 								<option value="잡화류" th:selected="${selectedCategory eq '잡화류'}">잡화류</option>
 								<option value="전자제품류"
@@ -96,10 +94,8 @@
 								<option value="건강기능식품"
 									th:selected="${selectedCategory eq '건강기능식품'}">건강기능식품</option>
 								<!-- 기존 카테고리 옵션들 -->
-							</select>
-
-							<label for="fragileFilter">Fragile:</label>
-							<select id="fragileFilter">
+							</select> <label for="fragileFilter">Fragile:</label> <select
+								id="fragileFilter">
 								<option value="전체">전체</option>
 								<option value="true">Yes</option>
 								<option value="false">No</option>
@@ -138,7 +134,6 @@
 									<td class="category" th:text="${product.category}"></td>
 									<td class="isFragile"
 										th:text="${product.isFragile != null ? (product.isFragile ? 'Yes' : 'No') : 'No'}"></td>
-
 								</tr>
 
 								<tr th:if="${products.size() == 0}">
@@ -166,43 +161,44 @@
 	</th:block>
 
 	<!-- 물품 추가, 수정 시 뜰 모달창 -->
-	<div class="modal fade" id="exampleModal" tabindex="-1"
-		aria-labelledby="exampleModalLabel" aria-hidden="true">
-		<div class="modal-dialog">
+	<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog"
+		aria-labelledby="exampleModalLabel">
+		<div class="modal-dialog modal-full" role="document">
 			<div class="modal-content">
 				<div class="modal-header">
 					<h1 class="modal-title fs-5" id="exampleModalLabel">Add
 						Product</h1>
 					<button type="button" class="btn-close" data-bs-dismiss="modal"
 						aria-label="Close">
-						<span aria-hidden="true">&times;</span>
+						<span class="visually-hidden">Close</span>
 					</button>
 				</div>
 				<div class="modal-body">
 					<form th:action="@{/admin/product/add}" method="post"
 						id="productAdd">
-						<input id="modalIndex" type="hidden" name="index" /> Name: <input
-							id="modalName" type="text" name="name" required /><br /> Width:
-						<input id="modalWidth" type="number" name="width" required /><br />
-						Depth: <input id="modalDepth" type="number" name="depth" required /><br />
-						Height: <input id="modalHeight" type="number" name="height"
-							required /><br /> Weight: <input id="modalWeight" type="number"
-							name="weight" required /><br /> Category: <select
-							id="modalCategory" name="category" required>
-							<option value="">선택하세요</option>
-							<option value="잡화류">잡화류</option>
-							<option value="전자제품류">전자제품류</option>
-							<option value="가공식품">가공식품</option>
-							<option value="제과류">제과류</option>
-							<option value="음료">음료</option>
-							<option value="의류">의류</option>
-							<option value="세정용 화장품류">세정용 화장품류</option>
-							<option value="그 밖의 화장품류">그 밖의 화장품류</option>
-							<option value="의약외품류">의약외품류</option>
-							<option value="세제류">세제류</option>
-							<option value="건강기능식품">건강기능식품</option>
-						</select><br /> Fragile: <input type="checkbox" name="fragile"
-							id="fragileCheckbox" value="true" />
+						<input id="modalIndex" type="hidden" name="index" /> 
+							Name: <input id="modalName" type="text" name="name" required /><br />
+							Width: <input id="modalWidth" type="number" name="width" required /><br />
+							Depth: <input id="modalDepth" type="number" name="depth" required /><br />
+							Height: <input id="modalHeight" type="number" name="height" required /><br /> 
+							Weight: <input id="modalWeight" type="number"name="weight" required /><br /> 
+							Category: 
+							<select id="modalCategory" name="category" required>
+								<option value="">선택하세요</option>
+								<option value="잡화류">잡화류</option>
+								<option value="전자제품류">전자제품류</option>
+								<option value="가공식품">가공식품</option>
+								<option value="제과류">제과류</option>
+								<option value="음료">음료</option>
+								<option value="의류">의류</option>
+								<option value="세정용 화장품류">세정용 화장품류</option>
+								<option value="그 밖의 화장품류">그 밖의 화장품류</option>
+								<option value="의약외품류">의약외품류</option>
+								<option value="세제류">세제류</option>
+								<option value="건강기능식품">건강기능식품</option>
+							</select><br /> 
+							Fragile: <input type="checkbox" name="isFragile" id="fragileCheckbox" value="1" /> 
+									 <input type="hidden"name="isFragileHidden" id="isFragileHidden" value="0" />>
 					</form>
 				</div>
 				<div class="modal-footer">
@@ -299,7 +295,10 @@
 				html = '<tr><td colspan="9" class="text-center">검색 결과가 없습니다.</td></tr>';
 			} else {
 				currentPageProducts.forEach((product, index) => {
-					html += `<tr >
+					// isFragile 값을 명시적으로 확인
+					let isFragileValue = product.fragile === true || product.fragile === 1;
+					
+					html += `<tr>
 						<td class="productId d-none">${product.productId}</td>
 						<td class="index">${startIndex + index + 1}</td>
 						<td class="name">${product.name}</td>
@@ -308,10 +307,10 @@
 						<td class="height">${product.height}</td>
 						<td class="weight">${product.weight}</td>
 						<td class="category">${product.category}</td>
-						<td class="isFragile">${product.isFragile ? 'Yes' : 'No'}</td>
+						<td class="isFragile">${isFragileValue ? 'Yes' : 'No'}</td>
 						<td>
 							<div class="btn-reveal-trigger position-static">
-								<button class="btn btn-sm dropdown-toggle dropdown-caret-none transition-none btn-reveal" type="button" data-bs-toggle="dropdown" data-boundary="window" aria-haspopup="true" aria-expanded="true" data-bs-reference="parent">
+								<button class="btn btn-sm dropdown-toggle dropdown-caret-none transition-none btn-reveal" type="button" data-bs-toggle="dropdown" data-boundary="window" aria-haspopup="true" aria-expanded="false" data-bs-reference="parent">
 									•••
 								</button>
 								<div class="dropdown-menu py-2">
@@ -432,21 +431,38 @@
 		// Edit 처리
 		function handleEdit(button) {
 			let row = $(button).closest("tr");
+			
+			// 모달 제목 변경
 			$("#exampleModalLabel").text("Edit Product");
+			
+			// 값 채우기
 			$("#modalIndex").val(row.find(".productId").text().trim());
 			$("#modalName").val(row.find(".name").text().trim());
 			$("#modalWidth").val(row.find(".width").text().trim());
 			$("#modalDepth").val(row.find(".depth").text().trim());
 			$("#modalHeight").val(row.find(".height").text().trim());
 			$("#modalWeight").val(row.find(".weight").text().trim());
+			$("#modalCategory").val(row.find(".category").text().trim());
 			
-			let isFragile = row.find(".isFragile").text().trim();
-			$("#fragileCheckbox").prop("checked", isFragile === "Yes");
+			// Fragile 상태 설정
+			let isFragileText = row.find(".isFragile").text().trim();
+			$("#fragileCheckbox").prop("checked", isFragileText === "Yes");
 			
-			let category = row.find(".category").text().trim();
-			$("#modalCategory").val(category);
+		    $("#exampleModal").removeAttr("aria-hidden");
+
+		    // 모달 열기
+		    $("#exampleModal").modal("show");
+		    
+		 	// 🔥 Bootstrap의 `shown.bs.modal` 이벤트를 사용해 포커스 조정
+		    $("#exampleModal").on("shown.bs.modal", function () {
+		        $("#modalName").trigger("focus"); // 첫 번째 입력 필드에 포커스
+		    });
+		 	
+		    // 🔥 추가: 모달이 닫힐 때 이벤트 정리
+		    $("#exampleModal").on("hidden.bs.modal", function () {
+		        $("#exampleModal").off("shown.bs.modal hidden.bs.modal"); // 이벤트 정리
+		    });
 			
-			$("#exampleModal").modal("show");
 		}
 
 		// Submit 처리
@@ -459,8 +475,8 @@
 				height: $("#modalHeight").val().trim(),
 				weight: $("#modalWeight").val().trim(),
 				category: $("#modalCategory").val().trim(),
-				isFragile: $("#fragileCheckbox").is(":checked"),
-				tmpFragile: $("#fragileCheckbox").is(":checked") ? 1 : 0
+				isFragile: $("#fragileCheckbox").is(":checked") ? 1 : 0
+				
 			};
 
 			if (!validateProduct(product)) {
@@ -528,6 +544,23 @@
 			$("#modalCategory").val("");
 			$("#fragileCheckbox").prop("checked", false);
 		}
+
+		// 모달 관련 JavaScript 수정
+		$('#exampleModal').on('show.bs.modal', function () {
+			// 모달이 열릴 때 aria-hidden 속성 제거
+			$(this).removeAttr('aria-hidden');
+		});
+
+		$('#exampleModal').on('shown.bs.modal', function () {
+			// 모달이 완전히 열린 후 첫 번째 입력 필드에 포커스
+			$('#modalName').trigger('focus');
+		});
+
+		$('#exampleModal').on('hidden.bs.modal', function () {
+			// 모달이 닫힐 때 초기화
+			clearModalInputs();
+			$(this).removeAttr('aria-hidden');
+		});
 	</script>
 
 
