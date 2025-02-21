@@ -1,5 +1,5 @@
 let currentPage = 1;
-const rowsPerPage = 10;
+const rowsPerPage = 15;
 const pageGroupSize = 10;
 let totalPages = 1;
 let progressData = [];
@@ -132,7 +132,10 @@ function loadProgress() {
     let boxState = document.getElementById("boxStateFilter").value;
     let progressState = document.getElementById("progressStateFilter").value;
 
-    let queryParams = new URLSearchParams({ page: currentPage, size: rowsPerPage });
+    let queryParams = new URLSearchParams({ 
+        page: currentPage, 
+        size: 15  // 20에서 15로 변경
+    });
 
     // ✅ 필터 값이 존재할 경우에만 추가
     if (boxSpec && boxSpec !== "전체") queryParams.append("boxSpec", boxSpec);

@@ -36,7 +36,7 @@ public class ProgressController {
             @RequestParam(value = "orderNum", required = false) String orderNum,
             Model model) {
 
-        int pageSize = 20;
+        int pageSize = 15;
         int offset = (page - 1) * pageSize;
 
         List<ProgressDTO> progressList = progressService.getFilteredProgressList(offset, pageSize, date, camp, orderNum, null, null, null);
@@ -62,7 +62,7 @@ public class ProgressController {
             @RequestParam(value = "boxState", required = false) Integer boxState,
             @RequestParam(value = "progressState", required = false) Integer progressState) {
 
-        int pageSize = 20;
+        int pageSize = 15;
         int offset = (page - 1) * pageSize;
 
         List<ProgressDTO> progressList = progressService.getFilteredProgressList(offset, pageSize, date, camp, orderNum, boxSpec, boxState, progressState);
