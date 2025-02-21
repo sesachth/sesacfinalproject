@@ -17,6 +17,7 @@ class OrderModel(BaseModel):
     destination: str = Field(max_length=45)
     box_state: int
     progress_state: int
+    image_number: int
     product_id: int
     pallet_id: Optional[int] = None
 
@@ -62,3 +63,8 @@ class OrderWithDetailsModel(BaseModel):
     order: OrderModel
     product: ProductModel
     box: Optional[BoxModel] = None
+    
+class BoxCheckRequest(BaseModel):
+    order_id: int
+    image_number: int    
+    

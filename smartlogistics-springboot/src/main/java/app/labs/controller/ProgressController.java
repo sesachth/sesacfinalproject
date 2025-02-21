@@ -1,18 +1,21 @@
 package app.labs.controller;
 
-import app.labs.service.ProgressService;
-import app.labs.model.ProgressDTO;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import app.labs.model.ProgressDTO;
+import app.labs.service.ProgressService;
 
 @Controller
 @RequestMapping("/admin/progress")
@@ -72,7 +75,7 @@ public class ProgressController {
         return response;
     }
     
- // ✅ WebSocket을 통해 "포장 완료" 메시지를 받으면 실행됨
+    // ✅ WebSocket을 통해 "포장 완료" 메시지를 받으면 실행됨
     @MessageMapping("/updateStatus")
     @Transactional
     public void updateOrderStatus(@Payload Map<String, Object> payload) {
@@ -80,9 +83,8 @@ public class ProgressController {
 
         List<Integer> orderIds = (List<Integer>) payload.get("orderIds");
         int progressState = (int) payload.get("progressState");
-        
-        // ✅ imageNumber가 존재하지 않는 경우 기본값 null 처리
-        Integer imageNumber = payload.containsKey("imageNumber") ? (Integer) payload.get("imageNumber") : null;
+        String imageNumberStr = (String) payload.get("imageNumber");
+        Integer imageNumber = imageNumberStr != null ? Integer.parseInt(imageNumberStr) : null;
 
         if (orderIds == null || orderIds.isEmpty()) {
             System.out.println("⚠️ [WebSocket] 주문 ID 없음, 업데이트 수행하지 않음");

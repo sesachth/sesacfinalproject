@@ -34,4 +34,8 @@ public class ProgressDTO {
     public boolean getIsFragile() {
         return isFragile != null && isFragile;
     }
+    
+    public void setIsFragile(Boolean isFragile) {
+        this.isFragile = isFragile;
+    }
 }

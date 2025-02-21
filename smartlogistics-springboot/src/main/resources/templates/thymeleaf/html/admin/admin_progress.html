@@ -117,6 +117,53 @@ function connectWebSocket() {
 }
 
 
+<!--
+function connectWebSocket() {
+    let socket = new SockJS('/ws');
+    stompClient = Stomp.over(socket);
+
+    stompClient.connect({}, function(frame) {
+        console.log('📌 WebSocket 연결됨:', frame);
+
+        // ✅ 진행 상태(progressState) 업데이트 구독
+        stompClient.subscribe('/topic/updateStatus', function(message) {
+            let updatedProgress = JSON.parse(message.body);
+            console.log("📌 [updateStatus] WebSocket 데이터:", updatedProgress);
+            updateProgressFromWebSocket(updatedProgress);
+        });
+
+        // ✅ 진행 상태(progress) 업데이트 구독
+        stompClient.subscribe('/topic/progress', function(message) {
+            let data = JSON.parse(message.body);
+            console.log("📌 [progress] WebSocket 데이터:", data);
+            updateProgressFromWebSocket(data);
+        });
+
+        // ✅ ✅ 신규 추가: boxState 실시간 업데이트 구독
+        stompClient.subscribe('/topic/updateImage', function(messageOutput) {
+            let message = JSON.parse(messageOutput.body);
+            console.log("📦 [updateImage] WebSocket 데이터:", message);
+
+            let orderId = message.orderId;
+            let boxState = message.boxState;
+
+            // ✅ 테이블에서 해당 orderId를 가진 행을 찾아 boxState 업데이트
+            let row = document.querySelector(`tr[data-order-id="${orderId}"]`);
+            if (row) {
+                let boxStateCell = row.children[6];  // 7번째 열 (0-based 인덱스)
+                boxStateCell.textContent = 
+                    boxState === 1 ? "정상" :
+                    boxState === 2 ? "파손" : "미검사";
+            }
+        });
+
+    }, function(error) {
+        console.error('🚨 WebSocket 연결 실패:', error);
+        setTimeout(connectWebSocket, 5000);  // 연결 실패 시 재시도
+    });
+}
+-->
+
 function updateProgressFromWebSocket(updatedData) {
     if (!updatedData.orderIds || !Array.isArray(updatedData.orderIds)) return;
 

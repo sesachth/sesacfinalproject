@@ -33,7 +33,8 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
                 "/admin/order", 
                 "/admin/progress", 
                 "/admin/pallet", 
-                "/admin/stacking"
+                "/admin/stacking",
+                "/admin/check"
             );
 
             if (adminUrls.contains(requestedUrl)) {
