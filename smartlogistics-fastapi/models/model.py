@@ -12,6 +12,10 @@ class Order(Base):
     progress_state = Column(Integer, nullable=False)
     product_id = Column(Integer, ForeignKey('product.product_id'), index=True, nullable=False)
     pallet_id = Column(Integer, ForeignKey('pallet.pallet_id'), index=True)
+    seq_stacking = Column(Integer)
+    x_coordinate = Column(Float)
+    y_coordinate = Column(Float)
+    z_coordinate = Column(Float)
 
 class Product(Base):
     __tablename__ = "product"

@@ -20,6 +20,12 @@ async def stacking_process(db: AsyncSession = Depends(get_db)):
     # 적재 최적화 알고리즘 처리
     stacking_results = stack_boxes_heuristic(sorted_df_orders)
 
+    # 처리 결과에 따라 order 테이블 업데이트
+    await crud.update_order_after_stacking(stacking_results)
+
+    # 처리 결과에 따라 pallet 테이블 업데이트
+    await crud.update_pallet_after_stacking(stacking_results)
+
     print('적재 시뮬레이터 페이지 측 전체 데이터 처리가 완료되었습니다!')
 
     return stacking_results
@@ -86,6 +92,9 @@ def stack_boxes_heuristic(df_orders, pallet_width=1100, pallet_depth=1100, max_h
             
             stacked_boxes = []
             occupied_spaces = set()
+            pallet_load = 0.0
+            seq_stacking = 1
+            pallet_height = 0
 
             box_width, box_depth, box_height = df_filtered.iloc[0][['box__width', 'box__depth', 'box__height']].astype(int)
             
@@ -102,15 +111,16 @@ def stack_boxes_heuristic(df_orders, pallet_width=1100, pallet_depth=1100, max_h
                                 
                                 if len(stacked_boxes) < len(df_filtered):
                                     box_data = df_filtered.iloc[len(stacked_boxes)]
+                                    pallet_load += box_data['product__weight']
                                     stacked_boxes.append({
-                                        "product_name": box_data['product__name'],
-                                        "width": box_width / 1000,  # mm를 m로 변환
-                                        "depth": box_depth / 1000,
-                                        "height": box_height / 1000,
+                                        "order_id": box_data['order_id'],
+                                        "seq_stacking": seq_stacking,
                                         "x_coordinate": x / 1000,
                                         "y_coordinate": z / 1000,
                                         "z_coordinate": y / 1000
                                     })
+                                    seq_stacking += 1
+                                    pallet_height = max(pallet_height, z + box_height)
                                 else:
                                     break
                     if len(stacked_boxes) == len(df_filtered):
@@ -122,9 +132,13 @@ def stack_boxes_heuristic(df_orders, pallet_width=1100, pallet_depth=1100, max_h
             if stacked_boxes:
                 stacking_results["pallets"].append({
                     "pallet_id": pallet_id,
+                    "load": pallet_load,
+                    "height": pallet_height,
                     "destination": destination,
                     "boxes": stacked_boxes
                 })
                 pallet_id += 1
+                pallet_load = 0
+                seq_stacking = 1
 
     return stacking_results
