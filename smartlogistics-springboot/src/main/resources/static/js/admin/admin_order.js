@@ -185,7 +185,7 @@ function toggleDropdown(menuId) {
 
 // 주문생성 관련 JS
 let currentPage = 1;
-const rowsPerPage = 20;
+const rowsPerPage = 15;
 const pageGroupSize = 10;
 let totalPages = 1;
 let orders = [];
@@ -293,8 +293,11 @@ function loadOrders(page = currentPage) {
     let date = document.getElementById("dateFilter").value || new Date().toISOString().split('T')[0];
     let camp = document.getElementById("campFilter").value;
 
-    let queryParams = new URLSearchParams({ page, size: 20 });
-    queryParams.append("date", date); // date 파라미터를 항상 포함
+    let queryParams = new URLSearchParams({ 
+        page, 
+        size: 15  // 20에서 15로 변경
+    });
+    queryParams.append("date", date);
     if (camp) queryParams.append("destination", camp);
 
     fetch(`/admin/order/api?${queryParams.toString()}`)

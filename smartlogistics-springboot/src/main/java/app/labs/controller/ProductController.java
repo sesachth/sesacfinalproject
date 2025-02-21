@@ -3,10 +3,16 @@ package app.labs.controller;
 import app.labs.model.Product;
 import app.labs.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -127,8 +133,8 @@ public class ProductController {
             products = products.stream()
                 .filter(p -> {
                     try {
-                        Boolean productIsFragile = p.isFragile();
-                        return isFragile != null && productIsFragile.equals(targetisFragile);
+                        Boolean isisFragile = p.isFragile();
+                        return isisFragile != null && isisFragile.equals(targetisFragile);
                     } catch (Exception e) {
                         return false; // 에러 발생 시 해당 항목 제외
                     }
@@ -162,6 +168,19 @@ public class ProductController {
 		return "redirect:/admin/product";
 	}
 	
-	
+	@GetMapping("/excel")
+	public ResponseEntity<InputStreamResource> exportToExcel() throws IOException {
+		String filename = "products.xlsx";
+		ByteArrayInputStream in = productService.exportProductsToExcel();
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("Content-Disposition", "attachment; filename=" + filename);
+
+		return ResponseEntity
+				.ok()
+				.headers(headers)
+				.contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+				.body(new InputStreamResource(in));
+	}
 
 }

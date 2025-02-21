@@ -277,7 +277,6 @@ table {
 .progress-table tbody {
     display: block;
     height: 520px;
-    overflow-y: scroll;
 }
 
 table thead tr {
