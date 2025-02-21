@@ -1,15 +1,27 @@
 package app.labs.service;
 
-import app.labs.model.Order;
-import app.labs.model.Product;
-import org.apache.ibatis.session.SqlSession;
-import org.springframework.stereotype.Service;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+
+import org.apache.ibatis.session.SqlSession;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.RestTemplate;
+
+import app.labs.model.Order;
+import app.labs.model.Product;
 
 @Service
 public class OrderService {
@@ -137,6 +149,7 @@ public class OrderService {
 
         System.out.println("📌 최종 삽입할 주문 개수: " + orders.size());
         batchInsertOrders(orders);  // ✅ 최종 한 번만 DB에 삽입
+        readStackingResultsFromFastAPI();
     }
 
  // ✅ 하루 1000~2000개 랜덤 주문 생성 (오늘 날짜 주문의 palletId는 NULL)
@@ -228,6 +241,27 @@ public class OrderService {
  // ✅ 오늘 날짜의 진행 중인 주문 조회
     public List<Order> getOrdersInProgress() {
         return sqlSession.selectList("smartlogistics.OrderMapper.getOrdersInProgress");
+    }
+    
+    public void readStackingResultsFromFastAPI() {
+    	String fastApiUrl = "http://localhost:8000/api/v1/stacking_results";
+    	RestTemplate restTemplate = new RestTemplate();
+    	
+    	try {
+            ResponseEntity<String> response = restTemplate.getForEntity(fastApiUrl, String.class);
+            
+            if (response.getStatusCode().is2xxSuccessful()) {
+                String body = response.getBody();
+                if (body != null && body.contains("\"message\": \"OK\"")) {
+                    // FastAPI 응답이 정상입니다.
+                    return;
+                }
+            } 
+        } catch (HttpClientErrorException | HttpServerErrorException e) {
+        	System.err.println("FastAPI 서버 오류: " + e.getMessage());
+        } catch (Exception e) {
+        	System.err.println("FastAPI 연결 실패: " + e.getMessage());
+        }
     }
 
 }
