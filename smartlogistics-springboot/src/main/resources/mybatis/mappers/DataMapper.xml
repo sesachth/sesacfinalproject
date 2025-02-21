@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="DataMapper">
+    <resultMap id="stackingResultMap" type="java.util.HashMap">
+        <id property="pallet_id" column="pallet_id" javaType="int"/>
+        <result property="destination" column="destination" javaType="string"/>
+        <collection property="boxes" ofType="java.util.HashMap" javaType="java.util.ArrayList">
+            <result property="order_id" column="order_id" javaType="int"/>
+            <result property="product_name" column="product_name" javaType="string"/>
+            <result property="width" column="width" javaType="float"/>
+            <result property="depth" column="depth" javaType="float"/>
+            <result property="height" column="height" javaType="float"/>
+            <result property="x_coordinate" column="x_coordinate" javaType="float"/>
+            <result property="y_coordinate" column="y_coordinate" javaType="float"/>
+            <result property="z_coordinate" column="z_coordinate" javaType="float"/>
+        </collection>
+    </resultMap>
+    
+    <select id="getStackingResults" resultMap="stackingResultMap" parameterType="java.util.Date">
+        SELECT 
+            p.pallet_id,
+            p.destination,
+            o.order_id,
+            pr.name AS product_name,
+            b.width / 1000.0 AS width,
+            b.depth / 1000.0 AS depth,
+            b.height / 1000.0 AS height,
+            o.x_coordinate,
+            o.y_coordinate,
+            o.z_coordinate
+        FROM 
+            pallet p
+        INNER JOIN 
+            `order` o ON p.pallet_id = o.pallet_id
+        INNER JOIN 
+            product pr ON o.product_id = pr.product_id
+        INNER JOIN 
+            box b ON pr.spec = b.spec
+        WHERE 
+            DATE(o.order_time) = DATE(#{currentDate})
+            AND o.pallet_id IS NOT NULL
+        ORDER BY 
+            p.pallet_id, o.seq_stacking
+    </select>
+</mapper>
