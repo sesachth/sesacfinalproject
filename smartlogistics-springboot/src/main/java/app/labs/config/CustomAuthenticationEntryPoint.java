@@ -31,7 +31,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
             "/admin/stacking", 
             "/worker/packaging", 
             "/worker/stacking", 
-            "/common/check"
+            "/admin/check"
         );
         
      // 요청된 URL이 allowedUrls일 때만 팝업 띄우기

@@ -33,7 +33,7 @@ public class WebSecurityConfig {
         "/admin/stacking",
         "/worker/packaging",
         "/worker/stacking", 
-        "/common/check",
+        "/admin/check",
     };
   
     @Bean
@@ -47,8 +47,8 @@ public class WebSecurityConfig {
             	.requestMatchers("/login").permitAll()
             	.requestMatchers(STATIC_RESOURCE_PATHS).permitAll()
                 //.requestMatchers(PUBLIC_URLS).permitAll()
-            	.requestMatchers("/admin/dashboard", "/admin/product", "/admin/order", "/admin/progress", "/admin/pallet", "/admin/stacking").hasRole("ADMIN")  
-            	.requestMatchers("/worker/packaging", "/worker/stacking", "/common/check").hasAnyRole("ADMIN", "WORKER") 
+            	.requestMatchers("/admin/dashboard", "/admin/product", "/admin/order", "/admin/progress", "/admin/pallet", "/admin/stacking", "/admin/check").hasRole("ADMIN")  
+            	.requestMatchers("/worker/packaging", "/worker/stacking").hasAnyRole("ADMIN", "WORKER") 
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form

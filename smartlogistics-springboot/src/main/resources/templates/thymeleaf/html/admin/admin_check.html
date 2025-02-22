@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	  layout:decorator="~{/thymeleaf/html/common/default_layout}">
+<head>
+	<th:block layout:fragment="css">
+		<link rel="stylesheet" th:href="@{/css/admin/admin.css}" />
+		<script src="https://cdn.jsdelivr.net/npm/sockjs-client/dist/sockjs.min.js"></script>
+	    <script src="https://cdn.jsdelivr.net/npm/stompjs/lib/stomp.min.js"></script>
+	    <style>
+			#boxImage {
+				width: 500px;
+				height: 500px;
+				object-fit: cover; /* 이미지 비율 유지하면서 박스 크기에 맞춤 */
+				box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+			}
+			.hidden {
+				display: none;
+			}
+		</style>
+	</th:block>
+</head>
+
+<th:block layout:fragment="wrapper">
+    	<div class="outside-container">
+        	<div class="main-container">
+                <div th:replace="~{thymeleaf/html/common/include::profile}"></div>
+				<div th:replace="~{thymeleaf/html/common/include::sidebar}"></div>
+            	<div layout:fragment="content" class="main-content">
+            		<!-- 📦 선택된 박스 이미지 표시 영역 -->
+	                <div id="imageContainer" class="mt-4">
+	                    <h3 class="text-lg font-semibold">📦박스 이미지</h3>
+	                    <img id="boxImage" src="" alt="박스 이미지" class="hidden" />
+	                </div>
+	                
+	                <div id="check_result" >
+	                
+	                </div>
+            	</div>
+        	</div>
+        </div>
+</th:block>
+    
+    <!-- ✅ WebSocket 연결 및 구독 스크립트 -->
+	<script>
+    var socket = new SockJS('/ws');  // /ws/progress로 연결
+    var stompClient = Stomp.over(socket);
+
+    stompClient.connect({}, function (frame) {
+        console.log("WebSocket 연결됨: " + frame);
+
+        stompClient.subscribe('/topic/updateImage', function (messageOutput) {
+            var message = JSON.parse(messageOutput.body); // JSON 형식으로 변환
+            var imageUrl = message.imageUrl;  // 수신된 이미지 URL
+            var boxState = message.boxState;  // boxState 값 받기
+            console.log("이미지 업데이트 수신:", imageUrl, "박스 상태:", boxState);
+            
+            var boxImage = document.getElementById('boxImage');
+            boxImage.src = imageUrl;               // ✅ 기존 이미지 사용
+            boxImage.classList.remove('hidden');   // 숨김 해제s
+
+            // 이미지를 화면에 표시
+            //var imageContainer = document.getElementById('imageContainer');
+            //var imgElement = document.createElement('img');
+            //imgElement.src = imageUrl;
+            //imageContainer.innerHTML = '';  // 기존 이미지 삭제
+            //imageContainer.appendChild(imgElement);
+            
+         	// ✅ 배경색 업데이트
+            document.body.style.backgroundColor = (boxState === 2) ? "#ffebee" : "#e8f5e9";
+        });
+    });
+</script>
+</html>

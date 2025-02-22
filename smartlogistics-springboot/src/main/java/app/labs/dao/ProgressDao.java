@@ -41,4 +41,6 @@ public interface ProgressDao {
         @Param("progressState") int progressState,
         @Param("imageNumber") Integer imageNumber  // ✅ imageNumber가 null 허용
     );
+    
+    void updateBoxState(@Param("orderId") Long orderId, @Param("boxState") int boxState);
 }

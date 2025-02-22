@@ -24,6 +24,7 @@ async def box_standardize(product_list, box_list):
         sorted_dim = sorted([pw, pd, ph])
         min_len, mid_len, max_len = sorted_dim
 
+        # 예외 처리 
         cond1 = sum_dim <= 500  # 50cm 이하
         cond2 = (min_len <= 0.2 * max_len) and (mid_len <= 0.2 * max_len)
         cond3 = mid_len >= 4 * min_len
@@ -62,6 +63,11 @@ async def box_standardize(product_list, box_list):
         if not found_box:
             result_list.append({**product, 'packaging': '패키징 제외'})
 
+    # 결과 출력
+    for item in result_list:
+        packaging_value = item['packaging']
+        print(f"가장 적합한 박스는 '{packaging_value}'호 박스입니다.")
+        
     return result_list
 
 # 박스 매칭 함수

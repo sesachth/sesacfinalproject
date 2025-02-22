@@ -99,6 +99,13 @@
 	    AND DATE(order_time) = CURDATE()  <!-- ✅ 오늘 날짜 주문만 조회 -->
 	    ORDER BY order_time ASC, order_id ASC;
 	</select>
+	
+	<!-- 박스 상태 변경 -->
+	<update id="updateBoxState">
+    UPDATE `order` 
+    SET box_state = #{boxState} 
+    WHERE order_id = #{orderId}
+	</update>
 
 
 </mapper>
