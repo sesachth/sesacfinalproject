@@ -209,3 +209,17 @@ document.addEventListener('click', function(event) {
 function formatDecimal(value) {
     return value ? Number(value).toFixed(1) : '-';
 }
+
+
+// 엑셀 다운로드 버튼 이벤트 리스너 
+document.getElementById('downloadExcelBtn').addEventListener('click', function() {
+const destination = document.getElementById('campFilter').value;
+const palletId = document.getElementById('palletIdSearch').value;
+let queryParams = new URLSearchParams();
+if (destination) queryParams.append('destination', destination);
+if (palletId) queryParams.append('palletId', palletId);
+// vehicleNumber 등 다른 필터 조건이 있다면 추가
+
+ // ✅ 필터링된 데이터 다운로드
+    window.location.href = `/admin/pallet/download/excel?${queryParams.toString()}`;
+});

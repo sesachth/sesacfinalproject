@@ -1,11 +1,16 @@
 package app.labs.controller;
 
 import app.labs.service.PalletService;
+import jakarta.servlet.http.HttpServletResponse;
 import app.labs.model.Pallet;
+
+import org.apache.commons.compress.utils.IOUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.List;
 
 @Controller
@@ -77,5 +82,25 @@ public class PalletController {
             destination, 
             vehicleNumber
         );
+    }
+    
+    
+ // ── 엑셀 다운로드 엔드포인트 ──
+    @GetMapping("/download/excel")
+    public void downloadExcel(@RequestParam(value = "palletId", required = false) String palletId,
+                              @RequestParam(value = "destination", required = false) String destination,
+                              @RequestParam(value = "vehicleNumber", required = false) String vehicleNumber,
+                              HttpServletResponse response) {
+        try {
+            ByteArrayInputStream bis = palletService.exportPalletListToExcel(palletId, destination, vehicleNumber);
+            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            response.setHeader("Content-Disposition", "attachment; filename=pallets.xlsx");
+
+            IOUtils.copy(bis, response.getOutputStream());
+            response.flushBuffer();
+        } catch (IOException e) {
+            e.printStackTrace();
+            // 필요 시 오류 처리 추가
+        }
     }
 }
