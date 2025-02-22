@@ -15,6 +15,7 @@
 		<div class="main-container">
 			<div th:replace="~{thymeleaf/html/common/include::profile}"></div>
 			<div th:replace="~{thymeleaf/html/common/include::sidebar}"></div>
+			<div th:replace="~{thymeleaf/html/common/include::logout}"></div>
 			<div layout:fragment="content" class="main-content">
 
 				<script th:src="@{https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js}"></script>
@@ -28,7 +29,7 @@
 
 				<div class="container">
 					<h1>관리자 - 적재 시뮬레이터 페이지입니다.</h1>
-					<div class="form-group float-start narrow-element mt-5">
+					<div class="form-group float-start mt-5">
 						<!-- 콤보박스 -->
 						<select class="form-control" id="palletSelect">
 							<option value="">Loading...</option>
@@ -36,7 +37,7 @@
 						</select>
 					</div>
 					<div class="clearfix"></div>
-					<div id="boxList" class="list-group mt-3 float-start narrow-element">
+					<div id="boxList" class="list-group mt-3 float-start">
 						<!-- 박스 정보가 여기에 동적으로 추가됩니다 -->
 					</div>
 				</div>

@@ -16,90 +16,24 @@
 
 .right-controls {
     display: flex;
-    gap: 12px;
+    gap: 4px;
     align-items: center;
-}
-
-/* 검색바 스타일 */
-.search-container {
-    position: relative;
-    width: 300px;
-}
-
-.search-input {
-    width: 100%;
-    height: 36px;
-    padding: 0 15px 0 40px;
-    border: 1px solid rgba(104, 38, 158, 0.6);
-    border-radius: 12px;
-    font-family: 'Inter', sans-serif;
-    font-size: 14px;
-    font-weight: 600;
-    background-color: transparent;
-    outline: none;
-    color: rgba(104, 38, 158, 0.6);
-}
-
-.search-input::placeholder {
-    color: rgba(104, 38, 158, 0.6); /* placeholder 텍스트 색상 */
-    text-decoration: none;
-    font-weight: 600;
-}
-
-.search-icon {
-    position: absolute;
-    left: 15px;            /* 검색창 오른쪽에 위치 */
-    top: 62%;              /* 수직 중앙 정렬 */
-    transform: translateY(-50%);
-    width: 20px;           /* 아이콘 전체 영역 */
-    height: 20px;
-}
-
-.magnifier {
-    position: relative; 
-    width: 100%;
-    height: 100%;
-}
-
-/* 돋보기 원형 부분 */
-.magnifier-circle {
-    position: absolute;
-    width: 12px;
-    height: 12px;
-    border: 2px solid rgba(104, 38, 158, 0.6);  /* 보라색 테두리에 투명도 적용 */
-    border-radius: 50%;    /* 완전한 원 모양 */
-}
-
-/* 돋보기 손잡이 부분 */
-.magnifier-line {
-    position: absolute;
-    width: 6px;
-    height: 1.8px;        
-    background: rgba(104, 38, 158, 0.6);
-    top: 10.6px;
-    left: 9.7px; 
-    transform: rotate(45deg);
-    border-radius: 5px;
-}
-
-#searchProductBtn {
-    display: none;  /* 버튼을 완전히 숨김 */
 }
 
 
 /* 드롭다운 스타일 */
 
 /* 드롭다운 그룹 컨테이너 */
-.toggle-group {
+.dropdown-group {
     display: flex;
-    width: 374px;
+    width: 480px;
     border: 1px solid rgba(104, 38, 158, 0.6);
     border-radius: 12px;
-    margin-left: 80px;
+    /* margin-left: 80px; */
     /* overflow: hidden;   내부 요소들이 border-radius를 벗어나지 않도록 */
 }
 
-.toggle-container {
+.dropdown-container {
     display: inline-block;
     position: relative;
     margin: 0;
@@ -108,17 +42,23 @@
 }
 
 /* 첫 번째 드롭다운 */
-.toggle-container:first-child .toggle-select {
+.dropdown-container:first-child .dropdown-select {
     border-right: 1px solid rgba(104, 38, 158, 0.6);  /* 구분선 */
     border-radius: 12px 0 0 12px;  /* 왼쪽만 둥글게 */
 }
 
-/* 두 번째 드롭다운 */
-.toggle-container:last-child .toggle-select {
+/* 첫 번째 드롭다운 */
+.dropdown-container:nth-child(2) .dropdown-select {
+    border-right: 1px solid rgba(104, 38, 158, 0.6);  /* 구분선 */
+    border-radius: 0 0 0 0;  /* 오른쪽만 둥글게 */
+}
+
+/* 마지막 번째 드롭다운 */
+.dropdown-container:last-child .dropdown-select {
     border-radius: 0 12px 12px 0;  /* 오른쪽만 둥글게 */
 }
 
-.toggle-select {
+.dropdown-select {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -142,20 +82,14 @@
     overflow: hidden;
 }
 
-/*
-.dropdown-select svg{
-    margin-left: 9px;
-    vertical-align: middle;
-}
-*/
-
 .arrow-icon {
     margin-left: 9px;
     margin-top: 5px;
     vertical-align: middle;
 }
 
-.toggle-menu {
+
+.dropdown-menu {
     display: none;
     position: absolute;
     top: calc(100% + 4px);
@@ -174,23 +108,22 @@
     z-index: 1000;
 }
 
-.toggle-menu.show {
-    display: block
+.dropdown-menu.show {
+    display: block;
 }
 
-.toggle-item {
+.dropdown-item {
     padding: 8px 10px;
     color: #68269E;
-    cursor: pointer;
 }
 
-.toggle-item:hover,
-.toggle-item.active {
+.dropdown-item:hover,
+.dropdown-item.active {
     background-color: rgba(104, 38, 158, 0.1);
 }
 
 /* hover 효과 */
-.toggle-group:hover {
+.dropdown-group:hover {
     border-color: rgba(104, 38, 158, 0.8);
 }
 
@@ -207,54 +140,33 @@
     color: rgba(104, 38, 158, 0.8);
 }*/
 
-.toggle-select:hover,
-.toggle-select.active {
+.date-placeholder:hover,
+.date-placeholder.active {
+    background-color: rgba(104, 38, 158, 0.1);
+}
+
+.dropdown-select:hover,
+.dropdown-select.active {
     background-color: rgba(104, 38, 158, 0.1);
 }
 
 /* 첫 번째 드롭다운 */
-.toggle-container:first-child:hover {
+.dropdown-container:first-child:hover {
     border-radius: 12px 0 0 12px;  /* 왼쪽만 둥글게 */
 }
 
 /* 첫 번째 드롭다운 */
-.toggle-container:last-child:hover {
+.dropdown-container:last-child:hover {
     border-radius: 0 12px 12px 0;  /* 오른쪽만 둥글게 */
 }
-
-
-/* 조회 버튼 스타일 */
-/* .inquiry-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 80px;
-    height: 37px;
-    margin-left: 2px;
-
-    border: 1px solid rgba(104, 38, 158, 0.6);
-    border-radius: 12px;
-    background-color: transparent;
-
-    font-family: 'Inter', sans-serif;
-    font-size: 14px;
-    font-weight: 600;
-    color: #68269E;
-    cursor: pointer;
-}
-
-.inquiry-btn:hover {
-    background-color: rgba(104, 38, 158, 0.1);
-} */
 
 #filterBtn {
     display: none;  /* 버튼을 완전히 숨김 */
 }
 
 
-
 /* 버튼 스타일 */
-.custom-btn {
+.btn {
     height: 36px;
     padding: 0 16px;
     border-radius: 8px;
@@ -275,15 +187,19 @@
     border: 1px solid rgba(104, 38, 158, 0.6);
 }
 
-.btn-add {
-    background-color: white;
+.date-show {
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
     color: #68269E;
-    border: 1px solid rgba(104, 38, 158, 0.6);
 }
 
-.plus-icon {
-    font-size: 18px;
-    font-weight: bold;
+.date-text {
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: #68269E;
+    margin-right: 20px;
 }
 
 /* Export 아이콘 */
@@ -302,9 +218,6 @@
     background-color: rgba(104, 38, 158, 0.1);
 }
 
-.btn-add:hover {
-    background-color: rgba(104, 38, 158, 0.1);
-}
 
 
 
@@ -312,13 +225,13 @@
 
 
 /* 테이블 스타일 */
+
 .table-container {
     position: relative;
     height: 580px;  /* 대략 20행이 보이는 높이 */
     /*overflow-y: scroll;*/
     border: 0px;
     background-color: #FFF;
-    font-family: 'Inter', sans-serif;
 }
 
 
@@ -331,7 +244,7 @@ table {
 }
 
 
-.product-table th {
+.progress-table th {
     padding: 12px;
     text-align: center;
     vertical-align: middle;
@@ -342,15 +255,15 @@ table {
 }
 
 /* 테이블 헤더를 고정하기 위한 스타일 */
-.product-table thead th {
+.progress-table thead th {
     position: sticky;
     top: 0;
     background-color: #FFFFFF;
     border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 }
 
-.product-table td {
-    padding: 2px 12px;
+.progress-table td {
+    padding: 4px 12px;
     border-bottom: 0.8px solid rgba(0, 0, 0, 0.05);
     color: black;
     text-align: center;
@@ -359,10 +272,9 @@ table {
     white-space: nowrap;        /* 모든 셀에 대해 줄바꿈 방지 */
     overflow: hidden;           /* 넘치는 텍스트 숨김 */
     text-overflow: ellipsis;    /* 말줄임표 표시 */
-    max-width: 0;
 }
 
-.product-table tbody {
+.progress-table tbody {
     display: block;
     height: 520px;
 }
@@ -378,89 +290,74 @@ table tbody tr {
 }
 
   
-table thead tr th {
+  table thead tr th {
     width: 140px
-}
-
-table tbody tr td {
+  }
+  
+  table tbody tr td {
     width: 140px
-}
-
-table tfoot tr td {
+  }
+  
+  table tfoot tr td {
     width: 140px
-}
+  }
 
-.product-table tbody tr:hover {
+.progress-table tbody tr:hover {
     background-color: #F8F9FA;
 }
 
-.product-table .align-left {
+
+.progress-table .align-left {
     text-align: left;
 }
 
-.product-table .align-right {
+.progress-table .align-right {
     text-align: right;
 }
 
-.product-table .align-center {
+.progress-table .align-center {
     text-align: center;
 }
 
 /* 각 열의 너비 설정 */
 table thead tr th:nth-child(1),
 table tbody tr td:nth-child(1) {
-    width: 5%;  /* product_id */
-    text-align: center;
+    width: 5%;  /* order_id */
 }
 
 table thead tr th:nth-child(2),
 table tbody tr td:nth-child(2) {
-    width: 20%;  /* product_name */
-    text-align: left;
-}
-
-table thead tr th:nth-child(3),
-table tbody tr td:nth-child(3) {
-    width: 11%;  /* width */
-    text-align: center;
-}
-
-table thead tr th:nth-child(4),
-table tbody tr td:nth-child(4) {
-    width: 11%;  /* depth */
-    text-align: center;
-}
-
-table thead tr th:nth-child(5),
-table tbody tr td:nth-child(5) {
-    width: 11%;  /* height */
-    text-align: center;
-}
-
-table thead tr th:nth-child(6),
-table tbody tr td:nth-child(6) {
-    width: 11%;  /* weight */
-    text-align: center;
-}
-
-table thead tr th:nth-child(7),
-table tbody tr td:nth-child(7) {
-    width: 12%;  /* category */
+    width: 30%;  /* product_name */
     text-align: left;
     padding-left: 40px;
 }
 
-table thead tr th:nth-child(8),
-table tbody tr td:nth-child(8) {
-    width: 14%;  /* fragile */
-    text-align: center;
+table thead tr th:nth-child(3),
+table tbody tr td:nth-child(3) {
+    width: 12%;  /* product_category */
+    text-align: left;
 }
 
-table thead tr th:nth-child(9),
-table tbody tr td:nth-child(9) {
-    width: 5%;  /* edit,delete */
-    text-align: center;
+table thead tr th:nth-child(4),
+table tbody tr td:nth-child(4) {
+    width: 12%;  /* box_spec */
 }
+
+table thead tr th:nth-child(5),
+table tbody tr td:nth-child(5) {
+    width: 11%;  /* pallet_id */
+}
+
+table thead tr th:nth-child(6),
+table tbody tr td:nth-child(6) {
+    width: 15%;  /* box_state */
+}
+
+table thead tr th:nth-child(7),
+table tbody tr td:nth-child(7) {
+    width: 15%;  /* progress_state */
+}
+
 
 
 
@@ -519,68 +416,3 @@ table tbody tr td:nth-child(9) {
     margin: 0 4px;
     box-sizing: border-box;
 }
-
-/* 테이블 드롭다운 스타일 */
-.table-dropdown-menu {
-    min-width: 10rem;
-    padding: 0.5rem 0;
-    margin: 0;
-    font-size: 1rem;
-    color: #5e6e82;
-    text-align: left;
-    background-color: #fff;
-    border: 1px solid #d8e2ef;
-    border-radius: 0.375rem;
-}
-
-.table-dropdown-item {
-    display: block;
-    width: 100%;
-    padding: 0.25rem 1rem;
-    clear: both;
-    font-weight: 400;
-    color: #5e6e82;
-    text-align: inherit;
-    white-space: nowrap;
-    background-color: transparent;
-    border: 0;
-    cursor: pointer;
-}
-
-.table-dropdown-item:hover {
-    color: #5e6e82;
-    background-color: #f9fafd;
-}
-
-.table-dropdown-toggle::after {
-    display: none;
-}
-
-/* 드롭다운 버튼 테두리 제거 */
-.btn-reveal-trigger .btn-reveal {
-	border: none !important;
-	box-shadow: none !important;
-	background: transparent !important;
-}
-
-.btn-reveal-trigger .btn-reveal:hover, .btn-reveal-trigger .btn-reveal:focus,
-	.btn-reveal-trigger .btn-reveal:active {
-	border: none !important;
-	box-shadow: none !important;
-	background: transparent !important;
-}
-
-/* 드롭다운 화살표 제거 */
-.dropdown-caret-none::after {
-	display: none !important;
-}
-
-.modal-backdrop {
-    display: none;
-}
-/* 모달이 열려도 body의 오버플로우나 포인터 이벤트를 재정의 */
-body.modal-open {
-  overflow: auto !important;
-  pointer-events: auto !important;
-}
-

@@ -20,6 +20,10 @@ class OrderModel(BaseModel):
     image_number: int
     product_id: int
     pallet_id: Optional[int] = None
+    seq_stacking: Optional[int] = None
+    x_coordinate: Optional[float] = None
+    y_coordinate: Optional[float] = None
+    z_coordinate: Optional[float] = None
 
     class Config:
         from_attributes = True
@@ -31,7 +35,7 @@ class ProductModel(BaseModel):
     depth: float
     height: float
     weight: float
-    is_fragile: bool 
+    is_fragile: bool
     category: str = Field(max_length=30)
     spec: Optional[int] = None
 

@@ -2,6 +2,9 @@ package app.labs.service;
 
 import java.util.List;
 import java.util.Map;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -10,6 +13,8 @@ import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import app.labs.dao.ProductlistRepository;
 import app.labs.model.Product;
@@ -101,5 +106,64 @@ public class ProductService {
         return productlistRepository.findByNameContaining(name);
     }
     
+    public ByteArrayInputStream exportProductsToExcel() throws IOException {
+        List<Product> products = getAllProducts();
+        
+        try (Workbook workbook = new XSSFWorkbook(); 
+             ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            
+            Sheet sheet = workbook.createSheet("제품 목록");
+            
+            // 헤더 스타일
+            CellStyle headerStyle = workbook.createCellStyle();
+            Font headerFont = workbook.createFont();
+            headerFont.setBold(true);
+            headerStyle.setFont(headerFont);
+            headerStyle.setAlignment(HorizontalAlignment.CENTER);
+            headerStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+            headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
 
+            // 데이터 스타일
+            CellStyle dataStyle = workbook.createCellStyle();
+            dataStyle.setAlignment(HorizontalAlignment.CENTER);
+
+            // 헤더 생성
+            Row headerRow = sheet.createRow(0);
+            String[] columns = {"제품 ID", "제품명", "너비(cm)", "깊이(cm)", "높이(cm)", "무게(kg)", "취급주의", "카테고리", "박스규격"};
+            
+            for (int col = 0; col < columns.length; col++) {
+                Cell cell = headerRow.createCell(col);
+                cell.setCellValue(columns[col]);
+                cell.setCellStyle(headerStyle);
+                sheet.setColumnWidth(col, 3500);  // 컬럼 너비 설정
+            }
+
+            // 데이터 입력
+            int rowIdx = 1;
+            for (Product product : products) {
+                Row row = sheet.createRow(rowIdx++);
+                
+                row.createCell(0).setCellValue(product.getProductId());
+                row.createCell(1).setCellValue(product.getName());
+                row.createCell(2).setCellValue(product.getWidth());
+                row.createCell(3).setCellValue(product.getDepth());
+                row.createCell(4).setCellValue(product.getHeight());
+                row.createCell(5).setCellValue(product.getWeight());
+                row.createCell(6).setCellValue(product.isFragile() ? "Yes" : "No");
+                row.createCell(7).setCellValue(product.getCategory());
+                row.createCell(8).setCellValue(product.getSpec() != null ? product.getSpec() : 0);
+
+                // 모든 셀에 데이터 스타일 적용
+                for (int col = 0; col < columns.length; col++) {
+                    Cell cell = row.getCell(col);
+                    if (cell != null) {
+                        cell.setCellStyle(dataStyle);
+                    }
+                }
+            }
+
+            workbook.write(out);
+            return new ByteArrayInputStream(out.toByteArray());
+        }
+    }
 }

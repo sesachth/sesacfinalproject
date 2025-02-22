@@ -43,7 +43,7 @@ public class OrderController {
     public ResponseEntity<?> getOrders(@RequestParam(value = "destination", required = false) String destination,
                                        @RequestParam(value = "date", required = false) String date,
                                        @RequestParam(value = "page", required = false, defaultValue = "1") int page,
-                                       @RequestParam(value = "size", required = false, defaultValue = "20") int size) {
+                                       @RequestParam(value = "size", required = false, defaultValue = "15") int size) {
 
         List<Order> orders;
         int offset = (page - 1) * size;

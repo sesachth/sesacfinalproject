@@ -11,7 +11,7 @@ async def box_standardize(product_list, box_list):
     box_list_sorted = sorted(box_list, key=lambda x: x['box_num'])
 
     for product in product_list:
-        pw, pd, ph, weight  = (
+        pw, pd, ph, weight = (
             product['width'], product['depth'], product['height'], product['weight']
         )
         

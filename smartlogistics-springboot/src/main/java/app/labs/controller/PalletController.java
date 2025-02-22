@@ -65,17 +65,14 @@ public class PalletController {
     @GetMapping("/api/list")
     @ResponseBody
     public List<Pallet> getPalletListApi(
-            @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "palletId", required = false) String palletId,
             @RequestParam(value = "destination", required = false) String destination,
             @RequestParam(value = "vehicleNumber", required = false) String vehicleNumber) {
 
-        int pageSize = 20;
-        int offset = (page - 1) * pageSize;
-
+        // offset과 pageSize를 제거하고 전체 데이터를 반환
         return palletService.getFilteredPalletList(
-            offset, 
-            pageSize, 
+            0,  // offset
+            Integer.MAX_VALUE,  // pageSize를 매우 큰 값으로 설정
             palletId, 
             destination, 
             vehicleNumber

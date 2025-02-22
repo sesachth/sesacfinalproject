@@ -5,6 +5,7 @@
 
 <th:block layout:fragment="css">
 	<link rel="stylesheet" th:href="@{/css/admin/admin.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/admin_pallet.css}" />
 </th:block>
 
 <th:block layout:fragment="wrapper">
@@ -12,362 +13,99 @@
 		<div class="main-container">
 			<div th:replace="~{thymeleaf/html/common/include::profile}"></div>
 			<div th:replace="~{thymeleaf/html/common/include::sidebar}"></div>
+            <div th:replace="~{thymeleaf/html/common/include::logout}"></div>
 			<div layout:fragment="content" class="main-content">
+                <!-- 상단 컨트롤 바 -->
+                <div class="control-bar">
+                    <div class="left-controls">
+                        <!-- 팔렛트 ID 검색바 -->
+                        <div class="search-container">
+                            <input type="text" id="palletIdSearch" class="search-input" placeholder="팔렛트 ID 입력">
+                            <div class="search-icon">
+                                <div class="magnifier">
+                                    <div class="magnifier-circle"></div>
+                                    <div class="magnifier-line"></div>
+                                </div>
+                            </div>
+                            <button id="searchPalletBtn">검색</button>
+                        </div>
 
 
-				<!-- 필터 컨테이너 -->
-				<div class="filter-container">
-					<div class="filter-group">
-						<label for="dateFilter">날짜:</label>
-						<input type="date" id="dateFilter" class="form-control" />
-					</div>
-					<div class="filter-group">
-						<label for="destinationFilter">캠프:</label>
-						<select id="destinationFilter" class="form-control">
-							<option value="">전체</option>
-							<option value="서초 캠프">서초 캠프</option>
-							<option value="강남 캠프">강남 캠프</option>
-							<option value="강서 캠프">강서 캠프</option>
-							<option value="중구 캠프">중구 캠프</option>
-							<option value="성동 캠프">성동 캠프</option>
-						</select>
-					</div>
-					<button id="filterBtn" class="btn btn-primary">조회</button>
+                        <div class="dropdown-group">
+                            <!-- 목적지 필터 -->
+                            <div class="dropdown-container">
+                                <div class="dropdown-select" onclick="toggleDropdown('campMenu')">
+                                    Destination
+                                    <svg class="arrow-icon" width="10" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M1 1L5.97126 6L11 1" stroke="#68269E" stroke-width="1.2" stroke-linecap="round"/>
+                                    </svg>
+                                </div>
+                                <div class="dropdown-menu" id="campMenu">
+                                    <div class="dropdown-item" data-value="" onclick="selectItem(this, 'campMenu', '')">전체</div>
+                                    <div class="dropdown-item" data-value="서초 캠프" onclick="selectItem(this, 'campMenu', '서초 캠프')">서초 캠프</div>
+                                    <div class="dropdown-item" data-value="강남 캠프" onclick="selectItem(this, 'campMenu', '강남 캠프')">강남 캠프</div>
+                                    <div class="dropdown-item" data-value="강서 캠프" onclick="selectItem(this, 'campMenu', '강서 캠프')">강서 캠프</div>
+                                    <div class="dropdown-item" data-value="중구 캠프" onclick="selectItem(this, 'campMenu', '중구 캠프')">중구 캠프</div>
+                                    <div class="dropdown-item" data-value="성동 캠프" onclick="selectItem(this, 'campMenu', '성동 캠프')">성동 캠프</div>
+                                </div>
+                                <!-- hidden input 추가 -->
+                                <input type="hidden" id="campFilter" value="" />
+                            </div>
+                        </div>
+                        <button class="inquiry-btn" id="filterBtn">조회</button>
+                    </div>
+               	</div>
 
-					<div class="search-group">
-						<label for="PalletIdSearch">팔렛트 ID:</label>
-						<input type="text" id="PalletIdSearch" class="form-control" placeholder="팔렛트 ID 입력" />
-						<button id="searchPalletBtn" class="btn btn-primary">검색</button>
-					</div>
-				</div>
-
-				<!-- 팔렛트 테이블 -->
-				<div class="table-container">
-					<table class="pallet-table">
-						<thead>
-							<tr>
-								<th>Pallet ID</th>
-								<th>Load</th>
-								<th>Width</th>
-								<th>Depth</th>
-								<th>Height</th>
-								<th>Destination</th>
-								<th>Vehicle Number</th>
-							</tr>
-						</thead>
-						<tbody>
-							<tr th:each="pallet : ${palletList}">
-								<td th:text="${pallet.palletId}"></td>
-								<td th:text="${pallet.load}"></td>
-								<td th:text="${pallet.width}"></td>
-								<td th:text="${pallet.depth}"></td>
-								<td th:text="${pallet.height}"></td>
-								<td th:text="${pallet.destination}"></td>
-								<td th:text="${pallet.vehicleNumber}"></td>
-							</tr>
-							<tr th:if="${#lists.isEmpty(palletList)}">
-								<td colspan="7">등록된 팔레트가 없습니다.</td>
-							</tr>
-						</tbody>
-					</table>
-
-					<!-- 페이지네이션 -->
-					<div class="pagination" th:if="${totalPages > 0}">
-						<!-- 이전 페이지 -->
-						<a th:if="${currentPage > 1}" 
-						   th:href="@{/admin/pallet(page=${currentPage - 1}, palletId=${palletId}, destination=${destination}, vehicleNumber=${vehicleNumber})}"
-						   class="btn btn-purple">이전</a>
-
-						<!-- 페이지 번호 -->
-						<th:block th:each="pageNum : ${#numbers.sequence(1, totalPages)}">
-							<a th:href="@{/admin/pallet(page=${pageNum}, palletId=${palletId}, destination=${destination}, vehicleNumber=${vehicleNumber})}"
-							   th:text="${pageNum}"
-							   th:class="${pageNum == currentPage ? 'btn btn-purple active' : 'btn btn-purple'}"></a>
-						</th:block>
-
-						<!-- 다음 페이지 -->
-						<a th:if="${currentPage < totalPages}"
-						   th:href="@{/admin/pallet(page=${currentPage + 1}, palletId=${palletId}, destination=${destination}, vehicleNumber=${vehicleNumber})}"
-						   class="btn btn-purple">다음</a>
-					</div>
-				</div>
+                <!-- 팔레트 테이블 -->
+                <div class="table-container">
+                    <table class="pallet-table">
+                        <colgroup>
+                            <col style="width: 5%">   <!-- pallet_id (#) -->
+                            <col style="width: 14%">  <!-- load -->
+                            <col style="width: 14%">  <!-- width -->    
+                            <col style="width: 14%">  <!-- depth -->
+                            <col style="width: 14%">  <!-- height -->
+                            <col style="width: 19%">  <!-- destination -->
+                            <col style="width: 20%">  <!-- vehicle_number -->
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th class="align-center">#</th>
+                                <th class="align-center">Load</th>
+                                <th class="align-center">Width</th>
+                                <th class="align-center">Depth</th>
+                                <th class="align-center">Height</th>
+                                <th class="align-center">Destination</th>
+                                <th class="align-center">Vehicle Number</th>
+                            </tr>
+                        </thead>
+                        <tbody id="palletTableBody">
+                            <!-- 팔레트 데이터가 여기에 추가됨 -->
+                        </tbody>
+                    </table>
+                </div>
+					
+                <!-- 페이지네이션 -->
+                <div class="pagination">
+                    <button id="prevGroup">
+                        <svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M9.01488 2.61115C9.07878 2.54353 9.12874 2.46398 9.1619 2.37704C9.19506 2.29011 9.21077 2.1975 9.20814 2.10449C9.20551 2.01149 9.18459 1.91991 9.14657 1.83499C9.10854 1.75007 9.05417 1.67347 8.98654 1.60957C8.91892 1.54566 8.83937 1.4957 8.75243 1.46254C8.6655 1.42938 8.57289 1.41367 8.47988 1.4163C8.38688 1.41893 8.2953 1.43985 8.21038 1.47788C8.12546 1.5159 8.04886 1.57028 7.98496 1.6379L1.96413 8.0129C1.83979 8.14442 1.77051 8.31854 1.77051 8.49953C1.77051 8.68051 1.83979 8.85463 1.96413 8.98615L7.98496 15.3619C8.04844 15.431 8.12502 15.4868 8.21025 15.526C8.29549 15.5653 8.38767 15.5872 8.48145 15.5906C8.57523 15.5939 8.66873 15.5785 8.75654 15.5454C8.84434 15.5123 8.92469 15.4621 8.99291 15.3977C9.06114 15.3332 9.11589 15.2559 9.15397 15.1701C9.19206 15.0844 9.21272 14.9919 9.21476 14.8981C9.21681 14.8043 9.20019 14.711 9.16587 14.6236C9.13156 14.5363 9.08023 14.4567 9.01488 14.3893L3.45304 8.49953L9.01488 2.61115Z" fill="black"/>
+                        </svg>
+                    </button>
+                    <span id="pageNumbers"></span>
+                    <button id="nextGroup">
+                        <svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M7.98512 2.61115C7.92122 2.54353 7.87126 2.46398 7.8381 2.37704C7.80494 2.29011 7.78923 2.1975 7.79186 2.10449C7.79449 2.01149 7.81541 1.91991 7.85343 1.83499C7.89146 1.75007 7.94583 1.67347 8.01346 1.60957C8.08108 1.54566 8.16063 1.4957 8.24757 1.46254C8.3345 1.42938 8.42711 1.41367 8.52012 1.4163C8.61312 1.41893 8.7047 1.43985 8.78962 1.47788C8.87454 1.5159 8.95114 1.57028 9.01504 1.6379L15.0359 8.0129C15.1602 8.14442 15.2295 8.31854 15.2295 8.49953C15.2295 8.68051 15.1602 8.85463 15.0359 8.98615L9.01504 15.3619C8.95156 15.431 8.87498 15.4868 8.78975 15.526C8.70451 15.5653 8.61233 15.5872 8.51855 15.5906C8.42477 15.5939 8.33127 15.5785 8.24346 15.5454C8.15566 15.5123 8.07531 15.4621 8.00709 15.3977C7.93886 15.3332 7.88411 15.2559 7.84603 15.1701C7.80794 15.0844 7.78728 14.9919 7.78524 14.8981C7.78319 14.8043 7.79981 14.711 7.83413 14.6236C7.86844 14.5363 7.91977 14.4567 7.98512 14.3893L13.547 8.49953L7.98512 2.61115Z" fill="black"/>
+                        </svg>
+                    </button>
+                </div>
+				
 			</div>
 		</div>
 	</div>
-	</div>
 </th:block>
 
-<script>
-// 페이지네이션 관련 변수
-let currentPage = 1;
-const rowsPerPage = 20;
-const pageGroupSize = 10;
+<script th:src="@{/js/admin/admin_pallet.js}"></script>
 
-// 페이지 로드 시 실행
-window.onload = function() {
-    initializeEventHandlers();
-    displayCurrentPage();
-    updatePagination();
-};
-
-// 이벤트 핸들러 초기화
-function initializeEventHandlers() {
-    // 검색 버튼 클릭 이벤트
-    document.getElementById('searchPalletBtn').addEventListener('click', function() {
-        searchPallets();
-    });
-
-    // 필터 버튼 클릭 이벤트
-    document.getElementById('filterBtn').addEventListener('click', function() {
-        searchPallets();
-    });
-
-    // 팔렛트 ID 입력 필드에서 엔터 키 이벤트
-    document.getElementById('PalletIdSearch').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            searchPallets();
-        }
-    });
-}
-
-// 팔렛트 검색 함수
-function searchPallets() {
-    const destination = document.getElementById('destinationFilter').value;
-    const palletId = document.getElementById('PalletIdSearch').value;
-    
-    // URL 파라미터 생성
-    const params = new URLSearchParams();
-    if (destination) params.append('destination', destination);
-    if (palletId) params.append('palletId', palletId);
-
-    // 페이지 리로드
-    window.location.href = `/admin/pallet?${params.toString()}`;
-}
-
-// 현재 페이지 표시
-function displayCurrentPage() {
-    const table = document.querySelector(".pallet-table tbody");
-    const rows = table.getElementsByTagName("tr");
-    const totalRows = rows.length;
-    const totalPages = Math.ceil(totalRows / rowsPerPage);
-
-    // 현재 페이지에 해당하는 행만 표시
-    const start = (currentPage - 1) * rowsPerPage;
-    const end = Math.min(start + rowsPerPage, totalRows);
-
-    for (let i = 0; i < totalRows; i++) {
-        if (i >= start && i < end) {
-            rows[i].style.display = "";
-        } else {
-            rows[i].style.display = "none";
-        }
-    }
-
-    return totalPages;
-}
-
-// 페이지네이션 UI 업데이트
-function updatePagination() {
-    const totalRows = document.querySelector(".pallet-table tbody").getElementsByTagName("tr").length;
-    const totalPages = Math.ceil(totalRows / rowsPerPage);
-    
-    let startPage = Math.floor((currentPage - 1) / pageGroupSize) * pageGroupSize + 1;
-    let endPage = Math.min(startPage + pageGroupSize - 1, totalPages);
-
-    let pageNumbers = document.getElementById("pageNumbers");
-    pageNumbers.innerHTML = "";
-
-    for (let i = startPage; i <= endPage; i++) {
-        let button = document.createElement("button");
-        button.innerText = i;
-        button.classList.add("btn", "mx-1", "btn-purple");
-        
-        if (i === currentPage) {
-            button.classList.add("btn-purple-active");
-        }
-        
-        button.onclick = function() {
-            if (currentPage !== i) {
-                currentPage = i;
-                displayCurrentPage();
-                updatePagination();
-            }
-        };
-        
-        pageNumbers.appendChild(button);
-    }
-
-    document.getElementById("prevGroup").disabled = currentPage === 1;
-    document.getElementById("nextGroup").disabled = currentPage >= totalPages;
-}
-
-// 이전/다음 페이지 그룹 이벤트 핸들러
-document.getElementById("prevGroup").onclick = function() {
-    if (currentPage > 1) {
-        currentPage--;
-        displayCurrentPage();
-        updatePagination();
-    }
-};
-
-document.getElementById("nextGroup").onclick = function() {
-    const totalPages = displayCurrentPage();
-    if (currentPage < totalPages) {
-        currentPage++;
-        displayCurrentPage();
-        updatePagination();
-    }
-};
-</script>
-
-<style>
-    .table-container { 
-        width: 100%;
-        max-height: 500px;
-        overflow-y: auto;
-        overflow-x: auto;
-        margin-top: 10px;
-    }
-
-    .pallet-table {
-        width: 100%;
-        border-collapse: collapse;
-        table-layout: fixed;
-    }
-
-    .pallet-table th {
-        background: #f4f4f4;
-        padding: 12px;
-        border: 1px solid #ddd;
-        text-align: center;
-        font-weight: bold;
-    }
-
-    .pallet-table td {
-        padding: 10px;
-        border: 1px solid #ddd;
-        text-align: center;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    /* 각 컬럼 너비 설정 */
-    .pallet-table th:nth-child(1),
-    .pallet-table td:nth-child(1) {
-        width: 15%;  /* Pallet ID */
-    }
-
-    .pallet-table th:nth-child(2),
-    .pallet-table td:nth-child(2) {
-        width: 10%;  /* Load */
-    }
-
-    .pallet-table th:nth-child(3),
-    .pallet-table td:nth-child(3) {
-        width: 10%;  /* Width */
-    }
-
-    .pallet-table th:nth-child(4),
-    .pallet-table td:nth-child(4) {
-        width: 10%;  /* Depth */
-    }
-
-    .pallet-table th:nth-child(5),
-    .pallet-table td:nth-child(5) {
-        width: 10%;  /* Height */
-    }
-
-    .pallet-table th:nth-child(6),
-    .pallet-table td:nth-child(6) {
-        width: 25%;  /* Destination */
-    }
-
-    .pallet-table th:nth-child(7),
-    .pallet-table td:nth-child(7) {
-        width: 20%;  /* Vehicle Number */
-    }
-
-    /* 필터 컨테이너 스타일 */
-    .filter-container {
-        display: flex;
-        gap: 20px;
-        align-items: center;
-        padding: 15px;
-        background-color: #f8f9fa;
-        border-radius: 8px;
-        margin-bottom: 20px;
-        flex-wrap: wrap;
-    }
-
-.filter-group, .search-group {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.form-control {
-    padding: 8px;
-    border: 1px solid #ced4da;
-    border-radius: 4px;
-    min-width: 120px;
-}
-
-    /* 페이지네이션 스타일 */
-    .pagination {
-        display: flex;
-        justify-content: center;
-        gap: 5px;
-        margin-top: 20px;
-    }
-
-    .pagination a {
-        padding: 8px 16px;
-        text-decoration: none;
-        border-radius: 4px;
-        color: white;
-    }
-
-    .btn-purple {
-        background-color: #6c5ce7;
-    }
-
-    .btn-purple:hover {
-        background-color: #5f3dc4;
-    }
-
-    .btn-purple.active {
-        background-color: #4c3398;
-    }
-
-    /* 반응형 디자인 */
-    @media (max-width: 768px) {
-        .filter-container {
-            flex-direction: column;
-            align-items: stretch;
-        }
-
-    .filter-group, .search-group {
-        flex-wrap: wrap;
-    }
-
-        .form-control {
-            width: 100%;
-        }
-
-        .table-container {
-            margin: 0;
-            border-radius: 0;
-        }
-    }
-</style>
 </body>
-</html>
-
-
-
-</div>
-</div>
-</div>
-</th:block>
 </html>
