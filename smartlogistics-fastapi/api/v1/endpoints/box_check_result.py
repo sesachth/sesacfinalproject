@@ -24,7 +24,7 @@ async def predict_image(request: BoxCheckRequest):
         websocket_payload = {
             "orderId": request.order_id,
             "boxState": box_state,
-            "imageUrl": f"/images/boximages/{request.image_number:03d}.jpg"
+            #"imageUrl": f"/images/boximages/{request.image_number:03d}.jpg"
         }
         
         response = requests.post(
