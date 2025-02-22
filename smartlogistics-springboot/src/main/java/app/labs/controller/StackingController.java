@@ -13,4 +13,11 @@ public class StackingController {
 		
         return "thymeleaf/html/admin/admin_stacking";
     }
+	
+	@GetMapping("/worker/stacking")
+    public String workerSimulatorPage(Model model) {
+		model.addAttribute("page", "stacking");
+		
+        return "thymeleaf/html/worker/worker_stacking";
+    }
 }
