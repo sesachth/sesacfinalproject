@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="DataMapper">
+<mapper namespace="app.labs.dao.DataRepository">
     <resultMap id="stackingResultMap" type="java.util.HashMap">
         <id property="pallet_id" column="pallet_id" javaType="int"/>
         <result property="destination" column="destination" javaType="string"/>
@@ -15,6 +15,85 @@
             <result property="z_coordinate" column="z_coordinate" javaType="float"/>
         </collection>
     </resultMap>
+    
+        <!-- ✅ 진행 단계 별 물품 개수 조회 -->
+    <select id="getOrderCountByProgressState" resultType="java.util.Map">
+        SELECT 
+            progress_state, 
+            COUNT(*) as count
+        FROM 
+            `order`
+        GROUP BY 
+            progress_state
+    </select>
+    
+	<!-- ✅ 날짜 별 박스 파손률 조회 -->
+	<select id="getBoxDamageRateByOrderTime" resultType="java.util.Map">
+	    SELECT 
+	        DATE(order_time) as date,
+	        (COUNT(CASE WHEN box_state = 2 THEN 1 END) * 100.0 / COUNT(*)) as damage_rate
+	    FROM 
+	        `order`
+	    GROUP BY 
+	        DATE(order_time)
+	    ORDER BY 
+	        DATE(order_time)
+	</select>
+    
+	<!-- ✅ 날짜 별 주문 건수 조회 -->
+	<select id="getOrderCountByOrderTime" resultType="java.util.Map">
+	    SELECT
+	        DATE(order_time) as date,
+	        COUNT(*) as order_count
+	    FROM
+	        `order`
+	    GROUP BY
+	        DATE(order_time)
+	    ORDER BY
+	        DATE(order_time)
+	</select>
+    
+	<!-- ✅ 캠프 별 물품 유동량 조회 -->
+	<select id="getOrderCountByDestination" resultType="java.util.Map">
+	    SELECT
+	        destination,
+	        COUNT(*) as count
+	    FROM
+	        `order`
+	    WHERE
+	        destination IS NOT NULL
+	    GROUP BY
+	        destination
+	    ORDER BY
+	        destination
+	</select>
+    
+	<!-- ✅ 박스 종류 별 주문 개수 조회 -->
+	<select id="getOrderCountBySpec" resultType="java.util.Map">
+	    SELECT
+	        p.spec,
+	        COUNT(*) as count
+	    FROM
+	        `order` o
+	    INNER JOIN
+	        product p ON o.product_id = p.product_id
+	    WHERE
+	        p.spec IS NOT NULL
+	    GROUP BY
+	        p.spec
+	    ORDER BY
+	        p.spec
+	</select>
+    
+    <!-- ✅ 진행 단계 별 주문 개수 조회 -->
+    <select id="getOrderCountByProgressState5" parameterType="int" resultType="int">
+        SELECT
+        	COUNT(*)
+        FROM
+        	order
+        WHERE
+        	progress_state = #{progressState}
+    </select>
     
     <select id="getStackingResults" resultMap="stackingResultMap" parameterType="java.util.Date">
         SELECT 

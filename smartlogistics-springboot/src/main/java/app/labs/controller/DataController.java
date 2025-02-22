@@ -18,7 +18,32 @@ public class DataController {
     @Autowired
     private DataService dataService;
     
-    @GetMapping("/stackingResults")
+    @GetMapping("/dashboard/chart1Data")
+    public List<Map<String, Object>> getChart1Data() {
+        return dataService.getOrderCountByProgressState();
+    }
+    
+    @GetMapping("/dashboard/chart2Data")
+    public List<Map<String, Object>> getChart2Data() {
+        return dataService.getBoxDamageRateByOrderTime();
+    }
+    
+    @GetMapping("/dashboard/chart3Data")
+    public List<Map<String, Object>> getChart3Data() {
+        return dataService.getOrderCountByOrderTime();
+    }
+    
+    @GetMapping("/dashboard/chart4Data")
+    public List<Map<String, Object>> getChart4Data() {
+        return dataService.getOrderCountByDestination();
+    }
+    
+    @GetMapping("/dashboard/chart5Data")
+    public List<Map<String, Object>> getChart5Data() {
+        return dataService.getOrderCountBySpec();
+    }
+    
+    @GetMapping("/stacking/stackingResults")
     public ResponseEntity<Map<String, List<Map<String, Object>>>> getStackingResults() {
         Map<String, List<Map<String, Object>>> stackingResults = dataService.getStackingResults();
         return ResponseEntity.ok(stackingResults);

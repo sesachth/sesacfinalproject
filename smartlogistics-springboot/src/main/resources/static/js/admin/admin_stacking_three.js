@@ -12,7 +12,7 @@ let stackingResults = null;
 $(document).ready(function() {
     // Ajax 요청으로 stackingResults 데이터 가져오기
     $.ajax({
-        url: '/api/stackingResults', // RESTFul API 엔드포인트
+        url: '/api/stacking/stackingResults', // RESTFul API 엔드포인트
         method: 'GET',
         dataType: 'json',
         success: function(response) {
