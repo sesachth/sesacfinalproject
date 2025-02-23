@@ -19,6 +19,17 @@
             <div th:replace="~{thymeleaf/html/common/include::profile}"></div>
             <div th:replace="~{thymeleaf/html/common/include::sidebar}"></div>
             <div th:replace="~{thymeleaf/html/common/include::logout}"></div>
+
+            <!-- 포장 검사 버튼 -->
+            <div class="boxStateChecker">
+                <button type="button" class="box-check-button" th:onclick="|location.href='@{/admin/check}'|">
+                    <div class="button-content">
+                        <img th:src="@{/images/admin/박스아이콘(컬러).png}" class="box-icon" alt="box icon"/>
+                        <span>Box Check</span>
+                    </div>
+                </button>
+            </div>
+            
             <div layout:fragment="content" class="main-content">
                 <!-- 상단 컨트롤 바 -->
                 <div class="control-bar">

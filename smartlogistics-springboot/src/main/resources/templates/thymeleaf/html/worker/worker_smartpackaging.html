@@ -5,52 +5,86 @@
 
 <head>
     <th:block layout:fragment="css">
+        <link rel="stylesheet" th:href="@{/css/admin/admin.css}" />
+        <link rel="stylesheet" th:href="@{/css/worker/worker_smartpackaging.css}" />
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
         <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/sockjs-client/dist/sockjs.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/stompjs/lib/stomp.min.js"></script>
+        <script th:src="@{/js/worker/worker_smartpackaging.js}"></script>
     </th:block>
 </head>
 
 <th:block layout:fragment="wrapper">
-    <div class="min-h-screen bg-gray-100 flex flex-col items-center p-6">
-        <div class="w-full max-w-6xl bg-white shadow-lg rounded-lg p-6">
-            <h3 class="text-2xl font-bold text-gray-800 flex items-center mb-4">
-                📦 주문 목록 (포장 담당)
-            </h3>
+    <div class="outside-container">
+        <div class="main-container">
+            <div class="current-product-box">
+                <div class="current-product-text">현재 물품</div>
+            </div>
+            <!-- 포장해야하는 물품 정보 공개창 -->
+            <div class="product-container">
+                <!-- 현재 물품 -->
+                <div class="current-section">
+                    <div class="current-product-orderid"></div>
+                    <div class="current-product-name"></div>
+                </div>
+            </div>
+            
+            <!-- 박스 정보, 포장완료 버튼, 완충재 필요 여부 -->
+            <div class="packaging-part">
+                <!-- 박스 정보 -->
+                <div class="packaging-box">
+                    <img th:src="@{/images/worker/무지 택배박스.jpg}" alt="박스 이미지" class="packaging-box-image">
+                    <div class="packaging-box-text" id="currentBoxSize"></div>
+                </div>
 
-           <!-- 주문 테이블 -->
-            <div class="overflow-x-auto">
-                <table class="table-auto w-full text-center border-collapse border border-gray-300 rounded-lg shadow-md">
-                    <thead class="bg-gray-200 text-gray-700">
+                <!-- 포장완료 버튼 -->
+                <div class="packaging-completion">
+                    <button class="packaging-button" onclick="completeSelectedPackaging(this)">
+                        포장완료
+                    </button>
+                </div>
+
+                <!-- 완충재 필요 여부 -->
+                <div class="fender-info">
+                    <img th:src="@{/images/worker/종이 완충재.jpg}" alt="종이 완충재" class="fender-image">
+                    <!-- <div class="${is_fragile ? 'fender-O' : 'fender-X'}" class="fender-OX"></div>-->
+                    <div class="fender-X"></div>
+                    <div class="fender-O"></div>
+                </div>
+            </div>
+            <!-- 물품 테이블 / 패키징할 물품 테이블 5개씩-->
+            <div class="table-container">
+                <div class="table-title">
+                    <h3>📦 물품 목록</h3>
+                </div>
+                <table class="packaging-table">
+                    <colgroup>
+                        <col style="width: 10%">   <!-- palletID -->
+                        <col style="width: 10%">   <!-- packaging_seq -->
+                        <col style="width: 20%">   <!-- orderID -->
+                        <col style="width: 35%">   <!-- product name -->
+                        <col style="width: 25%">   <!-- category -->
+                    </colgroup>
+                    <thead>
                         <tr>
-                            <th class="p-3 border border-gray-300">주문 ID</th>
-                            <th class="p-3 border border-gray-300">상품명</th>
-                            <th class="p-3 border border-gray-300">카테고리</th>
-                            <th class="p-3 border border-gray-300">박스 규격</th>
-                            <th class="p-3 border border-gray-300">완충재 여부</th>
-                            <th class="p-3 border border-gray-300">진행 상태</th>
+                            <th class="align-center">Pallet ID</th>
+                            <th class="align-center">Sequence</th>
+                            <th class="align-center">Order ID</th>
+                            <th class="align-left">Product Name</th>
+                            <th class="align-left">Category</th>
                         </tr>
                     </thead>
-                    <tbody id="workerOrderTableBody" class="text-gray-800">
-                        <tr>
-                            <td colspan="6" class="p-4 text-center text-gray-500">❌ 주문 데이터를 불러오는 중...</td>
-                        </tr>
+                    <tbody id="workerOrderTableBody">
+                        <!-- 동적으로 생성되는 행들 -->
                     </tbody>
                 </table>
-            </div>
-
-            <!-- 페이지네이션 -->
-            <div class="pagination">
-                <button id="prevGroup">«</button>
-                <span id="pageNumbers"></span>
-                <button id="nextGroup">»</button>
-            </div>
+            </div>  
         </div>
     </div>
 </th:block>
 
-<script>
+<!-- <script>
 let currentPage = 1;
 const rowsPerPage = 10;
 const pageGroupSize = 10;
@@ -226,111 +260,6 @@ document.addEventListener("DOMContentLoaded", function () {
         loadWorkerOrders();
         connectWebSocket();
     });
-</script>
-<style>
-    .table-container { max-height: 500px; overflow-y: auto; margin-top: 10px; }
-    .order-table { width: 100%; border-collapse: collapse; }
-    .order-table th, .order-table td { padding: 10px; border: 1px solid #ddd; text-align: center; }
-    .pagination { display: flex; justify-content: center; margin-top: 10px; }
-    .pagination button { padding: 5px 10px; margin: 2px; border: none; background: #eee; cursor: pointer; }
-    .pagination .active { background: #6200ea; color: white; }
-    
-    /* 테이블 컨테이너 */
-    .table-container {
-        width: 100%;
-        max-height: 500px;
-        overflow-y: auto;
-        overflow-x: auto;
-        margin-top: 10px;
-    }
-
-    /* 테이블 */
-    .progress-table {
-        width: 100%;
-        border-collapse: collapse;
-        table-layout: fixed; /* 열 너비 고정 */
-    }
-
-    /* 테이블 헤더 */
-    .progress-table th {
-        background: #f4f4f4;
-        padding: 12px;
-        border: 1px solid #ddd;
-        text-align: center;
-        font-weight: bold;
-    }
-
-    /* 테이블 본문 */
-    .progress-table td {
-        padding: 10px;
-        border: 1px solid #ddd;
-        text-align: center;
-        white-space: nowrap; /* 텍스트 줄 바꿈 방지 */
-        overflow: hidden;
-        text-overflow: ellipsis; /* 너무 길면 ... 처리 */
-    }
-
-    /* 각 열 크기 고정 */
-    .progress-table th:nth-child(1),
-    .progress-table td:nth-child(1) {
-        width: 15%; /* 주문번호 */
-    }
-
-    .progress-table th:nth-child(2),
-    .progress-table td:nth-child(2) {
-        width: 20%; /* 상품명 */
-    }
-
-    .progress-table th:nth-child(3),
-    .progress-table td:nth-child(3) {
-        width: 10%; /* 카테고리 */
-    }
-
-    .progress-table th:nth-child(4),
-    .progress-table td:nth-child(4) {
-        width: 15%; /* 주문 시간 */
-    }
-
-    .progress-table th:nth-child(5),
-    .progress-table td:nth-child(5) {
-        width: 10%; /* 배송지 */
-    }
-
-    .progress-table th:nth-child(6),
-    .progress-table td:nth-child(6) {
-        width: 10%; /* 팔렛트 ID */
-    }
-
-    .progress-table th:nth-child(7),
-    .progress-table td:nth-child(7) {
-        width: 10%; /* 박스 상태 */
-    }
-
-    .progress-table th:nth-child(8),
-    .progress-table td:nth-child(8) {
-        width: 10%; /* 진행 상태 */
-    }
-
-    /* 페이지네이션 스타일 */
-    .pagination {
-        display: flex;
-        justify-content: center;
-        margin-top: 10px;
-    }
-
-    .pagination button {
-        padding: 8px 12px;
-        margin: 2px;
-        border: none;
-        background: #eee;
-        cursor: pointer;
-        border-radius: 4px;
-    }
-
-    .pagination .active {
-        background: #6200ea;
-        color: white;
-    }
-</style>
+</script> -->
 
 </html>

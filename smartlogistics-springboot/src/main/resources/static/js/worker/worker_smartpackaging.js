@@ -1,252 +1,192 @@
-//✅ 페이지네이션 변수
-let currentPage = 1;
-const maxVisiblePages = 7; // 한 번에 보이는 페이지 수
-let totalPages = 1;
+/***************************************************
+ * 전역 변수
+ ***************************************************/
+let stompClient = null;   // STOMP 클라이언트
+let progressData = [];    // progressState=0 인 물품 목록
+const maxItemsToShow = 5; // 한 번에 표시할 최대 행 개수
 
-// ✅ 주문 목록 가져오기
-function loadWorkerOrders() {
-    fetch('/admin/progress/data')
-        .then(response => response.json())
-        .then(data => {
-            console.log("📌 Worker 페이지 주문 목록 응답:", data);
-
-            let tableBody = document.getElementById("workerOrderTableBody");
-            tableBody.innerHTML = "";
-
-            if (!data.progressList || data.progressList.length === 0) {
-                tableBody.innerHTML = "<tr><td colspan='7' class='p-4 text-center text-gray-500'>❌ 데이터가 없습니다.</td></tr>";
-                return;
-            }
-
-            data.progressList.forEach(order => {
-                let orderTime = convertUtcToKst(order.orderTime);
-                let row = `<tr class="hover:bg-gray-100 transition">
-                    <td class="p-3 border border-gray-300">
-                        <input type="checkbox" class="order-checkbox" data-id="${order.orderId}" />
-                    </td>
-                    <td class="p-3 border border-gray-300">${order.orderId}</td>
-                    <td class="p-3 border border-gray-300">${order.productName}</td>
-                    <td class="p-3 border border-gray-300">${order.productCategory}</td>
-                    <td class="p-3 border border-gray-300">${orderTime}</td>
-                    <td class="p-3 border border-gray-300">
-                        ${order.boxState === 0 ? '미검사' : order.boxState === 1 ? '정상' : '파손'}
-                    </td>
-                    <td class="p-3 border border-gray-300 progress-state">
-                        ${order.progressState === 0 ? '물품 대기' : order.progressState === 1 ? '포장 완료' : '적재 완료'}
-                    </td>
-                </tr>`;
-                tableBody.innerHTML += row;
-            });
-
-            // 전체 선택 체크박스 이벤트 등록
-            document.getElementById("selectAllCheckbox").addEventListener("change", toggleSelectAll);
-            document.querySelectorAll(".order-checkbox").forEach(checkbox => {
-                checkbox.addEventListener("change", updateSelectAllCheckbox);
-            });
-        })
-        .catch(error => console.error("📌 Worker 페이지 주문 목록 로딩 실패:", error));
-}
-
-// ✅ 포장 완료 버튼 클릭 시 선택된 주문 상태 변경
-function completeSelectedPackaging() {
-    let selectedOrders = [];
-    document.querySelectorAll(".order-checkbox:checked").forEach(checkbox => {
-        selectedOrders.push(checkbox.dataset.id);
-    });
-
-    if (selectedOrders.length === 0) {
-        alert("✅ 포장할 주문을 선택하세요.");
-        return;
-    }
-
-    let message = {
-        orderIds: selectedOrders,
-        progressState: 1 // 포장 완료
-    };
-
-    console.log("📌 WebSocket 전송 메시지:", message);
-
-    stompClient.send("/app/updateStatus", {}, JSON.stringify(message));
-
-    alert("✅ 선택한 주문이 포장 완료되었습니다.");
-
-    selectedOrders.forEach(orderId => {
-        let row = document.querySelector(`tr[data-order-id='${orderId}']`);
-        if (row) {
-            row.querySelector(".progress-state").innerText = "포장 완료";
-        }
-    });
-}
-
-// ✅ WebSocket 설정
-function connectWebSocket() {
-    let socket = new SockJS('/ws');
-    stompClient = Stomp.over(socket);
-
-    stompClient.connect({}, function(frame) {
-        console.log('📌 WebSocket 연결됨:', frame);
-        stompClient.subscribe('/topic/progress', function(message) {
-            let data = JSON.parse(message.body);
-            updateProgressState(data.orderIds, data.progressState);
-        });
-    });
-}
-
-// ✅ 특정 주문만 상태 업데이트
-function updateProgressState(orderIds, progressState) {
-    orderIds.forEach(orderId => {
-        let row = document.querySelector(`tr[data-order-id='${orderId}']`);
-        if (row) {
-            row.querySelector(".progress-state").innerText =
-                progressState === 1 ? '포장 완료' :
-                progressState === 2 ? '적재 완료' : '물품 대기';
-        }
-    });
-}
-
- // ✅ 전체 선택 체크박스 기능 (수정됨)
-function toggleSelectAll() {
-    let isChecked = document.getElementById("selectAllCheckbox").checked;
-    document.querySelectorAll(".order-checkbox").forEach(checkbox => {
-        checkbox.checked = isChecked;
-    });
-}
-
- // ✅ 개별 체크박스 해제 시 전체 선택 체크박스 상태 업데이트 (수정됨)
-function updateSelectAllCheckbox() {
-    let total = document.querySelectorAll(".order-checkbox").length;
-    let checked = document.querySelectorAll(".order-checkbox:checked").length;
-    document.getElementById("selectAllCheckbox").checked = total === checked;
-}
-
-// ✅ UTC → KST 변환 함수
-function convertUtcToKst(utcTime) {
-    if (!utcTime) return '-';
-    let orderDate = new Date(Date.parse(utcTime));
-    orderDate.setHours(orderDate.getHours());
-    return orderDate.toTimeString().split(" ")[0];
-}
-
-// ✅ 페이지 로드 시 자동 실행
-document.addEventListener("DOMContentLoaded", function () {
-    console.log("📌 Worker 페이지 DOM 로드 완료, 주문 목록 로드 시작");
+/**
+ * 1) DOMContentLoaded 시점에 초기화
+ */
+document.addEventListener("DOMContentLoaded", () => {
+    console.log("📌 DOM 로드 완료 → loadWorkerOrders() & connectWebSocket()");
     loadWorkerOrders();
     connectWebSocket();
 });
 
-// ✅ 페이지네이션 업데이트
-    function updatePagination() {
-        const paginationContainer = document.getElementById("pageNumbers");
-        paginationContainer.innerHTML = "";
-    
-        let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-    
-        if (endPage - startPage + 1 < maxVisiblePages) {
-            startPage = Math.max(1, endPage - maxVisiblePages + 1);
-        }
-    
-        // 이전 버튼 활성화 여부 설정
-        document.getElementById("prevGroup").disabled = currentPage === 1;
-        document.getElementById("nextGroup").disabled = currentPage === totalPages;
-    
-        for (let i = startPage; i <= endPage; i++) {
-            let pageButton = document.createElement("button");
-            pageButton.innerText = i;
-            pageButton.classList.add("px-4", "py-2", "rounded-lg", "transition");
-    
-            if (i === currentPage) {
-                pageButton.classList.add("bg-blue-500", "text-white");
-            } else {
-                pageButton.classList.add("bg-gray-200", "text-gray-700", "hover:bg-gray-300");
-            }
-    
-            pageButton.addEventListener("click", function () {
-                if (currentPage !== i) {
-                    currentPage = i;
-                    loadWorkerOrders(currentPage);
-                }
-            });
-    
-            paginationContainer.appendChild(pageButton);
-        }
+/**
+ * 2) 물품대기(progressState=0) 목록을 서버에서 가져오기
+ */
+function loadWorkerOrders() {
+    fetch('/admin/progress/dataAll?progressState=0')
+        .then(response => response.json())
+        .then(data => {
+            console.log("📌 서버 응답:", data);
+
+            // 서버가 이미 progressState=0인 목록만 준다면 필터 생략 가능
+            progressData = data.progressList.filter(item => item.progressState === 0);
+
+            // 테이블 / 현재 물품 영역 업데이트 (최대 5개)
+            updateTableContent(progressData.slice(0, maxItemsToShow));
+        })
+        .catch(error => console.error("📌 Worker 페이지 주문 목록 로딩 실패:", error));
+}
+
+/**
+ * 3) 테이블 내용 + 중간(현재 물품) 영역 업데이트
+ */
+function updateTableContent(data) {
+    const tableBody = document.getElementById("workerOrderTableBody");
+    tableBody.innerHTML = "";
+
+    // 데이터가 없으면
+    if (!data || data.length === 0) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="5" class="no-data-message">❌ 대기중인 물품이 없습니다.</td>
+            </tr>`;
+        updateCurrentSection("", "", "", false);
+        return;
     }
 
-    // ✅ 주문 목록 가져오기 (페이지네이션 적용)
-    function loadWorkerOrders(page = 1) {
-        fetch(`/admin/progress/data?page=${page}`)
-            .then(response => response.json())
-            .then(data => {
-                console.log("📌 Worker 페이지 주문 목록 응답:", data);
+    // 최대 5개만 행 생성
+    data.forEach((item, index) => {
+        // 주문 식별을 위해 <tr data-order-id="..."> 추가
+        const row = document.createElement("tr");
+        // orderId가 숫자라면 문자열 변환 없이 그대로 써도 됨
+        row.setAttribute("data-order-id", item.orderId);
 
-                let tableBody = document.getElementById("workerOrderTableBody");
-                tableBody.innerHTML = "";
+        // 필요한 만큼 <td>를 구성 (예: palletId, packagingSeq 등)
+        row.innerHTML = `
+            <td>${item.palletId}</td>
+            <td>${item.packagingSeq}</td>
+            <td>${item.orderId}</td>
+            <td>${item.productName}</td>
+            <td>${item.productCategory}</td>
+        `;
+        tableBody.appendChild(row);
 
-                if (!data.progressList || data.progressList.length === 0) {
-                    tableBody.innerHTML = "<tr><td colspan='7' class='p-4 text-center text-gray-500'>❌ 데이터가 없습니다.</td></tr>";
-                    return;
-                }
-
-                data.progressList.forEach(order => {
-                    let orderTime = convertUtcToKst(order.orderTime);
-                    let row = `<tr class="hover:bg-gray-100 transition">
-                        <td class="p-3 border border-gray-300">
-                            <input type="checkbox" class="order-checkbox cursor-pointer" data-id="${order.orderId}" />
-                        </td>
-                        <td class="p-3 border border-gray-300">${order.orderId}</td>
-                        <td class="p-3 border border-gray-300">${order.productName}</td>
-                        <td class="p-3 border border-gray-300">${order.productCategory}</td>
-                        <td class="p-3 border border-gray-300">${orderTime}</td>
-                        <td class="p-3 border border-gray-300">
-                            ${order.boxState === 0 ? '미검사' : order.boxState === 1 ? '정상' : '파손'}
-                        </td>
-                        <td class="p-3 border border-gray-300 progress-state">
-                            ${order.progressState === 0 ? '물품 대기' : order.progressState === 1 ? '포장 완료' : '적재 완료'}
-                        </td>
-                    </tr>`;
-                    tableBody.innerHTML += row;
-                });
-
-                // ✅ 이벤트 리스너 재등록 (수정됨)
-                document.getElementById("selectAllCheckbox").addEventListener("change", toggleSelectAll);
-                document.querySelectorAll(".order-checkbox").forEach(checkbox => {
-                    checkbox.addEventListener("change", updateSelectAllCheckbox);
-                });
-
-                totalPages = data.totalPages || 1;
-                updatePagination();
-            })
-            .catch(error => console.error("📌 Worker 페이지 주문 목록 로딩 실패:", error));
-    }
-
-    // ✅ 페이지 로드 시 자동 실행
-    document.addEventListener("DOMContentLoaded", function () {
-        console.log("📌 Worker 페이지 DOM 로드 완료, 주문 목록 로드 시작");
-        loadWorkerOrders();
+        // 첫 번째 행은 '현재 물품' 섹션에 표시
+        if (index === 0) {
+            updateCurrentSection(
+                item.orderId,
+                item.productName,
+                item.boxSpec,
+                item.isFragile
+            );
+        }
     });
+}
 
+/**
+ * 4) '현재 물품' 섹션 업데이트
+ */
+function updateCurrentSection(orderId, productName, boxSpec, isFragile) {
+    // 주문번호, 물품명
+    document.querySelector('.current-product-orderid').textContent = `주문 ID : ${orderId}`;
+    document.querySelector('.current-product-name').textContent = `물품명 : ${productName}`;
 
-    function completeSelectedPackaging(button) {
-        // 이미 클릭된 상태면 함수 종료
-        if (button.classList.contains('clicked')) {
-            return;
-        }
-        
-        // 버튼에 clicked 클래스 추가
-        button.classList.add('clicked');
-        
-        // 버튼 비활성화
-        button.disabled = true;
-        
-        // 여기에 포장완료 관련 로직 추가
-        console.log('포장완료 버튼이 클릭되었습니다.');
-        
-        // 선택적: 3초 후 버튼 상태 복구
-        /*
-        setTimeout(() => {
-            button.classList.remove('clicked');
-            button.disabled = false;
-        }, 3000);
-        */
+    // 박스 규격
+    const boxSizeElement = document.getElementById('currentBoxSize');
+    boxSizeElement.textContent = boxSpec ? `${boxSpec}호 박스` : '-';
+
+    // 완충재 필요 여부
+    const fenderO = document.querySelector('.fender-O');
+    const fenderX = document.querySelector('.fender-X');
+    if (isFragile === 'Y' || isFragile === true) {
+        fenderO.style.display = 'inline';
+        fenderX.style.display = 'none';
+    } else {
+        fenderO.style.display = 'none';
+        fenderX.style.display = 'inline';
     }
+}
+
+/**
+ * 5) [포장완료] 버튼 클릭 시
+ *    - 맨 위 물품(첫 번째 행)만 포장완료 처리
+ *    - HTML: onclick="completeSelectedPackaging(this)"
+ */
+function completeSelectedPackaging(button) {
+    // 중복 클릭 방지
+    if (button.classList.contains('clicked')) return;
+    button.classList.add('clicked');
+    button.disabled = true;
+
+    // 첫 번째 행 가져오기
+    const firstRow = document.querySelector('#workerOrderTableBody tr:first-child');
+    if (!firstRow) {
+        console.log("대기중인 물품이 없습니다.");
+        button.classList.remove('clicked');
+        button.disabled = false;
+        return;
+    }
+
+    // data-order-id 속성에서 주문번호 추출 (문자열인 경우 parseInt)
+    const orderIdString = firstRow.getAttribute('data-order-id');
+    const orderId = parseInt(orderIdString, 10);
+
+    if (!confirm("현재 물품을 포장완료 처리하시겠습니까?")) {
+        button.classList.remove('clicked');
+        button.disabled = false;
+        return;
+    }
+
+    // 서버가 @MessageMapping("/updateStatus")에서 Map<String,Object>로 받으므로
+    // orderIds, progressState, (imageNumber) 등을 JSON 형태로 전송
+    const message = {
+        orderIds: [orderId],  // [숫자]
+        progressState: 1      // 1 = 포장 완료
+        // imageNumber: ...    // 필요하다면 추가
+    };
+    console.log("📌 포장완료 전송 메시지:", message);
+
+    // WebSocket(STOMP)로 메시지 전송
+    if (stompClient) {
+        stompClient.send("/app/updateStatus", {}, JSON.stringify(message));
+    }
+
+    // 제거 애니메이션 (선택)
+    firstRow.style.transition = 'all 0.5s';
+    firstRow.style.opacity = '0';
+    firstRow.style.transform = 'translateX(-100%)';
+
+    // 0.5초 뒤 실제 제거
+    setTimeout(() => {
+        // progressData에서 해당 orderId 삭제
+        progressData = progressData.filter(item => item.orderId !== orderId);
+
+        // 남은 물품 중 5개만 다시 테이블 표시
+        updateTableContent(progressData.slice(0, maxItemsToShow));
+
+        // 버튼 복구
+        button.classList.remove('clicked');
+        button.disabled = false;
+    }, 500);
+}
+
+/**
+ * 6) WebSocket(STOMP) 연결
+ *    - 다른 화면(Admin 등)에서 업데이트된 내용도 실시간 반영
+ */
+function connectWebSocket() {
+    const socket = new SockJS('/ws'); // 서버쪽 registry.addEndpoint("/ws")
+    stompClient = Stomp.over(socket);
+
+    stompClient.connect({}, function(frame) {
+        console.log("📌 STOMP 연결 성공:", frame);
+
+        // /topic/updateStatus 구독 (서버 simpMessagingTemplate로 여기에 메시지 전송)
+        stompClient.subscribe('/topic/updateStatus', function(message) {
+            const updated = JSON.parse(message.body);
+            console.log("📌 클라이언트가 받은 메시지:", updated);
+
+            // updated.orderIds, updated.progressState 사용해 UI 갱신
+            // 예) if (updated.progressState === 1) { ... 포장완료 로직 ... }
+        });
+    }, function(error) {
+        console.error("📌 WebSocket 연결 실패:", error);
+    });
+}
+
 
