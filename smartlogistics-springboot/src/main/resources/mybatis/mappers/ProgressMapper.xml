@@ -30,13 +30,14 @@
     </resultMap>
 
     <!-- ✅ 진행 상태 리스트 조회 (기본적으로 오늘 날짜 기준) -->
-    <select id="getFilteredProgressList" resultMap="progressResultMap">
+	<select id="getFilteredProgressList" resultMap="progressResultMap">
 	    SELECT o.order_id, o.order_num, o.order_time, o.destination, o.pallet_id, 
 	           o.box_state, o.progress_state, p.name, p.category, p.spec AS boxSpec,
-	           CASE WHEN p.is_fragile = 1 THEN 1 ELSE 0 END AS is_fragile  <!-- ✅ 추가 -->
+	           o.seq_stacking,
+	           CASE WHEN p.is_fragile = 1 THEN 1 ELSE 0 END AS is_fragile
 	    FROM `order` o
 	    LEFT JOIN `product` p ON o.product_id = p.product_id
-	    WHERE DATE(o.order_time) = COALESCE(#{date}, CURDATE())  <!-- ✅ 기본값: 오늘 날짜 -->
+	    WHERE DATE(o.order_time) = COALESCE(#{date}, CURDATE())  <!-- 기본값: 오늘 날짜 -->
 	    <if test="camp != null and camp != ''">
 	        AND o.destination = #{camp}
 	    </if>
@@ -52,7 +53,18 @@
 	    <if test="progressState != null">
 	        AND o.progress_state = #{progressState}
 	    </if>
-	    ORDER BY o.order_time ASC
+	    ORDER BY 
+	        CASE 
+	            WHEN o.pallet_id IS NULL THEN 1  <!-- ✅ NULL인 `pallet_id`는 가장 뒤로 정렬 -->
+	            ELSE 0 
+	        END,
+	        o.pallet_id ASC,     <!-- ✅ `pallet_id` 오름차순 정렬 -->
+	        CASE 
+	            WHEN o.seq_stacking IS NULL THEN 1  <!-- ✅ NULL 값은 가장 뒤로 정렬 -->
+	            ELSE 0 
+	        END,
+	        o.seq_stacking ASC,  <!-- ✅ 같은 `pallet_id` 내에서 `seq_stacking` 기준 정렬 -->
+	        o.order_time ASC  <!-- ✅ 동일한 `seq_stacking`일 경우 시간순 정렬 -->
 	    LIMIT #{pageSize} OFFSET #{offset};
 	</select>
 
@@ -99,6 +111,13 @@
 	    AND DATE(order_time) = CURDATE()  <!-- ✅ 오늘 날짜 주문만 조회 -->
 	    ORDER BY order_time ASC, order_id ASC;
 	</select>
+	
+	<!-- 박스 상태 변경 -->
+	<update id="updateBoxState">
+    UPDATE `order` 
+    SET box_state = #{boxState} 
+    WHERE order_id = #{orderId}
+	</update>
 
 
 </mapper>

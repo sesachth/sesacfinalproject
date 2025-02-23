@@ -1,34 +1,34 @@
 package app.labs.controller;
 
-import app.labs.service.ProgressService;
-import app.labs.model.ProgressDTO;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import app.labs.model.ProgressDTO;
+import app.labs.service.ProgressService;
 
 @Controller
 @RequestMapping("/admin/progress")
 public class ProgressController {
 
     private final ProgressService progressService;
-    private final SimpMessagingTemplate simpMessagingTemplate;
 
-    public ProgressController(ProgressService progressService, SimpMessagingTemplate simpMessagingTemplate) {
+    public ProgressController(ProgressService progressService) {
         this.progressService = progressService;
-        this.simpMessagingTemplate = simpMessagingTemplate;
     }
 
     @GetMapping
@@ -79,39 +79,26 @@ public class ProgressController {
         return response;
     }
 
-    // ✅ WebSocket을 통해 "포장 완료" 메시지를 받으면 실행
-    @MessageMapping("/updateStatus") 
+    // ✅ WebSocket을 통해 "포장 완료" 메시지를 받으면 실행됨
+    @MessageMapping("/updateStatus")
     @Transactional
     public void updateOrderStatus(@Payload Map<String, Object> payload) {
         System.out.println("📌 [WebSocket] 메시지 수신 - 데이터: " + payload);
 
         List<Integer> orderIds = (List<Integer>) payload.get("orderIds");
         int progressState = (int) payload.get("progressState");
-
-        // ✅ imageNumber가 존재하면 사용, 없으면 null
-        Integer imageNumber = payload.containsKey("imageNumber") 
-                                ? (Integer) payload.get("imageNumber") 
-                                : null;
+        String imageNumberStr = (String) payload.get("imageNumber");
+        Integer imageNumber = imageNumberStr != null ? Integer.parseInt(imageNumberStr) : null;
 
         if (orderIds == null || orderIds.isEmpty()) {
             System.out.println("⚠️ [WebSocket] 주문 ID 없음, 업데이트 수행하지 않음");
             return;
         }
 
-        // ✅ DB 업데이트 (포장완료 등)
+        // ✅ 선택된 주문 업데이트 (imageNumber 포함)
         progressService.updateOrdersProgress(orderIds, progressState, imageNumber);
 
-        System.out.println("📌 [WebSocket] DB 업데이트 완료 - 업데이트된 주문 ID: " 
-                           + orderIds + ", imageNumber: " + imageNumber);
-
-        // ✅ 모든 클라이언트에게 상태 변경 내용 브로드캐스트
-        Map<String, Object> broadcastMsg = new HashMap<>();
-        broadcastMsg.put("orderIds", orderIds);
-        broadcastMsg.put("progressState", progressState);
-        broadcastMsg.put("imageNumber", imageNumber);
-
-        // /topic/updateStatus 로 메시지 발행 → 구독 중인 클라이언트 모두에게 전송
-        simpMessagingTemplate.convertAndSend("/topic/updateStatus", broadcastMsg);
+        System.out.println("📌 [WebSocket] DB 업데이트 완료 - 업데이트된 주문 ID: " + orderIds + ", imageNumber: " + imageNumber);
     }
 
     /**
@@ -140,38 +127,4 @@ public class ProgressController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
-
-    @GetMapping("/check")
-    public String checkBoxState(Model model) {
-        model.addAttribute("page", "check");  // 현재 페이지 표시
-        return "thymeleaf/html/admin/admin_check";  // admin_check.html로 이동
-    }
-
-    @GetMapping("/dataAll")
-    @ResponseBody
-    public Map<String, Object> getAllProgressData(
-        @RequestParam(value = "date", required = false) String date,
-        @RequestParam(value = "camp", required = false) String camp,
-        @RequestParam(value = "orderNum", required = false) String orderNum,
-        @RequestParam(value = "boxSpec", required = false) String boxSpec,
-        @RequestParam(value = "boxState", required = false) Integer boxState,
-        @RequestParam(value = "progressState", required = false) Integer progressState
-    ) {
-        // 여기서는 offset, pageSize 사용 X, 혹은 pageSize를 매우 큰 수로
-        // 예: offset=0, pageSize=Integer.MAX_VALUE
-        int offset = 0;
-        int unlimitedSize = Integer.MAX_VALUE;
-
-        // 페이징 없이 모든 항목 (필터는 동일하게)
-        List<ProgressDTO> progressList = progressService.getFilteredProgressList(
-                offset, unlimitedSize, date, camp, orderNum, boxSpec, boxState, progressState);
-
-        // 응답 생성
-        Map<String, Object> response = new HashMap<>();
-        response.put("progressList", progressList);
-        response.put("totalPages", 1); // 페이지네이션 없이 1로 처리
-        return response;
-    }
 }
-
-

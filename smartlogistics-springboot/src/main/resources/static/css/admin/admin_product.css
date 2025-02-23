@@ -521,10 +521,6 @@ table tbody tr td:nth-child(9) {
     box-sizing: border-box;
 }
 
-
-
-
-
 /* 테이블 드롭다운 스타일 */
 .table-dropdown-menu {
     min-width: 10rem;

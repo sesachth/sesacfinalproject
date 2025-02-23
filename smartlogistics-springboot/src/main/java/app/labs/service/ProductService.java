@@ -89,7 +89,6 @@ public class ProductService {
             product.setSpec(0L); // 기본값 처리
             productlistRepository.insert(product); // 계속해서 DB에 저장
         }
-
         // DB에 저장
         // productlistRepository.insert(product);
     }

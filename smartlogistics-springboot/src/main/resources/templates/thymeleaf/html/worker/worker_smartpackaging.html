@@ -225,7 +225,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // ✅ 개별 포장 완료 버튼 클릭 시 WebSocket 메시지 전송
     function completePackaging(orderId, buttonElement) {
         if (confirm("포장이 완료되었습니까?")) {
-            let imageNumber = Math.floor(Math.random() * 100) + 1; // 1~100 랜덤 이미지
+        	let imageNumber = String(Math.floor(Math.random() * 100) + 1).padStart(3, '0'); // 000~100 랜덤 이미지
 
             let message = {
                 orderIds: [orderId],
@@ -239,9 +239,33 @@ document.addEventListener("DOMContentLoaded", function () {
             stompClient.send("/app/updateStatus", {}, JSON.stringify(message));
             stompClient.send("/topic/updateStatus", {}, JSON.stringify(message));
 
+            
+         	// FastAPI로 이미지 검사 요청
+            fetch('http://localhost:8000/api/v1/box_check/', {
+	            method: 'POST',
+	            headers: {
+	                'Content-Type': 'application/json',
+	            },
+	            body: JSON.stringify({
+	                order_id: parseInt(orderId),  // 문자열을 숫자로 변환
+	                image_number: parseInt(imageNumber)
+	            })
+	        })
+	        .then(response => {
+	            if (!response.ok) {
+	                throw new Error('Network response was not ok');
+	            }
+	            return response.json();
+	        })
+	        .then(data => {
+	            console.log('박스 검사 결과:', data);
+	        })
+	        .catch(error => {
+	            console.error('박스 검사 요청 실패:', error);
+	        });
+              
             // ✅ UI 업데이트 (버튼을 '포장 완료'로 변경 및 비활성화)
             buttonElement.outerHTML = '<span class="text-green-600 font-bold">✅ 포장 완료</span>';
-
             alert("✅ 포장이 완료되었습니다.");
         }
     }
