@@ -37,6 +37,13 @@ function connectWebSocket() {
             console.log("📌 WebSocket으로 받은 업데이트 데이터:", updatedProgress);
             updateProgressFromWebSocket(updatedProgress);
         });
+		
+		// 박스 상태 업데이트를 위한 새로운 구독 추가
+		stompClient.subscribe('/topic/updateBoxState', function(message) {
+	    	let boxData = JSON.parse(message.body);
+		    console.log("📦 박스 상태 업데이트:", boxData);
+		    updateBoxState(boxData);
+		});
 
         stompClient.subscribe('/topic/progress', function(message) {
             let data = JSON.parse(message.body);
@@ -64,6 +71,24 @@ function updateProgressFromWebSocket(updatedData) {
             }
         }
     });
+}
+
+// 박스 상태 업데이트 함수 추가
+function updateBoxState(boxData) {
+    const orderId = boxData.orderId;
+    const boxState = boxData.boxState;
+	
+	console.log("📦 박스 상태 업데이트 시도:", orderId, boxState);
+    
+    let row = document.querySelector(`tr[data-order-id='${orderId}']`);
+    if (row) {
+        let boxStateCell = row.querySelector(".box-state");  // box-state 클래스를 가진 셀 찾기
+        if (boxStateCell) {
+            boxStateCell.innerText = boxState === 1 ? "정상" : "파손";
+            // 상태에 따른 스타일 변경
+            boxStateCell.className = `box-state ${boxState === 1 ? 'text-green-600' : 'text-red-600'}`;
+        }
+    }
 }
 
 // 필터 이벤트 리스너 등록

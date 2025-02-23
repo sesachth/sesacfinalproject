@@ -73,7 +73,7 @@ public class ProgressService {
         message.put("orderId", orderId);
         message.put("boxState", boxState);
         
-        messagingTemplate.convertAndSend("/topic/updateImage", message);
+        messagingTemplate.convertAndSend("/topic/updateBoxState", message);
         System.out.println("📦 박스 상태 업데이트 완료 - 주문 ID: " + orderId + ", 상태: " + boxState);
     }
     
