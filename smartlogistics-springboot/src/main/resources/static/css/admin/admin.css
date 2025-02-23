@@ -87,6 +87,7 @@
 	line-height: 27px;
 
 	color: #7B7B7B;
+	margin-bottom: unset !important;
 }
 
 .username {
@@ -98,6 +99,7 @@
 	line-height: 27px;
 
 	color: #000000;
+	margin-bottom: unset !important;
 }
 
 /* 사이드바 네비게이션 */
