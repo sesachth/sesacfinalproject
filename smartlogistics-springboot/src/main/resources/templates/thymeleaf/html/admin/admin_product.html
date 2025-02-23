@@ -122,9 +122,9 @@
 							<col style="width: 11%">  <!-- depth -->
 							<col style="width: 11%">  <!-- height -->
 							<col style="width: 11%">  <!-- weight -->
-							<col style="width: 12%">  <!-- category -->
-							<col style="width: 12%">  <!-- fragile -->
-							<col style="width: 11%">  <!-- edit,delete -->
+							<col style="width: 14%">  <!-- category -->
+							<col style="width: 5%">  <!-- fragile -->
+							<col style="width: 12%">  <!-- edit,delete -->
 						</colgroup>
 						<thead>
 							<tr>
@@ -176,16 +176,30 @@
 							</button>
 						</div>
 						<div class="modal-body">
-							<form th:action="@{/admin/product/add}" method="post"
-								id="productAdd">
-								<input id="modalIndex" type="hidden" name="index" /> 
-									Name: <input id="modalName" type="text" name="name" required /><br />
-									Width: <input id="modalWidth" type="number" name="width" required /><br />
-									Depth: <input id="modalDepth" type="number" name="depth" required /><br />
-									Height: <input id="modalHeight" type="number" name="height" required /><br /> 
-									Weight: <input id="modalWeight" type="number"name="weight" required /><br /> 
-									Category: 
-									<select id="modalCategory" name="category" required>
+							<form th:action="@{/admin/product/add}" method="post" id="productAdd">
+								<div class="form-group">
+									<label for="modalName">Name</label>
+									<input id="modalName" type="text" name="name" class="form-control custom-input" required />
+								</div>
+								<div class="form-group">
+									<label for="modalWidth">Width</label>
+									<input id="modalWidth" type="number" name="width" class="form-control custom-input" required />
+								</div>
+								<div class="form-group">
+									<label for="modalDepth">Depth</label>
+									<input id="modalDepth" type="number" name="depth" class="form-control custom-input" required />
+								</div>
+								<div class="form-group">
+									<label for="modalHeight">Height</label>
+									<input id="modalHeight" type="number" name="height" class="form-control custom-input" required />
+								</div>
+								<div class="form-group">
+									<label for="modalWeight">Weight</label>
+									<input id="modalWeight" type="number" name="weight" class="form-control custom-input" required />
+								</div>
+								<div class="form-group">
+									<label for="modalCategory">Category</label>
+									<select id="modalCategory" name="category" class="form-control custom-select" required>
 										<option value="">선택하세요</option>
 										<option value="잡화류">잡화류</option>
 										<option value="전자제품류">전자제품류</option>
@@ -193,19 +207,23 @@
 										<option value="제과류">제과류</option>
 										<option value="음료">음료</option>
 										<option value="의류">의류</option>
-											<option value="세정용 화장품류">세정용 화장품류</option>
+										<option value="세정용 화장품류">세정용 화장품류</option>
 										<option value="그 밖의 화장품류">그 밖의 화장품류</option>
 										<option value="의약외품류">의약외품류</option>
 										<option value="세제류">세제류</option>
 										<option value="건강기능식품">건강기능식품</option>
-									</select><br /> 
-									Fragile: <input type="checkbox" name="isFragile" id="fragileCheckbox" value="1" /> 
-											<input type="hidden"name="isFragileHidden" id="isFragileHidden" value="0" />>
+									</select>
+								</div>
+								<div class="form-group checkbox-group">
+									<label for="fragileCheckbox">Fragile</label>
+									<input type="checkbox" name="isFragile" id="fragileCheckbox" class="custom-checkbox" value="1" />
+									<input type="hidden" name="isFragileHidden" id="isFragileHidden" value="0" />
+								</div>
 							</form>
 						</div>
 						<div class="modal-footer">
-							<button type="button" class="btn btn-primary" id="submit-btn">Submit</button>
-							<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+							<button type="button" class="btn btn-primary custom-add-btn" id="submit-btn">Submit</button>
+							<button type="button" class="btn btn-secondary custom-close-btn" data-bs-dismiss="modal">Close</button>
 						</div>
 					</div>
 				</div>

@@ -445,21 +445,22 @@ table tbody tr td:nth-child(6) {
 
 table thead tr th:nth-child(7),
 table tbody tr td:nth-child(7) {
-    width: 12%;  /* category */
+    width: 14%;  /* category */
     text-align: left;
     padding-left: 40px;
 }
 
 table thead tr th:nth-child(8),
 table tbody tr td:nth-child(8) {
-    width: 14%;  /* fragile */
+    width: 5%;  /* fragile */
     text-align: center;
 }
 
 table thead tr th:nth-child(9),
 table tbody tr td:nth-child(9) {
-    width: 5%;  /* edit,delete */
+    width: 12%;  /* edit,delete */
     text-align: center;
+    padding-left: 60px;
 }
 
 
@@ -528,8 +529,8 @@ table tbody tr td:nth-child(9) {
     font-size: 1rem;
     color: #5e6e82;
     text-align: left;
-    background-color: #fff;
-    border: 1px solid #d8e2ef;
+    background-color: #F8F0FF;
+    border: 1px solid rgba(104, 38, 158, 0.6);
     border-radius: 0.375rem;
 }
 
@@ -539,7 +540,7 @@ table tbody tr td:nth-child(9) {
     padding: 0.25rem 1rem;
     clear: both;
     font-weight: 400;
-    color: #5e6e82;
+    color: #F8F0FF;
     text-align: inherit;
     white-space: nowrap;
     background-color: transparent;
@@ -548,8 +549,8 @@ table tbody tr td:nth-child(9) {
 }
 
 .table-dropdown-item:hover {
-    color: #5e6e82;
-    background-color: #f9fafd;
+    color: #F8F0FF;
+    background-color: #F8F0FF;
 }
 
 .table-dropdown-toggle::after {
@@ -584,3 +585,92 @@ body.modal-open {
   pointer-events: auto !important;
 }
 
+/* 커스텀 버튼 스타일 */
+.custom-add-btn {
+    background-color: #68269E !important;  /* 보라색 배경 */
+    border-color: #68269E !important;
+    color: white !important;
+    padding: 8px 24px !important;
+    border-radius: 8px !important;
+}
+
+.custom-close-btn {
+    background-color: #F8F0FF !important;  /* 연한 보라색 배경 */
+    border-color: #68269E !important;
+    color: #68269E !important;
+    padding: 8px 24px !important;
+    border-radius: 8px !important;
+}
+
+/* 호버 효과 */
+.custom-add-btn:hover {
+    background-color: #5a218b !important;
+    border-color: #5a218b !important;
+}
+
+.custom-close-btn:hover {
+    background-color: #EDE2FF !important;
+}
+
+/* 모달 스타일링 - 필수 */
+.modal-content {
+    border-radius: 12px;
+    padding: 20px;
+}
+
+/* 폼 그룹 스타일링 - 필수 */
+.form-group {
+    margin-bottom: 20px;
+}
+
+/* 라벨 스타일링 - 필수 */
+.form-group label {
+    display: block !important;
+    margin-bottom: 8px !important;
+    color: #333 !important;
+    font-weight: 500 !important;
+}
+
+/* 입력 필드 스타일링 - 필수 */
+.custom-input {
+    width: 100% !important;
+    padding: 10px 12px !important;
+    border: 1px solid #68269E !important;  /* 테두리 색상을 보라색으로 변경하고 진하게 */
+    border-radius: 8px !important;
+    font-size: 14px !important;
+}
+
+.custom-input:focus {
+    border-color: #68269E !important;
+    outline: none !important;
+    box-shadow: 0 0 0 2px rgba(104, 38, 158, 0.2) !important;  /* 그림자 효과도 더 진하게 */
+}
+
+/* 셀렉트 박스 스타일링 - 필수 */
+.custom-select {
+    width: 100% !important;
+    padding: 10px 12px !important;
+    border: 1px solid #68269E !important;  /* 테두리 색상을 보라색으로 변경하고 진하게 */
+    border-radius: 8px !important;
+    font-size: 14px !important;
+    background-color: white !important;
+}
+
+.custom-select:focus {
+    border-color: #68269E !important;
+    outline: none !important;
+    box-shadow: 0 0 0 2px rgba(104, 38, 158, 0.2) !important;  /* 그림자 효과도 더 진하게 */
+}
+
+/* 체크박스 그룹 스타일링 - 필수 */
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.custom-checkbox {
+    width: 18px;
+    height: 18px;
+    accent-color: #68269E;
+}
