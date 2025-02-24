@@ -13,16 +13,17 @@
 		        justify-content: space-between; /* 공간 균등 분배 */
 		        align-items: center;    /* 세로 중앙 정렬 */
 		    }
-		    
+		   
 		    #imageContainer {
 		        display: flex;
 		        flex-direction: column;
 		        align-items: center;
 		    }
 		    
+			/* 🔹 이미지 크기를 75%로 조정 */
 			#boxImage {
-				width: 1000px;
-				height: 1000px;
+				width: 650px;  /* 기존 1000px → 750px */
+				height: 650px; /* 기존 1000px → 750px */
 				object-fit: cover; /* 이미지 비율 유지하면서 박스 크기에 맞춤 */
 				box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 			}
@@ -30,9 +31,10 @@
 				display: none;
 			}
 			
+			/* 🔹 박스 검사 결과 크기 조정 */
 			#check_result {
-				width: 1000px;
-				height: 1000px;
+				width: 650px;  /* 기존 1000px → 750px */
+				height: 650px; /* 기존 1000px → 750px */
 			}
 		</style>
 	</th:block>
@@ -44,23 +46,19 @@
                 <div th:replace="~{thymeleaf/html/common/include::profile}"></div>
 				<div th:replace="~{thymeleaf/html/common/include::sidebar}"></div>
             	<div layout:fragment="content" class="main-content">
-            		<!-- ✅ 📦 이미지와 결과를 감싸는 컨테이너 추가 -->
                 	<div id="contentContainer" class="mt-4">
-                    <!-- 📦 선택된 박스 이미지 표시 영역 -->
 	                    <div id="imageContainer">
 	                        <img id="boxImage" src="" alt="박스 이미지" class="hidden" />
 	                    </div>
-	
-	                    <!-- ✅ 박스 검사 결과 표시 영역 -->
 	                    <div id="check_result"></div>
 	                </div>     
             	</div>
         	</div>
         </div>
 </th:block>  
-    <!-- ✅ WebSocket 연결 및 구독 스크립트 -->
+   
 	<script>
-    var socket = new SockJS('/ws');  // /ws/progress로 연결
+    var socket = new SockJS('/ws');
     var stompClient = Stomp.over(socket);
     
  	// ✅ 로컬스토리지에서 상태 불러오기
@@ -115,31 +113,8 @@
                 var boxState = (imageNumber >= 1 && imageNumber <= 70) ? 1 : (imageNumber >= 71 && imageNumber <= 100) ? 2 : 0;
 
                 updateBackgroundColor(boxState);
-                localStorage.setItem('savedBoxState', boxState);  // ✅ 박스 상태 저장
+                localStorage.setItem('savedBoxState', boxState);
             }
-            
-            // ✅ 이미지 번호 추출 (예: /images/boximages/008.jpg -> 8)
-            /*
-            var match = imageUrl.match(/\/images\/boximages\/(\d+)\.jpg/);
-            if (match) {
-                var imageNumber = parseInt(match[1], 10);  // 숫자 추출 및 정수 변환
-                console.log("이미지 번호:", imageNumber);
-
-                var checkResultDiv = document.getElementById("check_result");
-                if (checkResultDiv) {
-                    if (imageNumber >= 1 && imageNumber <= 70) {
-                        checkResultDiv.style.backgroundColor = "#e8f5e9";  // ✅ 초록색 (정상)
-                    } else if (imageNumber >= 71 && imageNumber <= 100) {
-                        checkResultDiv.style.backgroundColor = "#ffebee";  // ✅ 빨간색 (파손)
-                    } else {
-                        checkResultDiv.style.backgroundColor = "";  // ✅ 범위 밖이면 색상 초기화
-                    }
-                }
-            } else {
-                console.warn("이미지 번호를 추출할 수 없습니다.");
-            }
-            */
-                     
         });
         
      	// ✅ 박스 상태 수신 구독
@@ -147,17 +122,6 @@
             var message = JSON.parse(messageOutput.body);
             var boxState = message.boxState;
             console.log("박스 상태 수신:", boxState);
-
-            /*
-            var checkResultDiv = document.getElementById("check_result");
-            if (checkResultDiv) {
-                if (boxState === 1) {
-                    checkResultDiv.style.backgroundColor = "#e8f5e9";  // 정상
-                } else if (boxState === 2) {
-                    checkResultDiv.style.backgroundColor = "#ffebee";  // 파손
-                }
-            }
-            */
         });
     });
 </script>
