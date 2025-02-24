@@ -302,7 +302,6 @@ function handleEdit(productId) {
     $("#modalWeight").val(product.weight);
     $("#modalCategory").val(product.category);
     $("#fragileCheckbox").prop("checked", product.fragile);
-    
     $("#exampleModal").modal('show');
 }
 
@@ -326,7 +325,7 @@ function handleDelete(productId) {
 // Submit 처리
 function handleSubmit() {
     const product = {
-        productId: $("#modalIndex").val().trim(),
+		productId: $("#modalIndex").val() ? $("#modalIndex").val().trim() : null,
         name: $("#modalName").val().trim(),
         width: $("#modalWidth").val().trim(),
         depth: $("#modalDepth").val().trim(),
