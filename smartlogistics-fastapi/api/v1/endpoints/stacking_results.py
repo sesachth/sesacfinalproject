@@ -17,6 +17,10 @@ async def read_stacking_results(db: AsyncSession = Depends(get_db)):
     # DB에서 데이터 가져오기
     db_orders = await crud.get_order_with_details(db)
 
+    # DB에서 데이터 가져오기
+    db_vehicles = await crud.get_vehicles(db)
+    vehicle_numbers = [vehicle.vehicle_number for vehicle in db_vehicles]
+
     # SQL 쿼리 결과를 DataFrame으로 변환하기
     df_orders = sdm.convert_query_result_to_dataframe(db_orders)
 
@@ -31,7 +35,7 @@ async def read_stacking_results(db: AsyncSession = Depends(get_db)):
     await crud.update_order_after_stacking(stacking_results, db)
 
     # 적재 최적화 결과를 pallet 테이블에 업데이트
-    await crud.update_pallet_after_stacking(stacking_results, db)
+    await crud.update_pallet_after_stacking(stacking_results, vehicle_numbers, db)
 
     return {"meesage": "OK"}
 

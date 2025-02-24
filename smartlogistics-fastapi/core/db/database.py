@@ -11,7 +11,7 @@ engine = create_async_engine(
     pool_size=10,           # 연결 풀 크기
     max_overflow=20,        # 최대 초과 연결 수
     pool_recycle=3600,      # 연결 재활용 시간 (초)
-    echo=True,              # 디버깅용 로그 출력 (필요 시 False로 설정)
+    echo=False,              # 디버깅용 로그 출력 (필요 시 False로 설정)
 )
 
 # AsyncSession 생성

@@ -360,9 +360,9 @@ function fetchDataAndCreateChart5() {
 // progress_state 값을 라벨로 변환하는 함수
 function getProgressStateLabel(state) {
     switch(state) {
-        case 1: return '물품 대기';
-        case 2: return '포장 완료';
-        case 3: return '적재 완료';
+        case 0: return '물품 대기';
+        case 1: return '포장 완료';
+        case 2: return '적재 완료';
         // 필요에 따라 더 많은 상태를 추가할 수 있습니다.
         default: return `상태 ${state}`;
     }

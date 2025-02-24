@@ -63,6 +63,16 @@ class PalletModel(BaseModel):
     class Config:
         from_attributes = True
 
+class Vehicle(BaseModel):
+    vehicle_number: Optional[str] = Field(max_length=45)
+    width: float
+    depth: float
+    height: float
+    max_load: float
+    type: int
+    hub_id: Optional[int] = None
+    camp_id: Optional[int] = None
+
 class OrderWithDetailsModel(BaseModel):
     order: OrderModel
     product: ProductModel

@@ -1,12 +1,19 @@
-from models.model import Order, Product, Box, Pallet
+from models.model import Order, Product, Box, Pallet, Vehicle
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select    # SQLAlchemy 2.0 스타일 쿼리 사용
 from sqlalchemy import text, update, func
 from datetime import date
+from itertools import cycle
 
 # box 테이블 내 모든 레코드 가져오기 (테스트 전용, 비동기)
 async def get_boxes(db: AsyncSession):
     query = select(Box)                 # ORM 모델을 대상으로 쿼리 작성
+    result = await db.execute(query)    # 비동기 실행
+    return result.scalars().all()       # 결과를 ORM 객체로 반환
+
+# vehicle 테이블 내 모든 레코드 가져오기 (테스트 전용, 비동기)
+async def get_vehicles(db: AsyncSession):
+    query = select(Vehicle)                 # ORM 모델을 대상으로 쿼리 작성
     result = await db.execute(query)    # 비동기 실행
     return result.scalars().all()       # 결과를 ORM 객체로 반환
 
@@ -73,16 +80,36 @@ async def update_order_after_stacking(stacking_results: dict, db: AsyncSession):
         raise Exception(f"An error occurred: {str(e)}")
     
 # pallet 테이블 업데이트 (비동기)
-async def update_pallet_after_stacking(stacking_results: dict, db: AsyncSession):
+async def update_pallet_after_stacking(stacking_results: dict, vehicle_numbers: list, db: AsyncSession):
     try:
-        # 2. pallet 테이블 업데이트
+        # 목적지별로 파레트를 그룹화
+        vehicle_cycle = cycle(vehicle_numbers)
+        destination_pallets = {}
         for pallet in stacking_results["pallets"]:
-            stmt = update(Pallet).where(Pallet.pallet_id == pallet["pallet_id"]).values(
-                load=pallet["load"],
-                height=pallet["height"],
-                destination=pallet["destination"]
-            )
-            await db.execute(stmt)
+            destination = pallet["destination"]
+            if destination not in destination_pallets:
+                destination_pallets[destination] = []
+            destination_pallets[destination].append(pallet)
+
+        # 각 목적지에 대해 vehicle_numbers를 순환하며 할당
+        for destination, pallets in destination_pallets.items():
+            current_vehicle = next(vehicle_cycle)
+            pallet_count = 0
+
+            for pallet in pallets:
+                if pallet_count >= 12:
+                    current_vehicle = next(vehicle_cycle)
+                    pallet_count = 0
+
+                stmt = update(Pallet).where(Pallet.pallet_id == pallet["pallet_id"]).values(
+                    load=pallet["load"],
+                    height=pallet["height"],
+                    destination=pallet["destination"],
+                    vehicle_number=current_vehicle
+                )
+                await db.execute(stmt)
+
+                pallet_count += 1
 
         # 변경사항 커밋
         await db.commit()
