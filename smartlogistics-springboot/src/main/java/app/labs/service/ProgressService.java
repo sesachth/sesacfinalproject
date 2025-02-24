@@ -1,18 +1,24 @@
 package app.labs.service;
 
-import app.labs.dao.ProgressDao;
-import app.labs.model.ProgressDTO;
-import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import app.labs.dao.ProgressDao;
+import app.labs.model.ProgressDTO;
 
 @Service
 public class ProgressService {
@@ -73,7 +79,7 @@ public class ProgressService {
         message.put("orderId", orderId);
         message.put("boxState", boxState);
         
-        messagingTemplate.convertAndSend("/topic/updateImage", message);
+        messagingTemplate.convertAndSend("/topic/updateBoxState", message);
         System.out.println("📦 박스 상태 업데이트 완료 - 주문 ID: " + orderId + ", 상태: " + boxState);
     }
     

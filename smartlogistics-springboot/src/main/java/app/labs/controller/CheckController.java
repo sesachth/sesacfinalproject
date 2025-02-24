@@ -15,7 +15,6 @@ import app.labs.service.ProgressService;
 @Controller
 public class CheckController {
 	
-	/*
 	private final ProgressService progressService;
 	private final SimpMessagingTemplate messagingTemplate;
 	
@@ -23,14 +22,12 @@ public class CheckController {
         this.progressService = progressService;
         this.messagingTemplate = messagingTemplate;
     }
-    */
 	
 	@GetMapping("/admin/check")
     public String mainPage(Model model) {
         return "thymeleaf/html/admin/admin_check";
     }
 	
-	/*
 	@PostMapping("/api/v1/update-box-state")
     public ResponseEntity<?> updateBoxState(@RequestBody Map<String, Object> payload) {
         try {
@@ -41,7 +38,7 @@ public class CheckController {
             progressService.updateBoxState(orderId, boxState);
             
             // WebSocket으로 상태 변경 알림
-            // messagingTemplate.convertAndSend("/topic/updateImage", payload);
+            messagingTemplate.convertAndSend("/topic/updateBoxState", payload);
             
             return ResponseEntity.ok().build();
         } catch (Exception e) {
@@ -49,5 +46,4 @@ public class CheckController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-    */
 }

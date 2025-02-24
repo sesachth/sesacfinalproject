@@ -24,29 +24,22 @@ async def predict_image(request: BoxCheckRequest):
         websocket_payload = {
             "orderId": request.order_id,
             "boxState": box_state,
-            #"imageUrl": f"/images/boximages/{request.image_number:03d}.jpg"
         }
         
         response = requests.post(
-                "http://localhost:8080/api/v1/update-box-state",
+                "http://localhost:80/api/v1/update-box-state",
                 json=websocket_payload,
                 headers={'Content-Type': 'application/json'}
             )
         response.raise_for_status()
+        
+        
         logging.info(f"Spring Boot 서버 응답: {response.status_code}")
+        
+        logging.info(f"Spring Boot 서버 응답 본문: {response.text}")
         
         return {"boxState": box_state}
   
     except Exception as e:
         logging.error(f"오류 발생: {str(e)}")
         return {"error": str(e)}, 500
-    
-    """
-    try:
-        response = requests.post("http://localhost:8080/api/v1/update-box-state", json=websocket_payload)
-        response.raise_for_status()
-    except Exception as e:
-        logging.error(f"Spring Boot 서버 전송 실패: {e}")
-
-    return {"boxState": box_state}
-    """

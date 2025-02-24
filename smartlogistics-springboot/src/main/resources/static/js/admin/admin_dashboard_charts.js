@@ -246,80 +246,90 @@ function fetchDataAndCreateChart3() {
     });
 }
 
-// Ajax 요청을 보내고 차트를 그리는 함수
 async function fetchDataAndCreateChart4() {
     const seoul = await fetch('https://sesac-project-bucket.s3.ap-northeast-2.amazonaws.com/json/seoul_HangJeongDong.json').then((r) => r.json());
     const nation = ChartGeo.topojson.feature(seoul, seoul.objects.seoul_HangJeongDong).features[0];
     const states = ChartGeo.topojson.feature(seoul, seoul.objects.seoul_HangJeongDong).features;
 
-    // Fetch data from the API
     const response = await fetch('/api/dashboard/chart4Data');
     const destinationData = await response.json();
 
-    // Create a map of destination to count
     const destinationCountMap = {};
     destinationData.forEach(item => {
         destinationCountMap[item.destination] = item.count;
     });
-	
-	// Function to determine value
-	function getValue(feature) {
-	    const sggnm = feature.properties.sggnm;
-	    for (const dest in destinationCountMap) {
-	        if (dest === sggnm) {
-				console.log(dest);
-	            return destinationCountMap[dest];
-	        }
-	    }
-	    return 0;
-	}
+
+    const colors = ['#3E1F58', '#572E79', '#68269E', '#C8A1E0', '#E2BFD9'];
+    const sggnmColorMap = {};
+    let colorIndex = 0;
+
+    function getColorForSggnm(sggnm) {
+        if (!sggnmColorMap[sggnm]) {
+            sggnmColorMap[sggnm] = colors[colorIndex % colors.length];
+            colorIndex++;
+        }
+        return sggnmColorMap[sggnm];
+    }
+
+    function getValue(feature) {
+        const sggnm = feature.properties.sggnm;
+        return destinationCountMap[sggnm] || 0;
+    }
 
     new Chart(ctx4, {
         type: 'choropleth',
-		data: {
-		    labels: states.map(d => d.properties.adm_nm),
-		    datasets: [{
-		        label: '서울시 행정동',
+        data: {
+            labels: states.map(d => d.properties.adm_nm),
+            datasets: [{
+                label: '서울시 행정동',
                 backgroundColor: purpleColors[2],
-		        outline: nation,
-		        data: states.map(d => ({
-		            feature: d,
-		            value: getValue({ properties: { sggnm: d.properties.sggnm } })
-		        }))
-		    }]
-		},
-		options: {
-			showOutline: true,
-			showGraticule: true,
-			plugins: {
-				legend: {
-					usePointStyle: true, // ✅ 점 형태로 변환
-                    boxWidth: 0, // ✅ 색상 박스를 없앰
-                    color: 'transparent' // ✅ 글자 색상을 투명하게 (완전 지울 수도 있음)
-				},
-				title: {
-					display: true,
-					text: '캠프 별 물품 유동량',
-					align: 'start',
-					position: 'top',
-					font: customFont,
-					padding: {
-						top: -4,
-						left: 0
-					}
-				}
-			},
-			scales: {
-				projection: {
-					axis: 'x',
-					projection: 'mercator',
-					center: [126.986, 37.565],
-					padding: 122
-				}
-			}
-		}
+                outline: nation,
+                data: states.map(d => {
+                    const value = getValue({ properties: { sggnm: d.properties.sggnm } });
+                    return {
+                        feature: d,
+                        value: value,
+                        color: value > 0 ? getColorForSggnm(d.properties.sggnm) : 'transparent'
+                    };
+                })
+            }]
+        },
+        options: {
+            showOutline: true,
+            showGraticule: true,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                title: {
+                    display: true,
+                    text: '캠프 별 물품 유동량',
+                    align: 'start',
+                    position: 'top',
+                    font: customFont,
+                    padding: {
+                      top: -4,
+                      left: 0
+                    }
+                },
+            },
+            scales: {
+                projection: {
+                    axis: 'x',
+                    projection: 'mercator',
+                    center: [126.986, 37.565],
+                    padding: 122
+                }
+            },
+            elements: {
+                geoFeature: {
+                    backgroundColor: context => context.dataIndex !== undefined ? context.dataset.data[context.dataIndex].color : 'transparent'
+                }
+            }
+        }
     });
 }
+
 
 // Ajax 요청을 보내고 차트를 그리는 함수
 function fetchDataAndCreateChart5() {
@@ -378,9 +388,9 @@ function fetchDataAndCreateChart5() {
 // progress_state 값을 라벨로 변환하는 함수
 function getProgressStateLabel(state) {
     switch(state) {
-        case 1: return '물품 대기';
-        case 2: return '포장 완료';
-        case 3: return '적재 완료';
+        case 0: return '물품 대기';
+        case 1: return '포장 완료';
+        case 2: return '적재 완료';
         // 필요에 따라 더 많은 상태를 추가할 수 있습니다.
         default: return `상태 ${state}`;
     }

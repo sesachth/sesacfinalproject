@@ -8,14 +8,33 @@
 		<script src="https://cdn.jsdelivr.net/npm/sockjs-client/dist/sockjs.min.js"></script>
 	    <script src="https://cdn.jsdelivr.net/npm/stompjs/lib/stomp.min.js"></script>
 	    <style>
+	    	#contentContainer {
+		        display: flex;           /* 좌우 배치 */
+		        justify-content: space-between; /* 공간 균등 분배 */
+		        align-items: center;    /* 세로 중앙 정렬 */
+		    }
+		   
+		    #imageContainer {
+		        display: flex;
+		        flex-direction: column;
+		        align-items: center;
+		    }
+		    
+			/* 🔹 이미지 크기를 75%로 조정 */
 			#boxImage {
-				width: 500px;
-				height: 500px;
+				width: 650px;  /* 기존 1000px → 750px */
+				height: 650px; /* 기존 1000px → 750px */
 				object-fit: cover; /* 이미지 비율 유지하면서 박스 크기에 맞춤 */
 				box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 			}
 			.hidden {
 				display: none;
+			}
+			
+			/* 🔹 박스 검사 결과 크기 조정 */
+			#check_result {
+				width: 650px;  /* 기존 1000px → 750px */
+				height: 650px; /* 기존 1000px → 750px */
 			}
 		</style>
 	</th:block>
@@ -27,47 +46,82 @@
                 <div th:replace="~{thymeleaf/html/common/include::profile}"></div>
 				<div th:replace="~{thymeleaf/html/common/include::sidebar}"></div>
             	<div layout:fragment="content" class="main-content">
-            		<!-- 📦 선택된 박스 이미지 표시 영역 -->
-	                <div id="imageContainer" class="mt-4">
-	                    <h3 class="text-lg font-semibold">📦박스 이미지</h3>
-	                    <img id="boxImage" src="" alt="박스 이미지" class="hidden" />
-	                </div>
-	                
-	                <div id="check_result" >
-	                
-	                </div>
+                	<div id="contentContainer" class="mt-4">
+	                    <div id="imageContainer">
+	                        <img id="boxImage" src="" alt="박스 이미지" class="hidden" />
+	                    </div>
+	                    <div id="check_result"></div>
+	                </div>     
             	</div>
         	</div>
         </div>
-</th:block>
-    
-    <!-- ✅ WebSocket 연결 및 구독 스크립트 -->
+</th:block>  
+   
 	<script>
-    var socket = new SockJS('/ws');  // /ws/progress로 연결
+    var socket = new SockJS('/ws');
     var stompClient = Stomp.over(socket);
+    
+ 	// ✅ 로컬스토리지에서 상태 불러오기
+    window.addEventListener('DOMContentLoaded', function () {
+        var savedImageUrl = localStorage.getItem('savedImageUrl');
+        var savedBoxState = localStorage.getItem('savedBoxState');
 
+        if (savedImageUrl) {
+            var boxImage = document.getElementById('boxImage');
+            boxImage.src = savedImageUrl;
+            boxImage.classList.remove('hidden');
+        }
+
+        if (savedBoxState) {
+            updateBackgroundColor(parseInt(savedBoxState));
+        }
+    });
+ 	
+ 	// ✅ 배경색 업데이트 함수
+    function updateBackgroundColor(state) {
+        var checkResultDiv = document.getElementById("check_result");
+        if (checkResultDiv) {
+            if (state === 1) {
+                checkResultDiv.style.backgroundColor = "green";  // ✅ 초록색 (정상)
+            } else if (state === 2) {
+                checkResultDiv.style.backgroundColor = "red";  // ✅ 빨간색 (파손)
+            } else {
+                checkResultDiv.style.backgroundColor = "";  // 초기화
+            }
+        }
+    }
+	
+ 	// ✅ 박스 이미지 및 박스 상태 저장 
     stompClient.connect({}, function (frame) {
         console.log("WebSocket 연결됨: " + frame);
 
         stompClient.subscribe('/topic/updateImage', function (messageOutput) {
-            var message = JSON.parse(messageOutput.body); // JSON 형식으로 변환
-            var imageUrl = message.imageUrl;  // 수신된 이미지 URL
-            var boxState = message.boxState;  // boxState 값 받기
-            console.log("이미지 업데이트 수신:", imageUrl, "박스 상태:", boxState);
-            
-            var boxImage = document.getElementById('boxImage');
-            boxImage.src = imageUrl;               // ✅ 기존 이미지 사용
-            boxImage.classList.remove('hidden');   // 숨김 해제s
+        	var message = JSON.parse(messageOutput.body);
+            var imageUrl = message.imageUrl;
+            console.log("이미지 URL 수신:", imageUrl);
 
-            // 이미지를 화면에 표시
-            //var imageContainer = document.getElementById('imageContainer');
-            //var imgElement = document.createElement('img');
-            //imgElement.src = imageUrl;
-            //imageContainer.innerHTML = '';  // 기존 이미지 삭제
-            //imageContainer.appendChild(imgElement);
+            var boxImage = document.getElementById('boxImage');
+            if (boxImage) {
+                boxImage.src = imageUrl;
+                boxImage.classList.remove('hidden');
+                localStorage.setItem('savedImageUrl', imageUrl);
+            }
             
-         	// ✅ 배경색 업데이트
-            document.body.style.backgroundColor = (boxState === 2) ? "#ffebee" : "#e8f5e9";
+            var match = imageUrl.match(/\/images\/boximages\/(\d+)\.jpg/);
+            if (match) {
+                var imageNumber = parseInt(match[1], 10);
+                var boxState = (imageNumber >= 1 && imageNumber <= 70) ? 1 : (imageNumber >= 71 && imageNumber <= 100) ? 2 : 0;
+
+                updateBackgroundColor(boxState);
+                localStorage.setItem('savedBoxState', boxState);
+            }
+        });
+        
+     	// ✅ 박스 상태 수신 구독
+        stompClient.subscribe('/topic/updateBoxState', function (messageOutput) {
+            var message = JSON.parse(messageOutput.body);
+            var boxState = message.boxState;
+            console.log("박스 상태 수신:", boxState);
         });
     });
 </script>

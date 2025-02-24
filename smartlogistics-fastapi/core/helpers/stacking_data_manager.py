@@ -10,6 +10,10 @@ async def stacking_process(db: AsyncSession = Depends(get_db)):
     # DB에서 데이터 가져오기
     db_orders = await crud.get_order_with_details(db)
 
+    # DB에서 데이터 가져오기
+    db_vehicles = await crud.get_vehicles(db)
+    vehicle_numbers = [vehicle.vehicle_number for vehicle in db_vehicles]
+
     # SQL 쿼리 결과를 DataFrame으로 변환하기
     df_orders = convert_query_result_to_dataframe(db_orders)
 
@@ -24,7 +28,7 @@ async def stacking_process(db: AsyncSession = Depends(get_db)):
     await crud.update_order_after_stacking(stacking_results)
 
     # 처리 결과에 따라 pallet 테이블 업데이트
-    await crud.update_pallet_after_stacking(stacking_results)
+    await crud.update_pallet_after_stacking(stacking_results, vehicle_numbers)
 
     print('적재 시뮬레이터 페이지 측 전체 데이터 처리가 완료되었습니다!')
 
