@@ -48,3 +48,15 @@ class Pallet(Base):
     height = Column(Float)
     destination = Column(String(20))
     vehicle_number = Column(String(45), ForeignKey('vehicle.vehicle_number'), index=True)
+
+class Vehicle(Base):
+    __tablename__ = "vehicle"
+
+    vehicle_number = Column(String(45), primary_key=True, unique=True, index=True, nullable=False)
+    width = Column(Float, nullable=False)
+    depth = Column(Float, nullable=False)
+    height = Column(Float, nullable=False)
+    max_load = Column(Float, nullable=False)
+    type = Column(Integer, nullable=False)
+    hub_id = Column(Integer, ForeignKey('hub.hub_id'), index=True)
+    camp_id = Column(Integer, ForeignKey('camp.camp_id'), index=True)
