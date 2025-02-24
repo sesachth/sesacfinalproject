@@ -30,7 +30,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer, WebSoc
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws") // ✅ WebSocket 연결 엔드포인트
-                .setAllowedOrigins("http://localhost", "http://127.0.0.1", "http://localhost:8000", "http://localhost:8081")
+                .setAllowedOrigins("http://localhost", "http://127.0.0.1", "http://localhost:8000", "http://localhost:8081", "http://localhost:8080")
         		//.setAllowedOrigins("*")
         		.withSockJS();
     }
@@ -38,7 +38,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer, WebSoc
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         registry.addHandler(progressWebSocketHandler, "/ws/progress")  // WebSocket 핸들러 등록
-        		.setAllowedOriginPatterns("http://localhost:8000")  // 모든 출처에서 연결 허용
+        		.setAllowedOriginPatterns("http://localhost:8000", "http://localhost:8080", "http://localhost", "http://127.0.0.1")  // 모든 출처에서 연결 허용
                 .addInterceptors(new HttpSessionHandshakeInterceptor());  // 핸드셰이크 인터셉터 추가 (선택적)
     }
     

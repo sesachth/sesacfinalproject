@@ -44,6 +44,8 @@ public class WebSecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 //.requestMatchers("/admin/order/generate").permitAll() // ✅ 주문 생성 API 접근 허용
                 //.requestMatchers("/admin/order/**").permitAll() // ✅ 필요시 전체 허용 가능
+            	.requestMatchers("/api/v1/**").permitAll()  // API 엔드포인트 허용
+                .requestMatchers("/ws/**").permitAll()	
             	.requestMatchers("/login").permitAll()
             	.requestMatchers(STATIC_RESOURCE_PATHS).permitAll()
                 //.requestMatchers(PUBLIC_URLS).permitAll()
