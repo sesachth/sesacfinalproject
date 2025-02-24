@@ -45,46 +45,72 @@ function populatePalletSelect(pallets) {
 }
 
 function initThreeJS(palletId) {
-    // Three.js 초기화 및 렌더링
+    // // ✅ 기존 Three.js 캔버스 삭제 (새로 생성하지 않도록)
+    // const oldCanvas = document.querySelector(".threejs-canvas");
+    // if (oldCanvas) {
+    //     oldCanvas.remove(); // 기존 Three.js 캔버스 제거
+    // }
+
+    // ✅ Three.js 초기화
     scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xFFFFFF); // 완전 흰색 배경
+
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.set(2, 2, 2);
+    camera.position.set(2, 3, 3);
     camera.lookAt(0, 0, 0);
 
-    renderer = new THREE.WebGLRenderer();
+    renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth / 2, window.innerHeight / 2);
     $('.main-content').append(renderer.domElement);
 
-    // 바닥 큐브 생성
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+    
+
+
+    // ✅ 바닥 추가
+    const floorGeometry = new THREE.PlaneGeometry(5, 5);
+    const floorMaterial = new THREE.MeshBasicMaterial({ color: 0xFFFFFF });
+    const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+    floor.rotation.x = -Math.PI / 2;
+    floor.position.set(0, 0, 0);
+    scene.add(floor);
+
+    // ✅ 팔레트 추가
     const baseGeometry = new THREE.BoxGeometry(1.1, 0.15, 1.1);
-    const baseMaterial = new THREE.MeshPhongMaterial({ color: 0x808080 });
+    const baseMaterial = new THREE.MeshPhongMaterial({ color: 0x8B5A2B });
     baseCube = new THREE.Mesh(baseGeometry, baseMaterial);
-    baseCube.position.set(1.1 / 2, 0.15 / 2, 1.1 / 2);
+    baseCube.position.set(0, 0.075, 0);
     scene.add(baseCube);
 
-    // 조명 추가
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    // ✅ 조명 설정
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1.5);
     scene.add(ambientLight);
 
-    const pointLight = new THREE.PointLight(0xffffff, 1);
-    pointLight.position.set(5, 5, 5);
-    scene.add(pointLight);
+    const mainLight = new THREE.DirectionalLight(0xffffff, 2.0);
+    mainLight.position.set(5, 10, 5);
+    scene.add(mainLight);
 
-    // AxesHelper 추가
-    const axesHelper = new THREE.AxesHelper(5);
-    scene.add(axesHelper);
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.5;
 
-    // 선택된 파렛트의 박스 데이터 가져오기
-	if (stackingResults) {
-	    createBoxes(stackingResults.pallets[palletId].boxes);
-	    animate();
-	} else {
-	    console.error('Error fetching box data:');
-	}
+    // ✅ 기존 Three.js 화면을 초기화하고 새로운 팔레트의 박스를 배치
+    if (stackingResults) {
+        createBoxes(stackingResults.pallets[palletId].boxes);
+        animate();
+    } else {
+        console.error("Error fetching box data:");
+    }
 
-    // 이벤트 리스너 추가
     addEventListeners();
 }
+
+
+
+
+
+
 
 function updateBoxList(selectedPalletId) {
 	const boxList = $('#boxList');
@@ -134,15 +160,18 @@ function selectBox($element) {
 
 function createBoxes(boxesData) {
     boxes = [];
+    const palletSize = 1.1; // ✅ 팔레트 크기 (고정)
+
     boxesData.forEach(boxData => {
         const boxGeometry = new THREE.BoxGeometry(boxData.width, boxData.height, boxData.depth);
         const boxMaterial = new THREE.MeshPhongMaterial({ color: Math.random() * 0xffffff });
         const boxMesh = new THREE.Mesh(boxGeometry, boxMaterial);
 
+        // ✅ 팔레트의 중앙을 기준으로 박스 배치
         boxMesh.position.set(
-            boxData.x_coordinate + boxData.width / 2,
-            boxData.y_coordinate + 0.15 + boxData.height / 2, // 바닥 큐브 높이의 절반을 더해 바닥 위에 위치하도록 함
-            boxData.z_coordinate + boxData.depth / 2
+            boxData.x_coordinate - (palletSize / 2) + (boxData.width / 2),  // ✅ 팔레트 중심 기준 좌표 변환
+            0.15 + (boxData.height / 2),  // ✅ 팔레트 위에 정확히 배치
+            boxData.z_coordinate - (palletSize / 2) + (boxData.depth / 2)   // ✅ 팔레트 중심 기준 좌표 변환
         );
 
         boxes.push({
@@ -150,10 +179,13 @@ function createBoxes(boxesData) {
             velocity: 0 // 정적 위치이므로 속도는 0
         });
 
-		boxMesh.userData.productName = boxData.product_name;
+        boxMesh.userData.productName = boxData.product_name;
         scene.add(boxMesh);
     });
 }
+
+
+
 
 function addEventListeners() {
     document.addEventListener('mousedown', onMouseDown);

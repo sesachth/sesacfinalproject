@@ -2,19 +2,19 @@
 	position: absolute;
 	left: 30%;
 	top: 20;
-}
-
-.narrow-element {
+ }
+ 
+ .narrow-element {
 	width: 10%;
 	min-width: 150px; /* 최소 너비 설정 */
 	margin: 0 auto; /* 중앙 정렬 */
-}
-
-/* boxList 내부 아이템의 스타일 */
-#boxList .list-group-item {
+ }
+ 
+ /* boxList 내부 아이템의 스타일 */
+ #boxList .list-group-item {
 	word-wrap: break-word; /* 긴 텍스트 줄바꿈 */
-}
-
-#boxList .selected {
+ }
+ 
+ #boxList .selected {
 	background-color: #f8f0ff;
-}
+ }

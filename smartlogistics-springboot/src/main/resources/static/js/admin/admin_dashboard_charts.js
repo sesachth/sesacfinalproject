@@ -1,3 +1,30 @@
+// ✅ 보라색 계열 색상 팔레트 (투명도 추가)
+const purpleColors = [
+    'rgba(104, 38, 158, 0.7)',  // #68269E → 70% 투명
+    'rgba(217, 170, 255, 0.7)', // #D9AAFF
+    'rgba(213, 191, 231, 0.7)', // #D5BFE7
+    'rgba(181, 137, 218, 0.7)', // #B589DA
+    'rgba(177, 162, 190, 0.7)', // #B1A2BE
+    'rgba(236, 218, 250, 0.7)'  // #ECDAFA
+];
+
+const purpleColors2 = [
+    'rgba(163, 51, 255, 0.7)',  // #A333FF
+    'rgba(133, 0, 241, 0.7)',   // #8500F1
+    'rgba(167, 124, 241, 0.7)', // #A77CF1
+    'rgba(194, 183, 242, 0.7)', // #C2B7F2
+    'rgba(188, 150, 255, 0.7)', // #BC96FF
+    'rgba(96, 53, 194, 0.7)'    // #6035C2
+];
+
+// 공통 폰트 설정
+const customFont = {
+    family: '"Poppins", "Inter", "Noto Sans KR", sans-serif',
+    size: 22,  // ✅ 폰트 크기 키움
+    weight: 600,  // ✅ 강조
+    lineHeight: 1.4
+};
+
 // Chart 1: 진행 단계 별 물품 개수 차트(Horizontal Bar Chart)
 const ctx1 = document.getElementById('chart1').getContext('2d');
 // Chart 2: 날짜 별 박스 파손률 차트(Line Chart)
@@ -34,7 +61,9 @@ function fetchDataAndCreateChart1() {
                     datasets: [{
                         label: '물품 개수',
                         data: data,
-                        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF']
+                        backgroundColor: purpleColors,
+                        borderColor: purpleColors.map(color => color.replace('A9', 'FF')),
+                        borderWidth: 1
                     }]
                 },
                 options: {
@@ -51,13 +80,10 @@ function fetchDataAndCreateChart1() {
                             text: '진행 단계 별 물품 개수',
                             align: 'start',
                             position: 'top',
-                            font: {
-                                size: 24,
-                                weight: 'bold'
-                            },
+                            font: customFont,
                             padding: {
-                                top: 10,
-                                left: 10
+                                top: -4,
+                                left: 0
                             }
                         }
                     }
@@ -93,7 +119,9 @@ function fetchDataAndCreateChart2() {
                     datasets: [{
                         label: '박스 파손률',
                         data: data,
-                        borderColor: 'rgb(75, 192, 192)',
+                        borderColor: purpleColors[0],
+                        backgroundColor: purpleColors2[2],
+                        fill: true,
                         tension: 0.1
                     }]
                 },
@@ -120,13 +148,10 @@ function fetchDataAndCreateChart2() {
                             text: '날짜 별 박스 파손률',
                             align: 'start',
                             position: 'top',
-                            font: {
-                                size: 24,
-                                weight: 'bold'
-                            },
+                            font: customFont,
                             padding: {
-                                top: 10,
-                                left: 10
+                                top: -4,
+                                left: 0
                             }
                         }
                     }
@@ -162,8 +187,7 @@ function fetchDataAndCreateChart3() {
                     datasets: [{
                         label: '주문 건수',
                         data: data,
-                        backgroundColor: 'rgba(75, 192, 192, 0.6)',
-                        borderColor: 'rgba(75, 192, 192, 1)',
+                        backgroundColor: purpleColors,
                         borderWidth: 1
                     }]
                 },
@@ -206,13 +230,10 @@ function fetchDataAndCreateChart3() {
                             text: '날짜 별 주문 건수',
                             align: 'start',
                             position: 'top',
-                            font: {
-                                size: 24,
-                                weight: 'bold'
-                            },
+                            font: customFont,
                             padding: {
-                                top: 10,
-                                left: 10
+                                top: -4,
+                                left: 0
                             }
                         }
                     }
@@ -261,6 +282,7 @@ async function fetchDataAndCreateChart4() {
             labels: states.map(d => d.properties.adm_nm),
             datasets: [{
                 label: '서울시 행정동',
+                backgroundColor: purpleColors[2],
                 outline: nation,
                 data: states.map(d => {
                     const value = getValue({ properties: { sggnm: d.properties.sggnm } });
@@ -284,13 +306,10 @@ async function fetchDataAndCreateChart4() {
                     text: '캠프 별 물품 유동량',
                     align: 'start',
                     position: 'top',
-                    font: {
-                        size: 24,
-                        weight: 'bold'
-                    },
+                    font: customFont,
                     padding: {
-                        top: 10,
-                        left: 10
+                      top: -4,
+                      left: 0
                     }
                 },
             },
@@ -322,7 +341,7 @@ function fetchDataAndCreateChart5() {
             // 데이터 처리
             const labels = [];
             const data = [];
-            const backgroundColors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'];
+            const backgroundColors = ['#A333FF', '#8500F1', '#A77CF1', '#C2B7F2', '#BC96FF', '#6035C2'];
 
             response.forEach((item, index) => {
                 labels.push(`${item.spec}호`);
@@ -336,7 +355,7 @@ function fetchDataAndCreateChart5() {
                     labels: labels,
                     datasets: [{
                         data: data,
-                        backgroundColor: backgroundColors
+                        backgroundColor: purpleColors
                     }]
                 },
                 options: {
@@ -350,13 +369,10 @@ function fetchDataAndCreateChart5() {
                             text: '박스 종류 별 사용량',
                             align: 'start',
                             position: 'top',
-                            font: {
-                                size: 24,
-                                weight: 'bold'
-                            },
+                            font: customFont,
                             padding: {
-                                top: 10,
-                                left: 10
+                                top: -4,
+                                left: 0
                             }
                         }
                     }
@@ -395,7 +411,7 @@ new Chart(ctx6, {
 		labels: ['A', 'B', 'C', 'D', 'E'],
 		datasets: [{
 			data: [30, 25, 20, 15, 10],
-			backgroundColor: ['red', 'blue', 'green', 'yellow', 'purple']
+			backgroundColor: purpleColors2
 		}]
 	},
 	options: {
@@ -406,13 +422,10 @@ new Chart(ctx6, {
 				text: '물품 카테고리 별 취급주의 물품 비율',
 				align: 'start',
 				position: 'top',
-				font: {
-					size: 24,
-					weight: 'bold'
-				},
+				font: customFont,
 				padding: {
-					top: 10,
-					left: 10
+					top: -4,
+					left: 0
 				}
 			}
 		}

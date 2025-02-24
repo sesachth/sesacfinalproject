@@ -4,28 +4,31 @@ body {
 
 .container {
     width: 100%;
-    max-width: 1280px;
-    margin-left: auto;
-    margin-right: auto;
-    padding: 1rem;
-}
-
-h1 {
-    font-size: 1.875rem;
-    line-height: 2.25rem;
-    font-weight: 700;
-    margin-bottom: 1rem;
 }
 
 .grid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(2, minmax(0, 0.8fr));
+    gap: 15px;
 }
 
 .grid > div {
     background-color: white;
-    padding: 1rem;
-    border-radius: 0.25rem;
+    padding: 12px;
+    border-radius: 14px;
     box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+/* 메인 콘텐츠 */
+.main-content {
+	position: absolute;
+	width: calc(100% - 380px);
+	max-height: calc(100vh - 220px);
+	right: 40px;
+	top: 120px;
+	margin-bottom: 40px;
+	
+ 	background: transparent !important;
+ 	border-radius: 14px;
+    overflow-y: auto;
 }
