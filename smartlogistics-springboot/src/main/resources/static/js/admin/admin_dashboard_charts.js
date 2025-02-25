@@ -82,7 +82,7 @@ function fetchDataAndCreateChart1() {
                             position: 'top',
                             font: customFont,
                             padding: {
-                                top: -4,
+                                top: 0,
                                 left: 0
                             }
                         }
@@ -150,7 +150,7 @@ function fetchDataAndCreateChart2() {
                             position: 'top',
                             font: customFont,
                             padding: {
-                                top: -4,
+                                top: 0,
                                 left: 0
                             }
                         }
@@ -232,7 +232,7 @@ function fetchDataAndCreateChart3() {
                             position: 'top',
                             font: customFont,
                             padding: {
-                                top: -4,
+                                top: 0,
                                 left: 0
                             }
                         }
@@ -282,7 +282,6 @@ async function fetchDataAndCreateChart4() {
             labels: states.map(d => d.properties.adm_nm),
             datasets: [{
                 label: '서울시 행정동',
-                backgroundColor: purpleColors[2],
                 outline: nation,
                 data: states.map(d => {
                     const value = getValue({ properties: { sggnm: d.properties.sggnm } });
@@ -308,7 +307,7 @@ async function fetchDataAndCreateChart4() {
                     position: 'top',
                     font: customFont,
                     padding: {
-                      top: -4,
+                      top: 0,
                       left: 0
                     }
                 },
@@ -318,7 +317,7 @@ async function fetchDataAndCreateChart4() {
                     axis: 'x',
                     projection: 'mercator',
                     center: [126.986, 37.565],
-                    padding: 122
+                    padding: 153
                 }
             },
             elements: {
@@ -371,7 +370,7 @@ function fetchDataAndCreateChart5() {
                             position: 'top',
                             font: customFont,
                             padding: {
-                                top: -4,
+                                top: 0,
                                 left: 0
                             }
                         }
@@ -424,7 +423,7 @@ new Chart(ctx6, {
 				position: 'top',
 				font: customFont,
 				padding: {
-					top: -4,
+					top: 0,
 					left: 0
 				}
 			}
