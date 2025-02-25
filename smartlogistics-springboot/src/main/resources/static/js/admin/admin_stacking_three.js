@@ -106,12 +106,6 @@ function initThreeJS(palletId) {
     addEventListeners();
 }
 
-
-
-
-
-
-
 function updateBoxList(selectedPalletId) {
 	const boxList = $('#boxList');
 	boxList.empty();
@@ -170,7 +164,7 @@ function createBoxes(boxesData) {
         // ✅ 팔레트의 중앙을 기준으로 박스 배치
         boxMesh.position.set(
             boxData.x_coordinate - (palletSize / 2) + (boxData.width / 2),  // ✅ 팔레트 중심 기준 좌표 변환
-            0.15 + (boxData.height / 2),  // ✅ 팔레트 위에 정확히 배치
+            boxData.y_coordinate + 0.15 + (boxData.height / 2),  // ✅ 팔레트 위에 정확히 배치
             boxData.z_coordinate - (palletSize / 2) + (boxData.depth / 2)   // ✅ 팔레트 중심 기준 좌표 변환
         );
 

@@ -59,7 +59,6 @@ function updateTableContent(data) {
 		// 필요한 만큼 <td>를 구성 (예: palletId, packagingSeq 등)
 		row.innerHTML = `
             <td>${item.palletId}</td>
-            <td>${item.packagingSeq}</td>
             <td>${item.orderId}</td>
             <td>${item.productName}</td>
             <td>${item.productCategory}</td>

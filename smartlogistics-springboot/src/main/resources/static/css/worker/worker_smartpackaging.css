@@ -334,26 +334,22 @@ table tbody tr td:nth-child(1) {
     width: 15%;  /* pallet_id */
 }
 
+
 table thead tr th:nth-child(2),
 table tbody tr td:nth-child(2) {
-    width: 15%;  /* packaging_seq */
+    width: 15%;  /* order_id */
 }
 
 table thead tr th:nth-child(3),
 table tbody tr td:nth-child(3) {
-    width: 15%;  /* order_id */
+    width: 45%;  /* product_name */
+    text-align: left;
+    padding-left: 100px;
 }
 
 table thead tr th:nth-child(4),
 table tbody tr td:nth-child(4) {
-    width: 35%;  /* product_name */
-    text-align: left;
-    padding-left: 30px;
-}
-
-table thead tr th:nth-child(5),
-table tbody tr td:nth-child(5) {
-    width: 20%;  /* category */
+    width: 25%;  /* category */
     text-align: left;
     padding-left: 30px;
 }
